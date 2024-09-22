@@ -1,79 +1,68 @@
 <!DOCTYPE html>
-   <html lang="en">
-   <head>
-       <meta charset="UTF-8">
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Gráficos en Tiempo Real</title>
   <style>
-    /* Estilos básicos para el gráfico */
     #grafico {
-      display: none;
-      position: absolute;
-      top: 10px;
-      left: 10px;
       background-color: rgba(0, 0, 0, 0.5);
       color: white;
       padding: 10px;
       border-radius: 10px;
     }
   </style>
-   </head>
-   <body>
-      <div id="grafico">
-    <h1 id="invitado"></h1>
-    <h2 id="rol"></h2>
-    <p id="tema"></p>
+</head>
+<body>
+  <div id="grafico">
+    <h1 id="invitado">Cargando...</h1>
+    <h2 id="rol">Cargando...</h2>
+    <p id="tema">Cargando...</p>
   </div>
-     <script type="module">
-       // Importa Firebase y la configuración
-       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
-       import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js";
-       import { firebaseConfig } from './firebase-config.js';
-       
-       // Inicializa Firebase
-       const app = initializeApp(firebaseConfig);
-       const database = getDatabase(app);
+  <div id="status">Estado de la conexión: Desconectado</div>
 
-        console.log('Firebase inicializado:', app.name);
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyD0lkEDKhia76E6ef3uU0B1lOH8CyklCnc",
+      authDomain: "arki-service-autoridades.firebaseapp.com",
+      databaseURL: "https://arki-service-autoridades.firebaseio.com",
+      projectId: "arki-service-autoridades",
+      storageBucket: "arki-service-autoridades.appspot.com",
+      messagingSenderId: "829954736380",
+      appId: "1:829954736380:web:c4badfee0e0db02dd69779"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+    
+    console.log('Firebase inicializado');
+
+    const graficoRef = ref(database, 'CLAVE_STREAM_FB/GRAFICOS_TIEMPO_REAL');
+
+    onValue(graficoRef, (snapshot) => {
+      const data = snapshot.val();
+      console.log('Datos recibidos:', data);
+
+      if (data) {
+        document.getElementById('invitado').innerText = data.INVITADO_ACTIVO || 'Sin invitado';
+        document.getElementById('rol').innerText = data.ROL_ACTIVO || 'Sin rol';
+        document.getElementById('tema').innerText = data.TEMA_ACTIVO || 'Sin tema';
         
-       // Referencias a las claves en Firebase
-    const refInvitado = ref(database, 'CLAVE_STREAM_FB/GRAFICOS_TIEMPO_REAL/INVITADO_ACTIVO');
-    const refRol = ref(database, 'CLAVE_STREAM_FB/GRAFICOS_TIEMPO_REAL/ROL_ACTIVO');
-    const refTema = ref(database, 'CLAVE_STREAM_FB/GRAFICOS_TIEMPO_REAL/TEMA_ACTIVO');
-    const refGrafico = ref(database, 'CLAVE_STREAM_FB/GRAFICOS_TIEMPO_REAL/GRAFICO_AL_AIRE');
-
-    // Actualiza el gráfico cuando cambien los valores en Firebase
-    onValue(refInvitado, (snapshot) => {
-      const invitado = snapshot.val();
-      document.getElementById('invitado').innerText = invitado || 'Invitado Desconocido';
+        const grafico = document.getElementById('grafico');
+        grafico.style.display = data.GRAFICO_AL_AIRE ? 'block' : 'none';
+        
+        document.getElementById('status').innerText = 'Estado de la conexión: Conectado y actualizado';
+      } else {
+        console.log('No se recibieron datos');
+        document.getElementById('status').innerText = 'Estado de la conexión: Conectado, pero sin datos';
+      }
+    }, (error) => {
+      console.error('Error al leer datos:', error);
+      document.getElementById('status').innerText = 'Estado de la conexión: Error - ' + error.message;
     });
-
-    onValue(refRol, (snapshot) => {
-      const rol = snapshot.val();
-      document.getElementById('rol').innerText = rol || 'Rol Desconocido';
-    });
-
-    onValue(refTema, (snapshot) => {
-      const tema = snapshot.val();
-      document.getElementById('tema').innerText = tema || 'Tema Desconocido';
-    });
-
-    // Muestra/oculta el gráfico con base en el valor de GRAFICO_AL_AIRE
-    onValue(refGrafico, (snapshot) => {
-    console.log('Cambio detectado en GRAFICO_AL_AIRE');
-    const graficoAlAire = snapshot.val();
-    console.log('Nuevo valor de GRAFICO_AL_AIRE:', graficoAlAire);
-    const grafico = document.getElementById('grafico');
-    if (graficoAlAire === true) {
-      grafico.style.display = 'block';
-      console.log('Mostrando gráfico');
-    } else {
-      grafico.style.display = 'none';
-      console.log('Ocultando gráfico');
-    }
-  }, (error) => {
-    console.error('Error al leer GRAFICO_AL_AIRE:', error);
-  });
   </script>
-   </body>
-   </html>
+</body>
+</html>
