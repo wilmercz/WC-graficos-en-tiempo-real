@@ -20,12 +20,13 @@ signInAnonymously(auth)
 function initializeDataListeners() {
   const graficoRef = ref(database, 'CLAVE_STREAM_FB/GRAFICOS_TIEMPO_REAL');
 
+  // Escuchar los cambios en los datos de Firebase
   onValue(graficoRef, (snapshot) => {
     const data = snapshot.val();
     console.log('Datos recibidos:', data);
 
     if (data) {
-      // Actualizamos el texto del invitado y rol
+      // Actualizar textos de Invitado, Rol y Tema
       document.getElementById('invitado').innerText = data.INVITADO_ACTIVO || 'Sin invitado';
       document.getElementById('rol').innerText = data.ROL_ACTIVO || 'Sin rol';
       document.getElementById('tema').innerText = data.TEMA_ACTIVO || 'Sin tema';
@@ -33,33 +34,31 @@ function initializeDataListeners() {
       const graficoInvitadoRol = document.getElementById('grafico-invitado-rol');
       const graficoTema = document.getElementById('grafico-tema');
 
+      // Mostrar u ocultar el gráfico del tema
       if (data.TEMA_AL_AIRE) {
-          // Si el tema está al aire, ocultamos invitado/rol y mostramos tema
-        
-          //graficoInvitadoRol.style.display = 'none';
-          graficoTema.style.display = 'block';
-           // graficoTema.classList.add('show'); // Add class to show
-        
-          // Actualizamos el valor en Firebase para GRAFICO_AL_AIRE
-           // update(graficoRef, { GRAFICO_AL_AIRE: false });
-        } else {
-          graficoTema.style.display = 'none';    
-          //graficoTema.classList.remove('show'); // Remove class to hide
-        }
-      
-      if (data.GRAFICO_AL_AIRE) {
-        // Si el gráfico del invitado/rol está al aire, ocultamos el tema y mostramos invitado/rol
-
-        //graficoInvitadoRol.classList.add('show'); // Add class to show
-        //graficoTema.style.display = 'none';
-        graficoInvitadoRol.style.display = 'block';
-        
-        // Actualizamos el valor en Firebase para TEMA_AL_AIRE
-        //update(graficoRef, { TEMA_AL_AIRE: false });
-       } else {
-            //graficoInvitadoRol.classList.remove('show'); // Remove class to hide
+        graficoTema.style.display = 'block';
         graficoInvitadoRol.style.display = 'none';
-          }
+
+        // Asegurarse de que solo el tema está al aire
+        if (data.GRAFICO_AL_AIRE) {
+          update(graficoRef, { GRAFICO_AL_AIRE: false });
+        }
+      } else {
+        graficoTema.style.display = 'none';
+      }
+
+      // Mostrar u ocultar el gráfico de invitado/rol
+      if (data.GRAFICO_AL_AIRE) {
+        graficoInvitadoRol.style.display = 'block';
+        graficoTema.style.display = 'none';
+
+        // Asegurarse de que solo el invitado/rol está al aire
+        if (data.TEMA_AL_AIRE) {
+          update(graficoRef, { TEMA_AL_AIRE: false });
+        }
+      } else {
+        graficoInvitadoRol.style.display = 'none';
+      }
 
       document.getElementById('status').innerText = 'Estado de la conexión: Conectado y actualizado';
     } else {
