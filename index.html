@@ -4,14 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Gráficos en Tiempo Real</title>
-  <style>
-    #grafico {
-      background-color: rgba(22, 75, 131, 0.8);
-      color: white;
-      padding: 3px;
-      border-radius: 6px;
-    }
-  </style>
+  <link rel="stylesheet" href="styles.css"> <!-- Enlace al archivo CSS -->
 </head>
 <body>
   <div id="grafico">
@@ -24,18 +17,9 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
     import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js";
     import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
+    import { firebaseConfig } from './firebase-config.js'; // Importa la configuración de Firebase
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyD0lkEDKhia76E6ef3uU0B1lOH8CyklCnc",
-      authDomain: "arki-service-autoridades.firebaseapp.com",
-      databaseURL: "https://arki-service-autoridades.firebaseio.com",
-      projectId: "arki-service-autoridades",
-      storageBucket: "arki-service-autoridades.appspot.com",
-      messagingSenderId: "829954736380",
-      appId: "1:829954736380:web:c4badfee0e0db02dd69779"
-    };
-
-    const app = initializeApp(firebaseConfig);
+    const app = initializeApp(firebaseConfig); // Usa la configuración importada
     const auth = getAuth(app);
     const database = getDatabase(app);
     
@@ -59,11 +43,14 @@
         if (data) {
           document.getElementById('invitado').innerText = data.INVITADO_ACTIVO || 'Sin invitado';
           document.getElementById('rol').innerText = data.ROL_ACTIVO || 'Sin rol';
-          document.getElementById('tema').innerText = data.TEMA_ACTIVO || 'Sin tema';
-          
+
           const grafico = document.getElementById('grafico');
-          grafico.style.display = data.GRAFICO_AL_AIRE ? 'block' : 'none';
-          
+          if (data.GRAFICO_AL_AIRE) {
+            grafico.classList.add('show'); // Add class to show
+          } else {
+            grafico.classList.remove('show'); // Remove class to hide
+          }
+
           document.getElementById('status').innerText = 'Estado de la conexión: Conectado y actualizado';
         } else {
           console.log('No se recibieron datos');
@@ -77,3 +64,4 @@
   </script>
 </body>
 </html>
+
