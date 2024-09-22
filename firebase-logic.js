@@ -26,23 +26,24 @@ function initializeDataListeners() {
     console.log('Datos recibidos:', data);
 
     if (data) {
+      // Eliminar las comillas extremas de los campos si las hay
+      const invitado = (data.INVITADO_ACTIVO || 'Sin invitado').replace(/^"|"$/g, '');
+      const rol = (data.ROL_ACTIVO || 'Sin rol').replace(/^"|"$/g, '');
+      const tema = (data.TEMA_ACTIVO || 'Sin tema').replace(/^"|"$/g, '');
+
       // Actualizar textos de Invitado, Rol y Tema
-      document.getElementById('invitado').innerText = data.INVITADO_ACTIVO || 'Sin invitado';
-      document.getElementById('rol').innerText = data.ROL_ACTIVO || 'Sin rol';
-      document.getElementById('tema').innerText = data.TEMA_ACTIVO || 'Sin tema';
+      document.getElementById('invitado').innerText = invitado;
+      document.getElementById('rol').innerText = rol;
+      document.getElementById('tema').innerText = tema;
 
       const graficoInvitadoRol = document.getElementById('grafico-invitado-rol');
       const graficoTema = document.getElementById('grafico-tema');
+      const logo = document.getElementById('logo');
 
       // Mostrar u ocultar el gráfico del tema
       if (data.TEMA_AL_AIRE) {
         graficoTema.style.display = 'block';
         graficoInvitadoRol.style.display = 'none';
-
-        // Asegurarse de que solo el tema está al aire
-        //if (data.GRAFICO_AL_AIRE) {
-          //update(graficoRef, { GRAFICO_AL_AIRE: false });
-        //}
       } else {
         graficoTema.style.display = 'none';
       }
@@ -51,13 +52,15 @@ function initializeDataListeners() {
       if (data.GRAFICO_AL_AIRE) {
         graficoInvitadoRol.style.display = 'block';
         graficoTema.style.display = 'none';
-
-        // Asegurarse de que solo el invitado/rol está al aire
-        //if (data.TEMA_AL_AIRE) {
-          //update(graficoRef, { TEMA_AL_AIRE: false });
-        //}
       } else {
         graficoInvitadoRol.style.display = 'none';
+      }
+
+      // Mostrar u ocultar el logo basado en el valor de LOGO_AL_AIRE
+      if (data.LOGO_AL_AIRE === true) {
+        logo.style.display = 'block';
+      } else {
+        logo.style.display = 'none';
       }
 
       document.getElementById('status').innerText = 'Estado de la conexión: Conectado y actualizado';
