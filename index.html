@@ -24,6 +24,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
     import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js";
+    import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyD0lkEDKhia76E6ef3uU0B1lOH8CyklCnc",
@@ -36,33 +37,44 @@
     };
 
     const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
     const database = getDatabase(app);
     
-    console.log('Firebase inicializado');
+    signInAnonymously(auth)
+      .then(() => {
+        console.log("Autenticación anónima exitosa");
+        initializeDataListeners();
+      })
+      .catch((error) => {
+        console.error("Error de autenticación:", error);
+        document.getElementById('status').innerText = 'Error de autenticación: ' + error.message;
+      });
 
-    const graficoRef = ref(database, 'CLAVE_STREAM_FB/GRAFICOS_TIEMPO_REAL');
+    function initializeDataListeners() {
+      const graficoRef = ref(database, 'CLAVE_STREAM_FB/GRAFICOS_TIEMPO_REAL');
 
-    onValue(graficoRef, (snapshot) => {
-      const data = snapshot.val();
-      console.log('Datos recibidos:', data);
+      onValue(graficoRef, (snapshot) => {
+        const data = snapshot.val();
+        console.log('Datos recibidos:', data);
 
-      if (data) {
-        document.getElementById('invitado').innerText = data.INVITADO_ACTIVO || 'Sin invitado';
-        document.getElementById('rol').innerText = data.ROL_ACTIVO || 'Sin rol';
-        document.getElementById('tema').innerText = data.TEMA_ACTIVO || 'Sin tema';
-        
-        const grafico = document.getElementById('grafico');
-        grafico.style.display = data.GRAFICO_AL_AIRE ? 'block' : 'none';
-        
-        document.getElementById('status').innerText = 'Estado de la conexión: Conectado y actualizado';
-      } else {
-        console.log('No se recibieron datos');
-        document.getElementById('status').innerText = 'Estado de la conexión: Conectado, pero sin datos';
-      }
-    }, (error) => {
-      console.error('Error al leer datos:', error);
-      document.getElementById('status').innerText = 'Estado de la conexión: Error - ' + error.message;
-    });
+        if (data) {
+          document.getElementById('invitado').innerText = data.INVITADO_ACTIVO || 'Sin invitado';
+          document.getElementById('rol').innerText = data.ROL_ACTIVO || 'Sin rol';
+          document.getElementById('tema').innerText = data.TEMA_ACTIVO || 'Sin tema';
+          
+          const grafico = document.getElementById('grafico');
+          grafico.style.display = data.GRAFICO_AL_AIRE ? 'block' : 'none';
+          
+          document.getElementById('status').innerText = 'Estado de la conexión: Conectado y actualizado';
+        } else {
+          console.log('No se recibieron datos');
+          document.getElementById('status').innerText = 'Estado de la conexión: Conectado, pero sin datos';
+        }
+      }, (error) => {
+        console.error('Error al leer datos:', error);
+        document.getElementById('status').innerText = 'Error al leer datos: ' + error.message;
+      });
+    }
   </script>
 </body>
 </html>
