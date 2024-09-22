@@ -1,4 +1,4 @@
-body {
+body { 
   font-family: Arial, sans-serif;
   background-color: #f0f0f0;
   margin: 0;
@@ -6,6 +6,14 @@ body {
   position: relative;
   height: 100vh; /* Full height for the body */
   overflow: hidden; /* Hide overflow */
+}
+
+#logo {
+  position: absolute; /* Position logo */
+  top: 20px; /* Adjust position */
+  left: 20px; /* Adjust position */
+  width: 150px; /* Width of your logo */
+  height: auto; /* Maintain aspect ratio */
 }
 
 #grafico {
@@ -17,11 +25,10 @@ body {
   opacity: 0;
   transition: opacity 0.5s ease, transform 0.5s ease;
   transform: translateY(20px);
-  position: absolute; /* Position absolute to place at the bottom */
-  left: 50%;
-  transform: translateX(-50%); /* Center horizontally */
+  position: absolute; /* Position absolute to place near logo */
+  left: 200px; /* Adjust based on logo width */
   bottom: 20px; /* Space from the bottom */
-  width: 80%; /* Adjust width as needed */
+  width: 70%; /* Adjust width as needed */
   display: none; /* Initial display is none */
   text-align: center; /* Center the text */
 }
