@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -9,61 +9,13 @@
 <body>
   <img id="logo" src="https://raw.githubusercontent.com/wilmercz/WC-graficos-en-tiempo-real/main/imagenes/LOGOS%20ARKIMEDES%204.png" alt="Logo">
   <div id="grafico">
-    <h1 id="invitado">Cargando...</h1>
-    <h2 id="rol">Cargando...</h2>
-    <div class="tema">Tema</div>
+    <h1 id="invitado">Wilmer Caiza</h1>
+    <h2 id="rol">Ingeniero</h2>
+    <div id="tema" class="tema" style="display: none;">Tema</div> <!-- Oculto por defecto -->
   </div>
   <div id="status">Estado de la conexión: Desconectado</div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
-    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js";
-    import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
-    import { firebaseConfig } from './firebase-config.js'; // Importa la configuración de Firebase
-
-    const app = initializeApp(firebaseConfig); // Usa la configuración importada
-    const auth = getAuth(app);
-    const database = getDatabase(app);
-    
-    signInAnonymously(auth)
-      .then(() => {
-        console.log("Autenticación anónima exitosa");
-        initializeDataListeners();
-      })
-      .catch((error) => {
-        console.error("Error de autenticación:", error);
-        document.getElementById('status').innerText = 'Error de autenticación: ' + error.message;
-      });
-
-    function initializeDataListeners() {
-      const graficoRef = ref(database, 'CLAVE_STREAM_FB/GRAFICOS_TIEMPO_REAL');
-
-      onValue(graficoRef, (snapshot) => {
-        const data = snapshot.val();
-        console.log('Datos recibidos:', data);
-
-        if (data) {
-          document.getElementById('invitado').innerText = data.INVITADO_ACTIVO || 'Sin invitado';
-          document.getElementById('rol').innerText = data.ROL_ACTIVO || 'Sin rol';
-
-          const grafico = document.getElementById('grafico');
-          if (data.GRAFICO_AL_AIRE) {
-            grafico.classList.add('show'); // Add class to show
-          } else {
-            grafico.classList.remove('show'); // Remove class to hide
-          }
-
-          document.getElementById('status').innerText = 'Estado de la conexión: Conectado y actualizado';
-        } else {
-          console.log('No se recibieron datos');
-          document.getElementById('status').innerText = 'Estado de la conexión: Conectado, pero sin datos';
-        }
-      }, (error) => {
-        console.error('Error al leer datos:', error);
-        document.getElementById('status').innerText = 'Error al leer datos: ' + error.message;
-      });
-    }
-  </script>
+  <script type="module" src="firebase-logic.js"></script> <!-- Importar lógica de Firebase -->
 </body>
 </html>
 
