@@ -1,0 +1,42 @@
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f0f0f0;
+  margin: 0;
+  padding: 0;
+  position: relative;
+  height: 100vh; /* Full height for the body */
+  overflow: hidden; /* Hide overflow */
+}
+
+#grafico {
+  background-color: rgba(22, 75, 131, 0.8);
+  color: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  opacity: 0;
+  transition: opacity 0.5s ease, transform 0.5s ease;
+  transform: translateY(20px);
+  position: absolute; /* Position absolute to place at the bottom */
+  left: 50%;
+  transform: translateX(-50%); /* Center horizontally */
+  bottom: 20px; /* Space from the bottom */
+  width: 80%; /* Adjust width as needed */
+  display: none; /* Initial display is none */
+  text-align: center; /* Center the text */
+}
+
+#grafico.show {
+  display: block; /* Show when added the class */
+  opacity: 1;
+  transform: translateY(0);
+}
+
+#status {
+  margin-top: 20px;
+  font-size: 1.1em;
+  color: #333;
+  position: absolute; /* Position status at the top */
+  top: 10px;
+  left: 10px;
+}
