@@ -10,8 +10,8 @@ body {
 
 #logo {
   position: absolute; /* Position logo */
-  top: 20px; /* Adjust position */
-  left: 20px; /* Adjust position */
+  bottom: 60px; /* Adjust position from the bottom */
+  left: 20px; /* Position from the left */
   width: 150px; /* Width of your logo */
   height: auto; /* Maintain aspect ratio */
 }
@@ -19,18 +19,18 @@ body {
 #grafico {
   background-color: rgba(22, 75, 131, 0.8);
   color: white;
-  padding: 20px;
+  padding: 10px 15px; /* Adjust padding for better fit */
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   opacity: 0;
   transition: opacity 0.5s ease, transform 0.5s ease;
   transform: translateY(20px);
   position: absolute; /* Position absolute to place near logo */
-  left: 200px; /* Adjust based on logo width */
+  left: 20px; /* Align with logo */
   bottom: 20px; /* Space from the bottom */
-  width: 70%; /* Adjust width as needed */
+  width: auto; /* Adjust width to fit content */
   display: none; /* Initial display is none */
-  text-align: center; /* Center the text */
+  text-align: left; /* Align text to the left */
 }
 
 #grafico.show {
@@ -47,3 +47,4 @@ body {
   top: 10px;
   left: 10px;
 }
+
