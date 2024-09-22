@@ -16,7 +16,7 @@ body {
   height: auto; /* Maintain aspect ratio */
 }
 
-#grafico {
+#grafico-invitado-rol {
   display: flex;
   flex-direction: column; /* Align items vertically */
   position: absolute; /* Position absolute to place near logo */
@@ -24,7 +24,7 @@ body {
   bottom: 100px; /* Space from the bottom */
 }
 
-#grafico h1 {
+#grafico-invitado-rol h1 {
   background-color: rgba(220, 223, 220, 1); /* Fondo blanco para h1 */
   color: rgba(22, 75, 131, 1); /* Color de letra para h1 */
   padding: 8px 20px; /* Padding para h1 */
@@ -32,7 +32,7 @@ body {
   margin: 0; /* Remove default margin */
 }
 
-#grafico h2 {
+#grafico-invitado-rol h2 {
   background-color: rgba(22, 75, 131, 1); /* Fondo color para h2 */
   color: white; /* Color de letra para h2 */
   padding: 7px 20px; /* Padding para h2 */
@@ -62,7 +62,7 @@ body {
 }
 
 
-#grafico.show, #grafico-tema.show {
+#grafico-invitado-rol.show, #grafico-tema.show {
   opacity: 1;
   transform: translateY(0);
 }
