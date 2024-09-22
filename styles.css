@@ -40,7 +40,7 @@ body {
   margin: 0; /* Remove default margin */
 }
 
-#grafico .tema {
+#grafico-tema {
   background-color: rgba(22, 75, 131, 0.8); /* Fondo para tema */
   color: white; /* Color de letra para tema */
   padding: 10px 20px; /* Padding para tema */
