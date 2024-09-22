@@ -1,4 +1,4 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -8,14 +8,20 @@
 </head>
 <body>
   <img id="logo" src="https://raw.githubusercontent.com/wilmercz/WC-graficos-en-tiempo-real/main/imagenes/LOGOS%20ARKIMEDES%204.png" alt="Logo">
-  <div id="grafico">
-    <h1 id="invitado">Wilmer Caiza</h1>
-    <h2 id="rol">Ingeniero</h2>
-    <div id="tema" class="tema" style="display: none;">Tema</div> <!-- Oculto por defecto -->
+  
+  <!-- Recuadro para Invitado y Rol -->
+  <div id="grafico-invitado-rol">
+    <h1 id="invitado">Cargando...</h1>
+    <h2 id="rol">Cargando...</h2>
   </div>
-  <div id="status">Estado de la conexión: Desconectado</div>
-
+  
+  <!-- Recuadro para el Tema -->
+  <div id="grafico-tema" style="display: none;"> <!-- Oculto por defecto -->
+    <div id="tema">Tema</div>
+  </div>
+  
   <script type="module" src="firebase-logic.js"></script> <!-- Importar lógica de Firebase -->
 </body>
 </html>
+
 
