@@ -25,19 +25,29 @@ function initializeDataListeners() {
     console.log('Datos recibidos:', data);
 
     if (data) {
+      // Actualizamos el texto del invitado y rol
       document.getElementById('invitado').innerText = data.INVITADO_ACTIVO || 'Sin invitado';
       document.getElementById('rol').innerText = data.ROL_ACTIVO || 'Sin rol';
+      document.getElementById('tema').innerText = data.TEMA_ACTIVO || 'Sin tema';
 
-      const tema = document.getElementById('tema');
-      const grafico = document.getElementById('grafico');
+      const graficoInvitadoRol = document.getElementById('grafico-invitado-rol');
+      const graficoTema = document.getElementById('grafico-tema');
 
       if (data.TEMA_AL_AIRE) {
-        grafico.style.display = 'none'; // Ocultar el gráfico de invitado y rol
-        tema.style.display = 'block'; // Mostrar el tema
-        tema.classList.add('show'); // Agregar clase para animación
-      } else {
-        grafico.style.display = 'block'; // Mostrar gráfico de invitado y rol
-        tema.style.display = 'none'; // Ocultar tema
+        // Si el tema está al aire, ocultamos invitado/rol y mostramos tema
+        graficoInvitadoRol.style.display = 'none';
+        graficoTema.style.display = 'block';
+        
+        // Actualizamos el valor en Firebase para GRAFICO_AL_AIRE
+        update(graficoRef, { GRAFICO_AL_AIRE: false });
+        
+      } else if (data.GRAFICO_AL_AIRE) {
+        // Si el gráfico del invitado/rol está al aire, ocultamos el tema y mostramos invitado/rol
+        graficoTema.style.display = 'none';
+        graficoInvitadoRol.style.display = 'block';
+        
+        // Actualizamos el valor en Firebase para TEMA_AL_AIRE
+        update(graficoRef, { TEMA_AL_AIRE: false });
       }
 
       document.getElementById('status').innerText = 'Estado de la conexión: Conectado y actualizado';
