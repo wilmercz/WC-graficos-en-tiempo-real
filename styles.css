@@ -52,16 +52,6 @@ body {
   justify-content: center; /* Center horizontally */
 }
 
-.tema {
-  transition: all 0.5s ease; /* Agregar transición para animación */
-  opacity: 0; /* Oculto inicialmente */
-}
-
-.tema.show {
-  opacity: 1; /* Mostrar con opacidad */
-  transform: translateY(0); /* Sin desplazamiento */
-}
-
 #status {
   margin-top: 20px;
   font-size: 1.1em;
