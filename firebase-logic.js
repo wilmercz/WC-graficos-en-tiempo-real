@@ -40,9 +40,9 @@ function initializeDataListeners() {
         graficoInvitadoRol.style.display = 'none';
 
         // Asegurarse de que solo el tema está al aire
-        if (data.GRAFICO_AL_AIRE) {
-          update(graficoRef, { GRAFICO_AL_AIRE: false });
-        }
+        //if (data.GRAFICO_AL_AIRE) {
+          //update(graficoRef, { GRAFICO_AL_AIRE: false });
+        //}
       } else {
         graficoTema.style.display = 'none';
       }
@@ -53,9 +53,9 @@ function initializeDataListeners() {
         graficoTema.style.display = 'none';
 
         // Asegurarse de que solo el invitado/rol está al aire
-        if (data.TEMA_AL_AIRE) {
-          update(graficoRef, { TEMA_AL_AIRE: false });
-        }
+        //if (data.TEMA_AL_AIRE) {
+          //update(graficoRef, { TEMA_AL_AIRE: false });
+        //}
       } else {
         graficoInvitadoRol.style.display = 'none';
       }
