@@ -21,7 +21,7 @@ body {
   flex-direction: column; /* Align items vertically */
   position: absolute; /* Position absolute to place near logo */
   left: 215px; /* Align with logo */
-  bottom: 90px; /* Space from the bottom */
+  bottom: 100px; /* Space from the bottom */
 }
 
 #grafico h1 {
@@ -71,12 +71,12 @@ body {
   left: 10px;
 }
 
-#grafico-invitado-rol, #grafico-tema {
+#grafico, #grafico-tema {
   transition: all 0.5s ease;
   opacity: 0;
 }
 
-#grafico-invitado-rol.show, #grafico-tema.show {
+#grafico.show, #grafico-tema.show {
   opacity: 1;
   transform: translateY(0);
 }
