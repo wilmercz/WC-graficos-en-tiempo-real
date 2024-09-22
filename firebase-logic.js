@@ -34,29 +34,31 @@ function initializeDataListeners() {
       const graficoTema = document.getElementById('grafico-tema');
 
       if (data.TEMA_AL_AIRE) {
-        // Si el tema está al aire, ocultamos invitado/rol y mostramos tema
+          // Si el tema está al aire, ocultamos invitado/rol y mostramos tema
         
-        //graficoInvitadoRol.style.display = 'none';
-        //graficoTema.style.display = 'block';
-        graficoTema.classList.add('show'); // Add class to show
+          //graficoInvitadoRol.style.display = 'none';
+          graficoTema.style.display = 'block';
+           // graficoTema.classList.add('show'); // Add class to show
         
-        // Actualizamos el valor en Firebase para GRAFICO_AL_AIRE
-       // update(graficoRef, { GRAFICO_AL_AIRE: false });
+          // Actualizamos el valor en Firebase para GRAFICO_AL_AIRE
+           // update(graficoRef, { GRAFICO_AL_AIRE: false });
         } else {
-            graficoTema.classList.remove('show'); // Remove class to hide
-          }
+          graficoTema.style.display = 'none';    
+          //graficoTema.classList.remove('show'); // Remove class to hide
+        }
       
       if (data.GRAFICO_AL_AIRE) {
         // Si el gráfico del invitado/rol está al aire, ocultamos el tema y mostramos invitado/rol
 
-        graficoInvitadoRol.classList.add('show'); // Add class to show
+        //graficoInvitadoRol.classList.add('show'); // Add class to show
         //graficoTema.style.display = 'none';
-        //graficoInvitadoRol.style.display = 'block';
+        graficoInvitadoRol.style.display = 'block';
         
         // Actualizamos el valor en Firebase para TEMA_AL_AIRE
         //update(graficoRef, { TEMA_AL_AIRE: false });
        } else {
-            graficoInvitadoRol.classList.remove('show'); // Remove class to hide
+            //graficoInvitadoRol.classList.remove('show'); // Remove class to hide
+        graficoInvitadoRol.style.display = 'none';
           }
 
       document.getElementById('status').innerText = 'Estado de la conexión: Conectado y actualizado';
