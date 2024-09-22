@@ -40,8 +40,13 @@ function initializeDataListeners() {
       const graficoTema = document.getElementById('grafico-tema');
       const logo = document.getElementById('logo');
 
+      // Detectar true/false aunque sea cadena de texto
+      const temaAlAire = (data.TEMA_AL_AIRE === true || data.TEMA_AL_AIRE === "true");
+      const graficoAlAire = (data.GRAFICO_AL_AIRE === true || data.GRAFICO_AL_AIRE === "true");
+      const logoAlAire = (data.LOGO_AL_AIRE === true || data.LOGO_AL_AIRE === "true");
+
       // Mostrar u ocultar el gráfico del tema
-      if (data.TEMA_AL_AIRE) {
+      if (temaAlAire) {
         graficoTema.style.display = 'block';
         graficoInvitadoRol.style.display = 'none';
       } else {
@@ -49,7 +54,7 @@ function initializeDataListeners() {
       }
 
       // Mostrar u ocultar el gráfico de invitado/rol
-      if (data.GRAFICO_AL_AIRE) {
+      if (graficoAlAire) {
         graficoInvitadoRol.style.display = 'block';
         graficoTema.style.display = 'none';
       } else {
@@ -57,7 +62,7 @@ function initializeDataListeners() {
       }
 
       // Mostrar u ocultar el logo basado en el valor de LOGO_AL_AIRE
-      if (data.LOGO_AL_AIRE === true) {
+      if (logoAlAire) {
         logo.style.display = 'block';
       } else {
         logo.style.display = 'none';
@@ -73,3 +78,4 @@ function initializeDataListeners() {
     document.getElementById('status').innerText = 'Error al leer datos: ' + error.message;
   });
 }
+
