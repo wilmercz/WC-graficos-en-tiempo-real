@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
+   <html lang="en">
+   <head>
+       <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Gráficos en Tiempo Real</title>
   <style>
@@ -17,36 +17,24 @@
       border-radius: 10px;
     }
   </style>
-</head>
-<body>
-
-  <div id="grafico">
+   </head>
+   <body>
+      <div id="grafico">
     <h1 id="invitado"></h1>
     <h2 id="rol"></h2>
     <p id="tema"></p>
   </div>
-
-  <script type="module">
-    // Importa Firebase
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
-    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js";
-
-    // Configuración de Firebase
-    const firebaseConfig = {
-      apiKey: "AIzaSyD0lkEDKhia76E6ef3uU0B1lOH8CyklCnc",
-      authDomain: "arki-service-autoridades.firebaseapp.com",
-      databaseURL: "https://arki-service-autoridades.firebaseio.com",
-      projectId: "arki-service-autoridades",
-      storageBucket: "arki-service-autoridades.appspot.com",
-      messagingSenderId: "829954736380",
-      appId: "1:829954736380:web:c4badfee0e0db02dd69779"
-    };
-
-    // Inicializa Firebase
-    const app = initializeApp(firebaseConfig);
-    const database = getDatabase(app);
-
-    // Referencias a las claves en Firebase
+     <script type="module">
+       // Importa Firebase y la configuración
+       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+       import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js";
+       import { firebaseConfig } from './firebase-config.js';
+       
+       // Inicializa Firebase
+       const app = initializeApp(firebaseConfig);
+       const database = getDatabase(app);
+       
+       // Referencias a las claves en Firebase
     const refInvitado = ref(database, 'CLAVE_STREAM_FB/GRAFICOS_TIEMPO_REAL/INVITADO_ACTIVO');
     const refRol = ref(database, 'CLAVE_STREAM_FB/GRAFICOS_TIEMPO_REAL/ROL_ACTIVO');
     const refTema = ref(database, 'CLAVE_STREAM_FB/GRAFICOS_TIEMPO_REAL/TEMA_ACTIVO');
@@ -79,5 +67,5 @@
       }
     });
   </script>
-</body>
-</html>
+   </body>
+   </html>
