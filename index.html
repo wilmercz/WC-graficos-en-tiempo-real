@@ -33,7 +33,9 @@
        // Inicializa Firebase
        const app = initializeApp(firebaseConfig);
        const database = getDatabase(app);
-       
+
+        console.log('Firebase inicializado:', app.name);
+        
        // Referencias a las claves en Firebase
     const refInvitado = ref(database, 'CLAVE_STREAM_FB/GRAFICOS_TIEMPO_REAL/INVITADO_ACTIVO');
     const refRol = ref(database, 'CLAVE_STREAM_FB/GRAFICOS_TIEMPO_REAL/ROL_ACTIVO');
@@ -58,14 +60,20 @@
 
     // Muestra/oculta el gráfico con base en el valor de GRAFICO_AL_AIRE
     onValue(refGrafico, (snapshot) => {
-      const graficoAlAire = snapshot.val();
-      const grafico = document.getElementById('grafico');
-      if (graficoAlAire) {
-        grafico.style.display = 'block';
-      } else {
-        grafico.style.display = 'none';
-      }
-    });
+    console.log('Cambio detectado en GRAFICO_AL_AIRE');
+    const graficoAlAire = snapshot.val();
+    console.log('Nuevo valor de GRAFICO_AL_AIRE:', graficoAlAire);
+    const grafico = document.getElementById('grafico');
+    if (graficoAlAire === true) {
+      grafico.style.display = 'block';
+      console.log('Mostrando gráfico');
+    } else {
+      grafico.style.display = 'none';
+      console.log('Ocultando gráfico');
+    }
+  }, (error) => {
+    console.error('Error al leer GRAFICO_AL_AIRE:', error);
+  });
   </script>
    </body>
    </html>
