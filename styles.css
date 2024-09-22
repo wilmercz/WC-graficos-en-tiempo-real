@@ -61,7 +61,10 @@ body {
   left: 10px;
 }
 
-
+#grafico-invitado-rol, #grafico-tema {
+  transition: all 0.5s ease;
+  opacity: 0;
+}
 #grafico-invitado-rol.show, #grafico-tema.show {
   opacity: 1;
   transform: translateY(0);
