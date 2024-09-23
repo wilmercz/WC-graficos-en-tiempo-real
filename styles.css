@@ -9,6 +9,7 @@ body {
 }
 
 #logo {
+    background-color: rgba(220, 223, 220, 1);
   position: absolute; /* Position logo */
   bottom: 60px; /* Adjust position from the bottom */
   left: 20px; /* Position from the left */
@@ -41,7 +42,7 @@ body {
 }
 
 #grafico-tema {
-  background-color: rgba(22, 75, 131, 0.8); /* Fondo para tema */
+  background-color: rgba(220, 223, 220, 1); /* Fondo para tema */
   color: white; /* Color de letra para tema */
   padding: 7px 20px; /* Padding para tema */
   border-radius: 5px; /* Bordes redondeados */
