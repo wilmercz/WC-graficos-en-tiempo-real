@@ -9,11 +9,11 @@ body {
 }
 
 #logo {
-    background-color: rgba(220, 223, 220, 1);
+    background-color: transparent;
   position: absolute; /* Position logo */
   bottom: 60px; /* Adjust position from the bottom */
   left: 20px; /* Position from the left */
-  width: 100px; /* Width of your logo */
+  width: 180px; /* Width of your logo */
   height: auto; /* Maintain aspect ratio */
 }
 
