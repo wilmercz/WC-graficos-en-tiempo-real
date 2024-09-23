@@ -43,7 +43,7 @@ body {
 
 #grafico-tema {
   background-color: rgba(220, 223, 220, 1); /* Fondo para tema */
-  color: white; /* Color de letra para tema */
+  color: rgba(22, 75, 131, 1); /* Color de letra para tema */
   padding: 7px 20px; /* Padding para tema */
   border-radius: 5px; /* Bordes redondeados */
   text-align: left; /* Center the text */
