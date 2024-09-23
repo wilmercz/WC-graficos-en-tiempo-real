@@ -82,6 +82,12 @@ bottom: 100px; /* Space from the bottom */
   position: absolute;
   left: 10px;
   bottom: 10px; /* Ajusta la posición si es necesario */
+  width: 300px; /* Ajusta el tamaño si es necesario */
+  height: auto;
+  background-color: rgba(0, 0, 0, 0.7); /* Fondo semitransparente para visibilidad */
+  color: white; /* Asegúrate de que el texto sea visible */
+  padding: 10px; /* Espaciado interior */
+  border-radius: 8px; /* Bordes redondeados */
 }
 
 /* Cuando la clase .show se añade, el gráfico aparece */
@@ -90,7 +96,7 @@ bottom: 100px; /* Space from the bottom */
   transform: translateX(0); /* Se mueve hacia su posición normal */
 }
 
-/* Opcional: Animación para suavizar la aparición */
+/* Animación para suavizar la aparición */
 @keyframes slideInFromLeft {
   from {
     transform: translateX(-100%);
