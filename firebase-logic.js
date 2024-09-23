@@ -40,10 +40,10 @@ function initializeDataListeners() {
       const graficoTema = document.getElementById('grafico-tema');
       const logo = document.getElementById('logo');
 
-      // Detectar true/false aunque sea cadena de texto
-      const temaAlAire = (data.TEMA_AL_AIRE === true || data.TEMA_AL_AIRE === "true");
-      const graficoAlAire = (data.GRAFICO_AL_AIRE === true || data.GRAFICO_AL_AIRE === "true");
-      const logoAlAire = (data.LOGO_AL_AIRE === true || data.LOGO_AL_AIRE === "true");
+// Convertir explícitamente las cadenas "true" y "false" a booleanos
+      const temaAlAire = (data.TEMA_AL_AIRE === "true") ? true : (data.TEMA_AL_AIRE === "false") ? false : data.TEMA_AL_AIRE;
+      const graficoAlAire = (data.GRAFICO_AL_AIRE === "true") ? true : (data.GRAFICO_AL_AIRE === "false") ? false : data.GRAFICO_AL_AIRE;
+      const logoAlAire = (data.LOGO_AL_AIRE === "true") ? true : (data.LOGO_AL_AIRE === "false") ? false : data.LOGO_AL_AIRE;
 
       // Mostrar u ocultar el gráfico del tema
       if (temaAlAire) {
