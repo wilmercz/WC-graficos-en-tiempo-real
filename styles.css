@@ -68,3 +68,41 @@ bottom: 100px; /* Space from the bottom */
   opacity: 1;
   transform: translateY(0);
 }
+
+
+
+
+
+
+/* Estado inicial con el gráfico oculto fuera de la pantalla */
+#grafico-invitado-rol, #grafico-tema {
+  opacity: 0;
+  transform: translateX(-100%); /* Comienza fuera de la pantalla, a la izquierda */
+  transition: transform 0.5s ease-out, opacity 0.5s ease-out;
+  position: absolute;
+  left: 10px;
+  bottom: 10px; /* Ajusta la posición si es necesario */
+}
+
+/* Cuando la clase .show se añade, el gráfico aparece */
+#grafico-invitado-rol.show, #grafico-tema.show {
+  opacity: 1;
+  transform: translateX(0); /* Se mueve hacia su posición normal */
+}
+
+/* Opcional: Animación para suavizar la aparición */
+@keyframes slideInFromLeft {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Aplicar la animación cuando el gráfico esté visible */
+#grafico-invitado-rol.show, #grafico-tema.show {
+  animation: slideInFromLeft 0.5s ease-out forwards;
+}
