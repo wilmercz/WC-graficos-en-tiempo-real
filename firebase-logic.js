@@ -37,8 +37,8 @@ function initializeDataListeners() {
       const logoUrl = data.LOGO_RUTA || 'https://raw.githubusercontent.com/wilmercz/WC-graficos-en-tiempo-real/main/imagenes/LOGOS%20ARKIMEDES%204.png'; // Aquí es donde obtienes la URL del logo
 
       // Aplicar colores al h1 y h2 de #grafico-invitado-rol
-      const graficoInvitadoRolH1 = document.querySelector('#grafico-invitado-rol h1');
-      const graficoInvitadoRolH2 = document.querySelector('#grafico-invitado-rol h2');
+     // const graficoInvitadoRolH1 = document.querySelector('#grafico-invitado-rol h1');
+    //  const graficoInvitadoRolH2 = document.querySelector('#grafico-invitado-rol h2');
 
       //if (graficoInvitadoRolH1) {
       //  graficoInvitadoRolH1.style.backgroundColor = colorFondo1;
