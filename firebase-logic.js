@@ -18,6 +18,7 @@ signInAnonymously(auth)
   });
 
 function hexToRgba(hex, alpha = 1) {
+  if (!hex || typeof hex !== 'string') return null;
   const r = parseInt(hex.slice(1, 3), 16);
   const g = parseInt(hex.slice(3, 5), 16);
   const b = parseInt(hex.slice(5, 7), 16);
@@ -37,35 +38,44 @@ function initializeDataListeners() {
        // Leer los colores de Firebase
       const colorFondo1 = data.COLOR_FONDO_1 ? hexToRgba(data.COLOR_FONDO_1) : 'rgba(220, 223, 220, 1)';
       const colorLetra1 = data.COLOR_LETRA_1 ? hexToRgba(data.COLOR_LETRA_1) : 'rgba(22, 75, 131, 1)';
-      const colorLetra1 = data.COLOR_FONDO_2 ? hexToRgba(data.COLOR_FONDO_2) : 'rgba(255, 255, 255, 1)'; // Valor por defecto si no hay datos
-      const colorLetra1 = data.COLOR_LETRA_2 ? hexToRgba(data.COLOR_LETRA_2) :'rgba(0, 0, 0, 1)';
-      const colorFondo1 = data.COLOR_FONDO_3 ? hexToRgba(data.COLOR_FONDO_3) : 'rgba(220, 223, 220, 1)';
-      const colorLetra1 = data.COLOR_LETRA_3 ? hexToRgba(data.COLOR_LETRA_3) : 'rgba(22, 75, 131, 1)';
+      const colorFondo2 = data.COLOR_FONDO_2 ? hexToRgba(data.COLOR_FONDO_2) : 'rgba(255, 255, 255, 1)';
+      const colorLetra2 = data.COLOR_LETRA_2 ? hexToRgba(data.COLOR_LETRA_2) : 'rgba(0, 0, 0, 1)';
+      const colorFondo3 = data.COLOR_FONDO_3 ? hexToRgba(data.COLOR_FONDO_3) : 'rgba(220, 223, 220, 1)';
+      const colorLetra3 = data.COLOR_LETRA_3 ? hexToRgba(data.COLOR_LETRA_3) : 'rgba(22, 75, 131, 1)';
       //const colorFondo3 = data.COLOR_FONDO_3 || 'rgba(240, 240, 240, 1)'; // Color por defecto para graficoTema
+      console.log('Colores:', {
+        fondo1: colorFondo1,
+        letra1: colorLetra1,
+        fondo2: colorFondo2,
+        letra2: colorLetra2,
+        fondo3: colorFondo3,
+        letra3: colorLetra3
+      });
      
       const logoUrl = data.LOGO_RUTA || 'https://raw.githubusercontent.com/wilmercz/WC-graficos-en-tiempo-real/main/imagenes/LOGOS%20ARKIMEDES%204.png'; // Aquí es donde obtienes la URL del logo
 
       // Aplicar colores al h1 y h2 de #grafico-invitado-rol
-     const graficoInvitadoRolH1 = document.querySelector('#grafico-invitado-rol h1');
+    const graficoInvitadoRolH1 = document.querySelector('#grafico-invitado-rol h1');
     const graficoInvitadoRolH2 = document.querySelector('#grafico-invitado-rol h2');
 
-      //if (graficoInvitadoRolH1) {
-      //  graficoInvitadoRolH1.style.backgroundColor = colorFondo1;
-     //   graficoInvitadoRolH1.style.color = colorLetra1;
-      //}
-
-      //if (graficoInvitadoRolH2) {
-      //  graficoInvitadoRolH2.style.backgroundColor = colorFondo2;
-       // graficoInvitadoRolH2.style.color = colorLetra2;
-      //}
-
-      // Aplicar colores a graficoTema
-      //const graficoTema = document.querySelector('#grafico-tema h1');
-      //if (graficoTema) {
-      //  graficoTema.style.backgroundColor = colorFondo3;
-      //  graficoTema.style.color = colorLetra3;
-      //}
-      
+    if (graficoInvitadoRolH1) {
+      graficoInvitadoRolH1.style.setProperty('background-color', colorFondo1, 'important');
+      graficoInvitadoRolH1.style.setProperty('color', colorLetra1, 'important');
+      //graficoInvitadoRolH1.style.backgroundColor = colorFondo1;
+      //graficoInvitadoRolH1.style.color = colorLetra1;
+    }
+    
+    if (graficoInvitadoRolH2) {
+      graficoInvitadoRolH2.style.backgroundColor = colorFondo2;
+      graficoInvitadoRolH2.style.color = colorLetra2;
+    }
+    
+    const graficoTema = document.querySelector('#grafico-tema h1');
+    if (graficoTema) {
+      graficoTema.style.backgroundColor = colorFondo3;
+      graficoTema.style.color = colorLetra3;
+    }
+          
       
     // Eliminar las comillas extremas de los campos si las hay
       const invitado = (data.INVITADO_ACTIVO || 'Sin invitado').replace(/^"|"$/g, '');
@@ -96,7 +106,8 @@ function initializeDataListeners() {
 
       // Mostrar u ocultar el gráfico de invitado/rol
       if (graficoAlAire) {
-        graficoInvitadoRol.style.display = 'block';
+        graficoInvitadoRol.style.display = 'flex';  // Cambiado de 'block' a 'flex'
+        //graficoInvitadoRol.style.display = 'block';
         graficoTema.style.display = 'none';
       } else {
         graficoInvitadoRol.style.display = 'none';
