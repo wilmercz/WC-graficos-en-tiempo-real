@@ -66,8 +66,8 @@ function initializeDataListeners() {
     }
     
     if (graficoInvitadoRolH2) {
-      graficoInvitadoRolH2.style.backgroundColor = colorFondo2;
-      graficoInvitadoRolH2.style.color = colorLetra2;
+      //graficoInvitadoRolH2.style.backgroundColor = colorFondo2;
+      //graficoInvitadoRolH2.style.color = colorLetra2;
     }
     
     const graficoTema = document.querySelector('#grafico-tema h1');
