@@ -41,7 +41,7 @@ function initializeDataListeners() {
       const colorLetra2 = data.COLOR_LETRA_2 || 'rgba(0, 0, 0, 1)';
       const colorFondo3 = data.COLOR_FONDO_3 || 'rgba(240, 240, 240, 1)';
       const colorLetra3 = data.COLOR_LETRA_3 || 'rgba(0, 0, 0, 1)';
-
+console.log('COLORES:', colorLetra3 );
       // Aplicar colores al h1 y h2 de #grafico-invitado-rol
       const graficoInvitadoRolH1 = document.querySelector('#grafico-invitado-rol h1');
       const graficoInvitadoRolH2 = document.querySelector('#grafico-invitado-rol h2');
