@@ -86,7 +86,7 @@ function initializeDataListeners() {
       const publicidadAlAire = data.GRAFICO_PUBLICIDAD_AL_AIRE === "true";
 
       // Leer la URL del logo y de la publicidad desde Firebase
-      const logoUrl = data.LOGO_URL || '';
+      const logoUrl = data.LOGO_RUTA || '';
       const publicidadUrl = data.GRAFICO_1 || '';
 
       // Mostrar u ocultar elementos según su estado
