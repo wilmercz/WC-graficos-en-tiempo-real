@@ -34,6 +34,29 @@ function initializeDataListeners() {
       const colorLetra2 = data.COLOR_LETRA_2 || 'rgba(0, 0, 0, 1)';
       const colorFondo3 = data.COLOR_FONDO_3 || 'rgba(240, 240, 240, 1)'; // Color por defecto para graficoTema
       const colorLetra3 = data.COLOR_LETRA_3 || 'rgba(0, 0, 0, 1)'; // Color de letra por defecto para graficoTema
+
+
+      // Aplicar colores al h1 y h2 de #grafico-invitado-rol
+      const graficoInvitadoRolH1 = document.querySelector('#grafico-invitado-rol h1');
+      const graficoInvitadoRolH2 = document.querySelector('#grafico-invitado-rol h2');
+
+      if (graficoInvitadoRolH1) {
+        graficoInvitadoRolH1.style.backgroundColor = colorFondo1;
+        graficoInvitadoRolH1.style.color = colorLetra1;
+      }
+
+      if (graficoInvitadoRolH2) {
+        graficoInvitadoRolH2.style.backgroundColor = colorFondo2;
+        graficoInvitadoRolH2.style.color = colorLetra2;
+      }
+
+      // Aplicar colores a graficoTema
+      const graficoTema = document.querySelector('#grafico-tema h1');
+      if (graficoTema) {
+        graficoTema.style.backgroundColor = colorFondo3;
+        graficoTema.style.color = colorLetra3;
+      }
+      
       
     // Eliminar las comillas extremas de los campos si las hay
       const invitado = (data.INVITADO_ACTIVO || 'Sin invitado').replace(/^"|"$/g, '');
