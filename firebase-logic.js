@@ -34,50 +34,36 @@ function initializeDataListeners() {
     console.log('Datos recibidos:', data);
 
     if (data) {
-
-       // Leer los colores de Firebase
-      const colorFondo1 = data.COLOR_FONDO_1 ? hexToRgba(data.COLOR_FONDO_1) : 'rgba(220, 223, 220, 1)';
-      const colorLetra1 = data.COLOR_LETRA_1 ? hexToRgba(data.COLOR_LETRA_1) : 'rgba(22, 75, 131, 1)';
-      const colorFondo2 = data.COLOR_FONDO_2 ? hexToRgba(data.COLOR_FONDO_2) : 'rgba(255, 255, 255, 1)';
-      const colorLetra2 = data.COLOR_LETRA_2 ? hexToRgba(data.COLOR_LETRA_2) : 'rgba(0, 0, 0, 1)';
-      const colorFondo3 = data.COLOR_FONDO_3 ? hexToRgba(data.COLOR_FONDO_3) : 'rgba(220, 223, 220, 1)';
-      const colorLetra3 = data.COLOR_LETRA_3 ? hexToRgba(data.COLOR_LETRA_3) : 'rgba(22, 75, 131, 1)';
-      //const colorFondo3 = data.COLOR_FONDO_3 || 'rgba(240, 240, 240, 1)'; // Color por defecto para graficoTema
-      console.log('Colores:', {
-        fondo1: colorFondo1,
-        letra1: colorLetra1,
-        fondo2: colorFondo2,
-        letra2: colorLetra2,
-        fondo3: colorFondo3,
-        letra3: colorLetra3
-      });
-     
-      const logoUrl = data.LOGO_RUTA || 'https://raw.githubusercontent.com/wilmercz/WC-graficos-en-tiempo-real/main/imagenes/LOGOS%20ARKIMEDES%204.png'; // Aquí es donde obtienes la URL del logo
+      // Leer los colores de Firebase
+      const colorFondo1 = data.COLOR_FONDO_1 || 'rgba(220, 223, 220, 1)';
+      const colorLetra1 = data.COLOR_LETRA_1 || 'rgba(22, 75, 131, 1)';
+      const colorFondo2 = data.COLOR_FONDO_2 || 'rgba(255, 255, 255, 1)';
+      const colorLetra2 = data.COLOR_LETRA_2 || 'rgba(0, 0, 0, 1)';
+      const colorFondo3 = data.COLOR_FONDO_3 || 'rgba(240, 240, 240, 1)';
+      const colorLetra3 = data.COLOR_LETRA_3 || 'rgba(0, 0, 0, 1)';
 
       // Aplicar colores al h1 y h2 de #grafico-invitado-rol
-    const graficoInvitadoRolH1 = document.querySelector('#grafico-invitado-rol h1');
-    const graficoInvitadoRolH2 = document.querySelector('#grafico-invitado-rol h2');
+      const graficoInvitadoRolH1 = document.querySelector('#grafico-invitado-rol h1');
+      const graficoInvitadoRolH2 = document.querySelector('#grafico-invitado-rol h2');
 
-    if (graficoInvitadoRolH1) {
-      graficoInvitadoRolH1.style.setProperty('background-color', colorFondo1, 'important');
-      graficoInvitadoRolH1.style.setProperty('color', colorLetra1, 'important');
-      //graficoInvitadoRolH1.style.backgroundColor = colorFondo1;
-      //graficoInvitadoRolH1.style.color = colorLetra1;
-    }
-    
-    if (graficoInvitadoRolH2) {
-  graficoInvitadoRolH2.style.setProperty('background-color', colorFondo2, 'important');
-  graficoInvitadoRolH2.style.setProperty('color', colorLetra2, 'important');
-}
-    
-    const graficoTema = document.querySelector('#grafico-tema h1');
-    if (graficoTema) {
-      graficoTema.style.backgroundColor = colorFondo3;
-      graficoTema.style.color = colorLetra3;
-    }
-          
-      
-    // Eliminar las comillas extremas de los campos si las hay
+      if (graficoInvitadoRolH1) {
+        graficoInvitadoRolH1.style.backgroundColor = colorFondo1;
+        graficoInvitadoRolH1.style.color = colorLetra1;
+      }
+
+      if (graficoInvitadoRolH2) {
+        graficoInvitadoRolH2.style.backgroundColor = colorFondo2;
+        graficoInvitadoRolH2.style.color = colorLetra2;
+      }
+
+      // Aplicar colores a graficoTema
+      const graficoTemaH1 = document.querySelector('#grafico-tema h1');
+      if (graficoTemaH1) {
+        graficoTemaH1.style.backgroundColor = colorFondo3;
+        graficoTemaH1.style.color = colorLetra3;
+      }
+
+      // Eliminar las comillas extremas de los campos si las hay
       const invitado = (data.INVITADO_ACTIVO || 'Sin invitado').replace(/^"|"$/g, '');
       const rol = (data.ROL_ACTIVO || 'Sin rol').replace(/^"|"$/g, '');
       const tema = (data.TEMA_ACTIVO || 'Sin tema').replace(/^"|"$/g, '');
@@ -90,34 +76,37 @@ function initializeDataListeners() {
       const graficoInvitadoRol = document.getElementById('grafico-invitado-rol');
       const graficoTema = document.getElementById('grafico-tema');
       const logo = document.getElementById('logo');
-      if (!graficoInvitadoRol || !graficoTema || !logo) {
-        console.error('Uno o más elementos no se encontraron en el DOM');
-        return;
-      }
+      const graficoPublicidad = document.getElementById('grafico-publicidad');
+      const publicidadImg = document.getElementById('publicidad-img');
+
       // Convertir explícitamente las cadenas "true" y "false" a booleanos
-      const temaAlAire = (data.TEMA_AL_AIRE === "true") ? true : (data.TEMA_AL_AIRE === "false") ? false : data.TEMA_AL_AIRE;
-      const graficoAlAire = (data.GRAFICO_AL_AIRE === "true") ? true : (data.GRAFICO_AL_AIRE === "false") ? false : data.GRAFICO_AL_AIRE;
-      const logoAlAire = (data.LOGO_AL_AIRE === "true") ? true : (data.LOGO_AL_AIRE === "false") ? false : data.LOGO_AL_AIRE;
+      const temaAlAire = data.TEMA_AL_AIRE === "true";
+      const graficoAlAire = data.GRAFICO_AL_AIRE === "true";
+      const logoAlAire = data.LOGO_AL_AIRE === "true";
+      const publicidadAlAire = data.GRAFICO_PUBLICIDAD_AL_AIRE === "true";
 
-      // Mostrar u ocultar el gráfico del tema o Lowerthirds
-      if (temaAlAire) {
-        graficoTema.style.display = 'block';
-        graficoInvitadoRol.style.display = 'none';
-      } else if (graficoAlAire) {
-        graficoInvitadoRol.style.display = 'flex';
-        graficoTema.style.display = 'none';
-      } else {
-        graficoTema.style.display = 'none';
-        graficoInvitadoRol.style.display = 'none';
-      }
+      // Leer la URL del logo y de la publicidad desde Firebase
+      const logoUrl = data.LOGO_URL || '';
+      const publicidadUrl = data.GRAFICO_1 || '';
 
-      // Mostrar u ocultar el logo basado en el valor de LOGO_AL_AIRE
+      // Mostrar u ocultar elementos según su estado
+      graficoTema.style.display = temaAlAire ? 'block' : 'none';
+      graficoInvitadoRol.style.display = graficoAlAire ? 'block' : 'none';
       
-      if (logoAlAire) {
-        logo.src = logoUrl; // Cambiar dinámicamente la URL del logo
+      if (logoAlAire && logoUrl) {
+        logo.src = logoUrl;
         logo.style.display = 'block';
       } else {
         logo.style.display = 'none';
+      }
+
+      if (publicidadAlAire && publicidadUrl) {
+        publicidadImg.src = publicidadUrl;
+        graficoPublicidad.style.display = 'block';
+        graficoInvitadoRol.style.display = 'none';
+        graficoTema.style.display = 'none';
+      } else {
+        graficoPublicidad.style.display = 'none';
       }
 
       document.getElementById('status').innerText = 'Estado de la conexión: Conectado y actualizado';
