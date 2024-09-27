@@ -99,8 +99,10 @@ function initializeDataListeners() {
 // Convertir explícitamente las cadenas "true" y "false" a booleanos
       const temaAlAire = (data.TEMA_AL_AIRE === "true") ? true : (data.TEMA_AL_AIRE === "false") ? false : data.TEMA_AL_AIRE;
       const graficoAlAire = (data.GRAFICO_AL_AIRE === "true") ? true : (data.GRAFICO_AL_AIRE === "false") ? false : data.GRAFICO_AL_AIRE;
+       // Leer la URL del logo desde Firebase
       const logoAlAire = (data.LOGO_AL_AIRE === "true") ? true : (data.LOGO_AL_AIRE === "false") ? false : data.LOGO_AL_AIRE;
-
+      const logoUrl = data.LOGO_URL || ''; // Aquí es donde obtienes la URL del logo
+    
       // Mostrar u ocultar el gráfico del tema
       if (temaAlAire) {
         graficoTema.style.display = 'block';
@@ -119,6 +121,7 @@ function initializeDataListeners() {
 
       // Mostrar u ocultar el logo basado en el valor de LOGO_AL_AIRE
       if (logoAlAire) {
+        logo.src = logoUrl; // Cambiar dinámicamente la URL del logo
         logo.style.display = 'block';
       } else {
         logo.style.display = 'none';
