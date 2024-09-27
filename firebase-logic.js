@@ -72,7 +72,8 @@ document.getElementById('status').innerText = 'PASO 2';
       document.getElementById('invitado').innerText = invitado;
       document.getElementById('rol').innerText = rol;
       document.getElementById('tema').innerText = tema;
-document.getElementById('status').innerText = 'PASO 3';
+
+      
       const graficoInvitadoRol = document.getElementById('grafico-invitado-rol');
       const graficoTema = document.getElementById('grafico-tema');
       const logo = document.getElementById('logo');
@@ -80,11 +81,18 @@ document.getElementById('status').innerText = 'PASO 3';
       const publicidadImg = document.getElementById('publicidad-img');
 
       // Convertir explícitamente las cadenas "true" y "false" a booleanos
-      const temaAlAire = data.TEMA_AL_AIRE === "true";
-      const graficoAlAire = data.GRAFICO_AL_AIRE === "true";
-      const logoAlAire = data.LOGO_AL_AIRE === "true";
-      const publicidadAlAire = data.GRAFICO_PUBLICIDAD_AL_AIRE === "true";
+      //const temaAlAire = data.TEMA_AL_AIRE === "true";
+      //const graficoAlAire = data.GRAFICO_AL_AIRE === "true";
+      //const logoAlAire = data.LOGO_AL_AIRE === "true";
+      //const publicidadAlAire = data.GRAFICO_1_ALAIRE === "true";
+// Convertir explícitamente las cadenas "true" y "false" a booleanos
+      const temaAlAire = (data.TEMA_AL_AIRE === "true") ? true : (data.TEMA_AL_AIRE === "false") ? false : data.TEMA_AL_AIRE;
+      const graficoAlAire = (data.GRAFICO_AL_AIRE === "true") ? true : (data.GRAFICO_AL_AIRE === "false") ? false : data.GRAFICO_AL_AIRE;
+      const logoAlAire = (data.LOGO_AL_AIRE === "true") ? true : (data.LOGO_AL_AIRE === "false") ? false : data.LOGO_AL_AIRE;
+      const publicidadAlAire = (data.GRAFICO_1_ALAIRE === "true") ? true : (data.GRAFICO_1_ALAIRE === "false") ? false : data.GRAFICO_1_ALAIRE;
 
+      console.log('PUBLICIDAD ESTADO:', publicidadAlAire);
+      
       // Leer la URL del logo y de la publicidad desde Firebase
       const logoUrl = data.LOGO_RUTA || 'https://raw.githubusercontent.com/wilmercz/WC-graficos-en-tiempo-real/main/imagenes/LOGOS%20ARKIMEDES%204.png';
       const publicidadUrl = data.GRAFICO_1 || '';
