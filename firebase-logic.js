@@ -116,8 +116,10 @@ document.getElementById('status').innerText = 'PASO 4';
       if (logoAlAire && logoUrl) {
         logo.src = logoUrl;
         logo.style.display = 'block';
+        document.getElementById('status').innerText = 'logo visible';
       } else {
         logo.style.display = 'none';
+        document.getElementById('status').innerText = 'Logo invisible';
       }
 
       if (publicidadAlAire && publicidadUrl) {
@@ -129,7 +131,8 @@ document.getElementById('status').innerText = 'PASO 4';
         graficoPublicidad.style.display = 'none';
       }
 
-      document.getElementById('status').innerText = 'Estado de la conexión: Conectado y actualizado';
+      //document.getElementById('status').innerText = 'Estado de la conexión: Conectado y actualizado';
+      
     } else {
       console.log('No se recibieron datos');
       document.getElementById('status').innerText = 'Estado de la conexión: Conectado, pero sin datos';
