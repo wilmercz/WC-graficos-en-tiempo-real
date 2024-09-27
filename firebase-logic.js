@@ -17,6 +17,13 @@ signInAnonymously(auth)
     document.getElementById('status').innerText = 'Error de autenticación: ' + error.message;
   });
 
+function hexToRgba(hex, alpha = 1) {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
 function initializeDataListeners() {
   const graficoRef = ref(database, 'CLAVE_STREAM_FB/GRAFICOS_TIEMPO_REAL');
 
@@ -28,8 +35,8 @@ function initializeDataListeners() {
     if (data) {
 
        // Leer los colores de Firebase
-      const colorFondo1 = data.COLOR_FONDO_1 || 'rgba(220, 223, 220, 1)'; // Valor por defecto si no hay datos
-      const colorLetra1 = data.COLOR_LETRA_1 || 'rgba(22, 75, 131, 1)';
+      const colorFondo1 = data.COLOR_FONDO_1 ? hexToRgba(data.COLOR_FONDO_1) : 'rgba(220, 223, 220, 1)';
+      const colorLetra1 = data.COLOR_LETRA_1 ? hexToRgba(data.COLOR_LETRA_1) : 'rgba(22, 75, 131, 1)';
       const colorFondo2 = data.COLOR_FONDO_2 || 'rgba(255, 255, 255, 1)'; // Valor por defecto si no hay datos
      const colorLetra2 = data.COLOR_LETRA_2 || 'rgba(0, 0, 0, 1)';
       const colorFondo3 = data.COLOR_FONDO_3 || 'rgba(240, 240, 240, 1)'; // Color por defecto para graficoTema
