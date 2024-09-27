@@ -114,13 +114,6 @@ document.getElementById('status').innerText = 'PASO 4';
         graficoInvitadoRol.style.display = 'none';
       }
 
-      // Mostrar u ocultar el logo basado en el valor de LOGO_AL_AIRE
-      //if (logoAlAire) {
-      //  logo.style.display = 'block';
-      //} else {
-      //  logo.style.display = 'none';
-      //}
-  
       console.log('LOGO Estado:', logoAlAire);
       console.log('LOGO URL:', logoUrl);
       if (logoAlAire && logoUrl) {
@@ -132,6 +125,16 @@ document.getElementById('status').innerText = 'PASO 4';
         document.getElementById('status').innerText = 'Logo invisible';
       }
 
+            // Mostrar u ocultar el logo basado en el valor de LOGO_AL_AIRE
+      if (logoAlAire) {
+        logo.src = logoUrl;
+        logo.style.display = 'block';
+        console.log('Logo Visible segundo bloque', logoAlAire);
+      } else {
+        logo.style.display = 'none';
+      }
+
+      
       if (publicidadAlAire && publicidadUrl) {
         publicidadImg.src = publicidadUrl;
         graficoPublicidad.style.display = 'block';
