@@ -112,7 +112,9 @@ document.getElementById('status').innerText = 'PASO 4';
       //} else {
       //  logo.style.display = 'none';
       //}
-      document.getElementById('status').innerText = logoAlAire;
+  
+      console.log('LOGO Estado:', logoAlAire);
+      console.log('LOGO URL:', logoUrl);
       if (logoAlAire && logoUrl) {
         logo.src = logoUrl;
         logo.style.display = 'block';
