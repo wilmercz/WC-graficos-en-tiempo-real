@@ -45,7 +45,7 @@ function initializeDataListeners() {
       // Aplicar colores al h1 y h2 de #grafico-invitado-rol
       const graficoInvitadoRolH1 = document.querySelector('#grafico-invitado-rol h1');
       const graficoInvitadoRolH2 = document.querySelector('#grafico-invitado-rol h2');
-
+document.getElementById('status').innerText = 'PASO 1';
       if (graficoInvitadoRolH1) {
         graficoInvitadoRolH1.style.backgroundColor = colorFondo1;
         graficoInvitadoRolH1.style.color = colorLetra1;
@@ -55,7 +55,7 @@ function initializeDataListeners() {
         graficoInvitadoRolH2.style.backgroundColor = colorFondo2;
         graficoInvitadoRolH2.style.color = colorLetra2;
       }
-
+document.getElementById('status').innerText = 'PASO 2';
       // Aplicar colores a graficoTema
       const graficoTemaH1 = document.querySelector('#grafico-tema h1');
       if (graficoTemaH1) {
@@ -72,7 +72,7 @@ function initializeDataListeners() {
       document.getElementById('invitado').innerText = invitado;
       document.getElementById('rol').innerText = rol;
       document.getElementById('tema').innerText = tema;
-
+document.getElementById('status').innerText = 'PASO 3';
       const graficoInvitadoRol = document.getElementById('grafico-invitado-rol');
       //const graficoTema = document.getElementById('grafico-tema');
       const logo = document.getElementById('logo');
@@ -88,7 +88,7 @@ function initializeDataListeners() {
       // Leer la URL del logo y de la publicidad desde Firebase
       const logoUrl = data.LOGO_RUTA || '';
       const publicidadUrl = data.GRAFICO_1 || '';
-
+document.getElementById('status').innerText = 'PASO 4';
       // Mostrar u ocultar elementos según su estado
       graficoTema.style.display = temaAlAire ? 'block' : 'none';
       graficoInvitadoRol.style.display = graficoAlAire ? 'block' : 'none';
