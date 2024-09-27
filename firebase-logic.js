@@ -51,11 +51,11 @@ function initializeDataListeners() {
       //}
 
       // Aplicar colores a graficoTema
-      const graficoTema = document.querySelector('#grafico-tema h1');
-      if (graficoTema) {
-        graficoTema.style.backgroundColor = colorFondo3;
-        graficoTema.style.color = colorLetra3;
-      }
+      //const graficoTema = document.querySelector('#grafico-tema h1');
+      //if (graficoTema) {
+      //  graficoTema.style.backgroundColor = colorFondo3;
+      //  graficoTema.style.color = colorLetra3;
+      //}
       
       
     // Eliminar las comillas extremas de los campos si las hay
