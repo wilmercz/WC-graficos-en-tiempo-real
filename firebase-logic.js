@@ -45,10 +45,10 @@ function initializeDataListeners() {
         graficoInvitadoRolH1.style.color = colorLetra1;
       }
 
-      if (graficoInvitadoRolH2) {
-        graficoInvitadoRolH2.style.backgroundColor = colorFondo2;
-        graficoInvitadoRolH2.style.color = colorLetra2;
-      }
+      //if (graficoInvitadoRolH2) {
+      //  graficoInvitadoRolH2.style.backgroundColor = colorFondo2;
+       // graficoInvitadoRolH2.style.color = colorLetra2;
+      //}
 
       // Aplicar colores a graficoTema
       const graficoTema = document.querySelector('#grafico-tema h1');
