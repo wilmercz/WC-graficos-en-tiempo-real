@@ -112,7 +112,7 @@ document.getElementById('status').innerText = 'PASO 4';
       //} else {
       //  logo.style.display = 'none';
       //}
-      document.getElementById('status').innerText = logoUrl;
+      document.getElementById('status').innerText = logoAlAire;
       if (logoAlAire && logoUrl) {
         logo.src = logoUrl;
         logo.style.display = 'block';
