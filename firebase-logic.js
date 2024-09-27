@@ -41,7 +41,7 @@ function initializeDataListeners() {
       const colorLetra2 = data.COLOR_LETRA_2 || 'rgba(0, 0, 0, 1)';
       const colorFondo3 = data.COLOR_FONDO_3 || 'rgba(240, 240, 240, 1)';
       const colorLetra3 = data.COLOR_LETRA_3 || 'rgba(0, 0, 0, 1)';
-console.log('COLORES:', colorLetra3 );
+
       // Aplicar colores al h1 y h2 de #grafico-invitado-rol
       const graficoInvitadoRolH1 = document.querySelector('#grafico-invitado-rol h1');
       const graficoInvitadoRolH2 = document.querySelector('#grafico-invitado-rol h2');
@@ -86,12 +86,32 @@ document.getElementById('status').innerText = 'PASO 3';
       const publicidadAlAire = data.GRAFICO_PUBLICIDAD_AL_AIRE === "true";
 
       // Leer la URL del logo y de la publicidad desde Firebase
-      const logoUrl = data.LOGO_RUTA || '';
+      const logoUrl = data.LOGO_RUTA || 'https://raw.githubusercontent.com/wilmercz/WC-graficos-en-tiempo-real/main/imagenes/LOGOS%20ARKIMEDES%204.png';
       const publicidadUrl = data.GRAFICO_1 || '';
 document.getElementById('status').innerText = 'PASO 4';
-      // Mostrar u ocultar elementos según su estado
-      graficoTema.style.display = temaAlAire ? 'block' : 'none';
-      graficoInvitadoRol.style.display = graficoAlAire ? 'block' : 'none';
+      
+           // Mostrar u ocultar el gráfico del tema
+      if (temaAlAire) {
+        graficoTema.style.display = 'block';
+        graficoInvitadoRol.style.display = 'none';
+      } else {
+        graficoTema.style.display = 'none';
+      }
+
+      // Mostrar u ocultar el gráfico de invitado/rol
+      if (graficoAlAire) {
+        graficoInvitadoRol.style.display = 'block';
+        graficoTema.style.display = 'none';
+      } else {
+        graficoInvitadoRol.style.display = 'none';
+      }
+
+      // Mostrar u ocultar el logo basado en el valor de LOGO_AL_AIRE
+      //if (logoAlAire) {
+      //  logo.style.display = 'block';
+      //} else {
+      //  logo.style.display = 'none';
+      //}
       
       if (logoAlAire && logoUrl) {
         logo.src = logoUrl;
