@@ -28,8 +28,8 @@ function initializeDataListeners() {
     if (data) {
 
        // Leer los colores de Firebase
-      const colorFondo1 = data.COLOR_FONDO_1 || 'rgba(220, 223, 220, 1)'; // Valor por defecto si no hay datos
-      const colorLetra1 = data.COLOR_LETRA_1 || 'rgba(22, 75, 131, 1)';
+      //const colorFondo1 = data.COLOR_FONDO_1 || 'rgba(220, 223, 220, 1)'; // Valor por defecto si no hay datos
+      //const colorLetra1 = data.COLOR_LETRA_1 || 'rgba(22, 75, 131, 1)';
       //const colorFondo2 = data.COLOR_FONDO_2 || 'rgba(255, 255, 255, 1)'; // Valor por defecto si no hay datos
      // const colorLetra2 = data.COLOR_LETRA_2 || 'rgba(0, 0, 0, 1)';
       //const colorFondo3 = data.COLOR_FONDO_3 || 'rgba(240, 240, 240, 1)'; // Color por defecto para graficoTema
