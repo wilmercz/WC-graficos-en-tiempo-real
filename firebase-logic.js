@@ -90,13 +90,16 @@ function initializeDataListeners() {
       const graficoInvitadoRol = document.getElementById('grafico-invitado-rol');
       const graficoTema = document.getElementById('grafico-tema');
       const logo = document.getElementById('logo');
-
-// Convertir explícitamente las cadenas "true" y "false" a booleanos
+      if (!graficoInvitadoRol || !graficoTema || !logo) {
+        console.error('Uno o más elementos no se encontraron en el DOM');
+        return;
+      }
+      // Convertir explícitamente las cadenas "true" y "false" a booleanos
       const temaAlAire = (data.TEMA_AL_AIRE === "true") ? true : (data.TEMA_AL_AIRE === "false") ? false : data.TEMA_AL_AIRE;
       const graficoAlAire = (data.GRAFICO_AL_AIRE === "true") ? true : (data.GRAFICO_AL_AIRE === "false") ? false : data.GRAFICO_AL_AIRE;
       const logoAlAire = (data.LOGO_AL_AIRE === "true") ? true : (data.LOGO_AL_AIRE === "false") ? false : data.LOGO_AL_AIRE;
 
-      // Mostrar u ocultar el gráfico del tema
+      // Mostrar u ocultar el gráfico del tema o Lowerthirds
       if (temaAlAire) {
         graficoTema.style.display = 'block';
         graficoInvitadoRol.style.display = 'none';
