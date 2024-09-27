@@ -69,3 +69,18 @@ bottom: 100px; /* Space from the bottom */
   transform: translateY(0);
 }
 
+
+#grafico-publicidad {
+  display: flex;
+  justify-content: center; /* Centrar horizontalmente */
+  position: absolute;
+  left: 215px;
+  bottom: 100px;
+}
+
+#grafico-publicidad img {
+  width: auto; /* Mantiene la proporción original de la imagen */
+  height: 150px; /* Ajusta la altura como mejor te convenga */
+  border-radius: 5px; /* Bordes redondeados si lo deseas */
+  object-fit: contain; /* Asegura que la imagen se ajuste dentro de su contenedor sin deformarse */
+}
