@@ -26,7 +26,16 @@ function initializeDataListeners() {
     console.log('Datos recibidos:', data);
 
     if (data) {
-// Eliminar las comillas extremas de los campos si las hay
+
+       // Leer los colores de Firebase
+      const colorFondo1 = data.COLOR_FONDO_1 || 'rgba(220, 223, 220, 1)'; // Valor por defecto si no hay datos
+      const colorLetra1 = data.COLOR_LETRA_1 || 'rgba(22, 75, 131, 1)';
+      const colorFondo2 = data.COLOR_FONDO_2 || 'rgba(255, 255, 255, 1)'; // Valor por defecto si no hay datos
+      const colorLetra2 = data.COLOR_LETRA_2 || 'rgba(0, 0, 0, 1)';
+      const colorFondo3 = data.COLOR_FONDO_3 || 'rgba(240, 240, 240, 1)'; // Color por defecto para graficoTema
+      const colorLetra3 = data.COLOR_LETRA_3 || 'rgba(0, 0, 0, 1)'; // Color de letra por defecto para graficoTema
+      
+    // Eliminar las comillas extremas de los campos si las hay
       const invitado = (data.INVITADO_ACTIVO || 'Sin invitado').replace(/^"|"$/g, '');
       const rol = (data.ROL_ACTIVO || 'Sin rol').replace(/^"|"$/g, '');
       const tema = (data.TEMA_ACTIVO || 'Sin tema').replace(/^"|"$/g, '');
