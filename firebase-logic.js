@@ -66,9 +66,9 @@ function initializeDataListeners() {
     }
     
     if (graficoInvitadoRolH2) {
-      //graficoInvitadoRolH2.style.backgroundColor = colorFondo2;
-      //graficoInvitadoRolH2.style.color = colorLetra2;
-    }
+  graficoInvitadoRolH2.style.setProperty('background-color', colorFondo2, 'important');
+  graficoInvitadoRolH2.style.setProperty('color', colorLetra2, 'important');
+}
     
     const graficoTema = document.querySelector('#grafico-tema h1');
     if (graficoTema) {
@@ -100,16 +100,11 @@ function initializeDataListeners() {
       if (temaAlAire) {
         graficoTema.style.display = 'block';
         graficoInvitadoRol.style.display = 'none';
-      } else {
-        graficoTema.style.display = 'none';
-      }
-
-      // Mostrar u ocultar el gráfico de invitado/rol
-      if (graficoAlAire) {
-        graficoInvitadoRol.style.display = 'flex';  // Cambiado de 'block' a 'flex'
-        //graficoInvitadoRol.style.display = 'block';
+      } else if (graficoAlAire) {
+        graficoInvitadoRol.style.display = 'flex';
         graficoTema.style.display = 'none';
       } else {
+        graficoTema.style.display = 'none';
         graficoInvitadoRol.style.display = 'none';
       }
 
