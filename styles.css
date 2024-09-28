@@ -21,7 +21,7 @@ body {
   display: flex;
   flex-direction: column; /* Align items vertically */
   position: absolute; /* Position absolute to place near logo */
-  left: 215px; /* Align with logo */
+  left: 190px; /* Align with logo */
   bottom: 60px; /* Space from the bottom */
 }
 
