@@ -54,7 +54,7 @@ body {
   align-items: center; /* Center vertically */
     position: absolute; /* Position absolute to place near logo */
   left: 131px; /* Align with logo */
-bottom: 45px; /* Space from the bottom */
+bottom: 43px; /* Space from the bottom */
 }
 
 #grafico-tema h1 {
