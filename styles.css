@@ -11,9 +11,9 @@ body {
 #logo {
     background-color: transparent;
   position: absolute; /* Position logo */
-  bottom: 55px; /* Adjust position from the bottom */
-  left: 80px; /* Position from the left */
-  width: 110px; /* Width of your logo */
+  bottom: 34px; /* Adjust position from the bottom */
+  left: 30px; /* Position from the left */
+  width: 100px; /* Width of your logo */
   height: auto; /* Maintain aspect ratio */
 }
 
@@ -21,26 +21,26 @@ body {
   display: flex;
   flex-direction: column; /* Align items vertically */
   position: absolute; /* Position absolute to place near logo */
-  left: 190px; /* Align with logo */
-  bottom: 60px; /* Space from the bottom */
+  left: 131px; /* Align with logo */
+  bottom: 40px; /* Space from the bottom */
 }
 
 #grafico-invitado-rol h1 {
   background-color: rgba(220, 223, 120, 1); /* Fondo blanco para h1 */
   color: rgba(22, 75, 131, 1); /* Color de letra para h1 */
-  padding: 8px 20px; /* Padding para h1 */
+  padding: 8px 13px; /* Padding para h1 */
   border-radius: 5px 5px 0 0; /* Bordes redondeados superiores */
   margin: 0; /* Remove default margin */
-  font-size: 14px; /* Tamaño de letra reducido para h1 */
+  font-size: 13px; /* Tamaño de letra reducido para h1 */
 }
 
 #grafico-invitado-rol h2 {
   background-color: rgba(22, 75, 131, 1); /* Fondo color para h2 */
   color: white; /* Color de letra para h2 */
-  padding: 7px 20px; /* Padding para h2 */
+  padding: 7px 13px; /* Padding para h2 */
   border-radius: 0 0 5px 5px; /* Bordes redondeados inferiores */
   margin: 0; /* Remove default margin */
-  font-size: 12px; /* Tamaño de letra reducido para h2 */
+  font-size: 11px; /* Tamaño de letra reducido para h2 */
 }
 
 #grafico-tema {
