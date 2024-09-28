@@ -12,7 +12,7 @@ body {
     background-color: transparent;
   position: absolute; /* Position logo */
   bottom: 60px; /* Adjust position from the bottom */
-  left: 20px; /* Position from the left */
+  left: 80px; /* Position from the left */
   width: 110px; /* Width of your logo */
   height: auto; /* Maintain aspect ratio */
 }
@@ -22,7 +22,7 @@ body {
   flex-direction: column; /* Align items vertically */
   position: absolute; /* Position absolute to place near logo */
   left: 215px; /* Align with logo */
-  bottom: 100px; /* Space from the bottom */
+  bottom: 60px; /* Space from the bottom */
 }
 
 #grafico-invitado-rol h1 {
