@@ -11,7 +11,7 @@ body {
 #logo {
     background-color: transparent;
   position: absolute; /* Position logo */
-  bottom: 60px; /* Adjust position from the bottom */
+  bottom: 55px; /* Adjust position from the bottom */
   left: 80px; /* Position from the left */
   width: 110px; /* Width of your logo */
   height: auto; /* Maintain aspect ratio */
