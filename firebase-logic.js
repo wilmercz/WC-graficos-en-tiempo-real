@@ -129,7 +129,7 @@ document.getElementById('status').innerText = 'PASO 4';
         /logo.style.display = 'none';
         //document.getElementById('status').innerText = 'Logo invisible';
       }
-
+console.log('PROCESO 1 LOGO', logoAlAire);
             // Mostrar u ocultar el logo basado en el valor de LOGO_AL_AIRE
       //if (logoAlAire) {
        // logo.src = logoUrl;
