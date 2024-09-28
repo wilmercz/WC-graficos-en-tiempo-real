@@ -63,7 +63,7 @@ bottom: 45px; /* Space from the bottom */
   padding: 10px 20px; /* Padding para h1 */
   border-radius: 5px 5px 0 0; /* Bordes redondeados superiores */
   margin: 0; /* Remove default margin */
-  font-size: 15px; /* Tamaño de letra reducido para h1 */
+  font-size: 16px; /* Tamaño de letra reducido para h1 */
 }
 
 #status {
