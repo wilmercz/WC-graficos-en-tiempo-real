@@ -44,7 +44,7 @@ body {
 }
 
 #grafico-tema {
-  background-color: rgba(220, 223, 220, 1); /* Fondo para tema */
+  background-color: transparent; /* rgba(220, 223, 220, 1); /* Fondo para tema */
   color: rgba(22, 75, 131, 1); /* Color de letra para tema */
   padding: 7px 15px; /* Padding para tema */
   border-radius: 5px; /* Bordes redondeados */
