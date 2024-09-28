@@ -150,7 +150,7 @@ function initializeDataListeners() {
       }
 
       //document.getElementById('status').innerText = 'Estado de la conexión: Conectado y actualizado';
-       console.log('proceso 11, PUBLICIDAD ESTADO:', publicidadAlAire);
+       console.log('proceso 12, PUBLICIDAD ESTADO:', publicidadAlAire);
     } else {
       console.log('No se recibieron datos');
       //document.getElementById('status').innerText = 'Estado de la conexión: Conectado, pero sin datos';
