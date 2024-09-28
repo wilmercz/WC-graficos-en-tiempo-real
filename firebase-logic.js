@@ -126,7 +126,7 @@ document.getElementById('status').innerText = 'PASO 4';
         logo.style.display = 'block';
         //document.getElementById('status').innerText = 'logo visible';
       } else {
-        /logo.style.display = 'none';
+        logo.style.display = 'none';
         //document.getElementById('status').innerText = 'Logo invisible';
       }
 console.log('PROCESO 1 LOGO', logoAlAire);
