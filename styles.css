@@ -13,7 +13,7 @@ body {
   position: absolute; /* Position logo */
   bottom: 60px; /* Adjust position from the bottom */
   left: 20px; /* Position from the left */
-  width: 150px; /* Width of your logo */
+  width: 100px; /* Width of your logo */
   height: auto; /* Maintain aspect ratio */
 }
 
