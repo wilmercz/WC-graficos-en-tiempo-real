@@ -45,7 +45,7 @@ function initializeDataListeners() {
       // Aplicar colores al h1 y h2 de #grafico-invitado-rol
       const graficoInvitadoRolH1 = document.querySelector('#grafico-invitado-rol h1');
       const graficoInvitadoRolH2 = document.querySelector('#grafico-invitado-rol h2');
-document.getElementById('status').innerText = 'PASO 1';
+
       if (graficoInvitadoRolH1) {
         graficoInvitadoRolH1.style.backgroundColor = colorFondo1;
         graficoInvitadoRolH1.style.color = colorLetra1;
@@ -55,7 +55,7 @@ document.getElementById('status').innerText = 'PASO 1';
         graficoInvitadoRolH2.style.backgroundColor = colorFondo2;
         graficoInvitadoRolH2.style.color = colorLetra2;
       }
-document.getElementById('status').innerText = 'PASO 2';
+
       // Aplicar colores a graficoTema
       const graficoTemaH1 = document.querySelector('#grafico-tema h1');
       if (graficoTemaH1) {
@@ -101,7 +101,7 @@ document.getElementById('status').innerText = 'PASO 2';
       const publicidadUrl = (data.GRAFICO_1 || '')
         .trim()
         .replace(/^"|"$/g, '');
-document.getElementById('status').innerText = 'PASO 4';
+//document.getElementById('status').innerText = 'PASO 4';
       
            // Mostrar u ocultar el gráfico del tema
       if (temaAlAire) {
@@ -119,8 +119,8 @@ document.getElementById('status').innerText = 'PASO 4';
         graficoInvitadoRol.style.display = 'none';
       }
 
-      console.log('LOGO Estado:', logoAlAire);
-      console.log('LOGO URL:', logoUrl);
+     // console.log('LOGO Estado:', logoAlAire);
+     // console.log('LOGO URL:', logoUrl);
       if (logoAlAire && logoUrl) {
         logo.src = logoUrl;
         logo.style.display = 'block';
@@ -129,7 +129,7 @@ document.getElementById('status').innerText = 'PASO 4';
         logo.style.display = 'none';
         //document.getElementById('status').innerText = 'Logo invisible';
       }
-console.log('PROCESO 1 LOGO', logoAlAire);
+
             // Mostrar u ocultar el logo basado en el valor de LOGO_AL_AIRE
       //if (logoAlAire) {
        // logo.src = logoUrl;
@@ -150,7 +150,7 @@ console.log('PROCESO 1 LOGO', logoAlAire);
       }
 
       //document.getElementById('status').innerText = 'Estado de la conexión: Conectado y actualizado';
-      
+       console.log('proceso 2, PUBLICIDAD ESTADO:', publicidadAlAire);
     } else {
       console.log('No se recibieron datos');
       document.getElementById('status').innerText = 'Estado de la conexión: Conectado, pero sin datos';
