@@ -124,20 +124,20 @@ document.getElementById('status').innerText = 'PASO 4';
       if (logoAlAire && logoUrl) {
         logo.src = logoUrl;
         logo.style.display = 'block';
-        document.getElementById('status').innerText = 'logo visible';
+        //document.getElementById('status').innerText = 'logo visible';
       } else {
-        //logo.style.display = 'none';
-        document.getElementById('status').innerText = 'Logo invisible';
+        /logo.style.display = 'none';
+        //document.getElementById('status').innerText = 'Logo invisible';
       }
 
             // Mostrar u ocultar el logo basado en el valor de LOGO_AL_AIRE
-      if (logoAlAire) {
-        logo.src = logoUrl;
-        logo.style.display = 'block';
-        console.log('Logo Visible segundo bloque', logoAlAire);
-      } else {
-        logo.style.display = 'none';
-      }
+      //if (logoAlAire) {
+       // logo.src = logoUrl;
+       // logo.style.display = 'block';
+       // console.log('Logo Visible segundo bloque', logoAlAire);
+      //} else {
+      //  logo.style.display = 'none';
+     // }
 
       
       if (publicidadAlAire && publicidadUrl) {
