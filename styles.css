@@ -31,7 +31,7 @@ body {
   padding: 8px 20px; /* Padding para h1 */
   border-radius: 5px 5px 0 0; /* Bordes redondeados superiores */
   margin: 0; /* Remove default margin */
-  font-size: 10px; /* Tamaño de letra reducido para h1 */
+  font-size: 14px; /* Tamaño de letra reducido para h1 */
 }
 
 #grafico-invitado-rol h2 {
@@ -40,7 +40,7 @@ body {
   padding: 7px 20px; /* Padding para h2 */
   border-radius: 0 0 5px 5px; /* Bordes redondeados inferiores */
   margin: 0; /* Remove default margin */
-  font-size: 8px; /* Tamaño de letra reducido para h2 */
+  font-size: 12px; /* Tamaño de letra reducido para h2 */
 }
 
 #grafico-tema {
