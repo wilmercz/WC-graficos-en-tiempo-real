@@ -94,8 +94,13 @@ document.getElementById('status').innerText = 'PASO 2';
       console.log('PUBLICIDAD ESTADO:', publicidadAlAire);
       
       // Leer la URL del logo y de la publicidad desde Firebase
-      const logoUrl = (data.LOGO_RUTA || 'https://raw.githubusercontent.com/wilmercz/WC-graficos-en-tiempo-real/main/imagenes/LOGOS%20ARKIMEDES%204.png').trim();
-      const publicidadUrl = (data.GRAFICO_1 || '').trim();
+      const logoUrl = (data.LOGO_RUTA || 'https://raw.githubusercontent.com/wilmercz/WC-graficos-en-tiempo-real/main/imagenes/LOGOS%20ARKIMEDES%204.png')
+        .trim()
+        .replace(/^"|"$/g, '');
+      
+      const publicidadUrl = (data.GRAFICO_1 || '')
+        .trim()
+        .replace(/^"|"$/g, '');
 document.getElementById('status').innerText = 'PASO 4';
       
            // Mostrar u ocultar el gráfico del tema
