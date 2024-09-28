@@ -46,15 +46,15 @@ body {
 #grafico-tema {
   background-color: rgba(220, 223, 220, 1); /* Fondo para tema */
   color: rgba(22, 75, 131, 1); /* Color de letra para tema */
-  padding: 7px 20px; /* Padding para tema */
+  padding: 7px 15px; /* Padding para tema */
   border-radius: 5px; /* Bordes redondeados */
   text-align: left; /* Center the text */
   width: auto; /* Ajusta el ancho según sea necesario */
   display: flex;
   align-items: center; /* Center vertically */
     position: absolute; /* Position absolute to place near logo */
-  left: 215px; /* Align with logo */
-bottom: 100px; /* Space from the bottom */
+  left: 131px; /* Align with logo */
+bottom: 40px; /* Space from the bottom */
 }
 
 #status {
