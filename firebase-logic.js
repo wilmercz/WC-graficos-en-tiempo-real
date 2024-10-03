@@ -35,12 +35,12 @@ function initializeDataListeners() {
 
     if (data) {
       // Leer los colores de Firebase
-      const colorFondo1 = data.COLORFONDO1 || 'rgba(220, 223, 220, 1)';
-      const colorLetra1 = data.COLORLETRA1 || 'rgba(22, 75, 131, 1)';
-      const colorFondo2 = data.COLORFONDO2 || 'rgba(255, 255, 255, 1)';
-      const colorLetra2 = data.COLORLETRA2 || 'rgba(0, 0, 0, 1)';
-      const colorFondo3 = data.COLORFONDO3 || 'rgba(240, 240, 240, 1)';
-      const colorLetra3 = data.COLORLETRA3 || 'rgba(0, 0, 0, 1)';
+      const colorFondo1 = data.colorFondo1 || 'rgba(220, 223, 220, 1)';
+      const colorLetra1 = data.colorLetra1 || 'rgba(22, 75, 131, 1)';
+      const colorFondo2 = data.colorFondo2 || 'rgba(255, 255, 255, 1)';
+      const colorLetra2 = data.colorLetra2 || 'rgba(0, 0, 0, 1)';
+      const colorFondo3 = data.colorFondo3 || 'rgba(240, 240, 240, 1)';
+      const colorLetra3 = data.colorLetra3 || 'rgba(0, 0, 0, 1)';
 
       // Aplicar colores al h1 y h2 de #grafico-invitado-rol
       const graficoInvitadoRolH1 = document.querySelector('#grafico-invitado-rol h1');
@@ -65,8 +65,8 @@ function initializeDataListeners() {
 
       // Eliminar las comillas extremas de los campos si las hay
       const invitado = (data.Invitado || 'Sin Invitado').replace(/^"|"$/g, '');
-      const rol = (data.ROL || '-').replace(/^"|"$/g, '');
-      const tema = (data.TEMA || '-').replace(/^"|"$/g, '');
+      const rol = (data.Rol || '-').replace(/^"|"$/g, '');
+      const tema = (data.Tema || '-').replace(/^"|"$/g, '');
 
       // Actualizar textos de Invitado, Rol y Tema
       document.getElementById('invitado').innerText = invitado;
