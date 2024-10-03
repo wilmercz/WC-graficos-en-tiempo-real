@@ -64,7 +64,7 @@ function initializeDataListeners() {
       }
 
       // Eliminar las comillas extremas de los campos si las hay
-      const invitado = (data.INVITADO || '-').replace(/^"|"$/g, '');
+      const invitado = (data.Invitado || 'Sin Invitado').replace(/^"|"$/g, '');
       const rol = (data.ROL || '-').replace(/^"|"$/g, '');
       const tema = (data.TEMA || '-').replace(/^"|"$/g, '');
 
@@ -91,7 +91,7 @@ function initializeDataListeners() {
       const logoAlAire = (data.Mostrar_Logo === "true") ? true : (data.Mostrar_Logo === "false") ? false : data.Mostrar_Logo;
       const publicidadAlAire = (data.Mostrar_Publicidad === "true") ? true : (data.Mostrar_Publicidad === "false") ? false : data.Mostrar_Publicidad;
 
-      console.log('PUBLICIDAD ESTADO:', publicidadAlAire);
+      console.log('Invitado:', invitado);
       
       // Leer la URL del logo y de la publicidad desde Firebase
       const logoUrl = (data.urlLogo || 'https://raw.githubusercontent.com/wilmercz/WC-graficos-en-tiempo-real/main/imagenes/LOGOS%20ARKIMEDES%204.png')
