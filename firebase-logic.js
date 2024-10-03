@@ -35,12 +35,12 @@ function initializeDataListeners() {
 
     if (data) {
       // Leer los colores de Firebase
-      const colorFondo1 = data.COLOR_FONDO_1 || 'rgba(220, 223, 220, 1)';
-      const colorLetra1 = data.COLOR_LETRA_1 || 'rgba(22, 75, 131, 1)';
-      const colorFondo2 = data.COLOR_FONDO_2 || 'rgba(255, 255, 255, 1)';
-      const colorLetra2 = data.COLOR_LETRA_2 || 'rgba(0, 0, 0, 1)';
-      const colorFondo3 = data.COLOR_FONDO_3 || 'rgba(240, 240, 240, 1)';
-      const colorLetra3 = data.COLOR_LETRA_3 || 'rgba(0, 0, 0, 1)';
+      const colorFondo1 = data.COLORFONDO1 || 'rgba(220, 223, 220, 1)';
+      const colorLetra1 = data.COLORLETRA1 || 'rgba(22, 75, 131, 1)';
+      const colorFondo2 = data.COLORFONDO2 || 'rgba(255, 255, 255, 1)';
+      const colorLetra2 = data.COLORLETRA2 || 'rgba(0, 0, 0, 1)';
+      const colorFondo3 = data.COLORFONDO3 || 'rgba(240, 240, 240, 1)';
+      const colorLetra3 = data.COLORLETRA3 || 'rgba(0, 0, 0, 1)';
 
       // Aplicar colores al h1 y h2 de #grafico-invitado-rol
       const graficoInvitadoRolH1 = document.querySelector('#grafico-invitado-rol h1');
@@ -64,9 +64,9 @@ function initializeDataListeners() {
       }
 
       // Eliminar las comillas extremas de los campos si las hay
-      const invitado = (data.INVITADO_ACTIVO || 'Sin invitado').replace(/^"|"$/g, '');
-      const rol = (data.ROL_ACTIVO || 'Sin rol').replace(/^"|"$/g, '');
-      const tema = (data.TEMA_ACTIVO || 'Sin tema').replace(/^"|"$/g, '');
+      const invitado = (data.INVITADO || '-').replace(/^"|"$/g, '');
+      const rol = (data.ROL || '-').replace(/^"|"$/g, '');
+      const tema = (data.TEMA || '-').replace(/^"|"$/g, '');
 
       // Actualizar textos de Invitado, Rol y Tema
       document.getElementById('invitado').innerText = invitado;
@@ -86,19 +86,19 @@ function initializeDataListeners() {
       //const logoAlAire = data.LOGO_AL_AIRE === "true";
       //const publicidadAlAire = data.GRAFICO_1_ALAIRE === "true";
 // Convertir explícitamente las cadenas "true" y "false" a booleanos
-      const temaAlAire = (data.TEMA_AL_AIRE === "true") ? true : (data.TEMA_AL_AIRE === "false") ? false : data.TEMA_AL_AIRE;
-      const graficoAlAire = (data.GRAFICO_AL_AIRE === "true") ? true : (data.GRAFICO_AL_AIRE === "false") ? false : data.GRAFICO_AL_AIRE;
-      const logoAlAire = (data.LOGO_AL_AIRE === "true") ? true : (data.LOGO_AL_AIRE === "false") ? false : data.LOGO_AL_AIRE;
-      const publicidadAlAire = (data.GRAFICO_1_ALAIRE === "true") ? true : (data.GRAFICO_1_ALAIRE === "false") ? false : data.GRAFICO_1_ALAIRE;
+      const temaAlAire = (data.Mostrar_Tema === "true") ? true : (data.Mostrar_Tema === "false") ? false : data.Mostrar_Tema;
+      const graficoAlAire = (data.Mostrar_Invitado === "true") ? true : (data.Mostrar_Invitado === "false") ? false : data.Mostrar_Invitado;
+      const logoAlAire = (data.Mostrar_Logo === "true") ? true : (data.Mostrar_Logo === "false") ? false : data.Mostrar_Logo;
+      const publicidadAlAire = (data.Mostrar_Publicidad === "true") ? true : (data.Mostrar_Publicidad === "false") ? false : data.Mostrar_Publicidad;
 
       console.log('PUBLICIDAD ESTADO:', publicidadAlAire);
       
       // Leer la URL del logo y de la publicidad desde Firebase
-      const logoUrl = (data.LOGO_RUTA || 'https://raw.githubusercontent.com/wilmercz/WC-graficos-en-tiempo-real/main/imagenes/LOGOS%20ARKIMEDES%204.png')
+      const logoUrl = (data.urlLogo || 'https://raw.githubusercontent.com/wilmercz/WC-graficos-en-tiempo-real/main/imagenes/LOGOS%20ARKIMEDES%204.png')
         .trim()
         .replace(/^"|"$/g, '');
       
-      const publicidadUrl = (data.GRAFICO_1 || '')
+      const publicidadUrl = (data.urlImagenPublicidad || '')
         .trim()
         .replace(/^"|"$/g, '');
 //document.getElementById('status').innerText = 'PASO 4';
@@ -130,7 +130,7 @@ function initializeDataListeners() {
         //document.getElementById('status').innerText = 'Logo invisible';
       }
 
-            // Mostrar u ocultar el logo basado en el valor de LOGO_AL_AIRE
+            // Mostrar u ocultar el logo basado en el valor de Mostar_Logo
       //if (logoAlAire) {
        // logo.src = logoUrl;
        // logo.style.display = 'block';
