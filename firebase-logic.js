@@ -26,7 +26,7 @@ function hexToRgba(hex, alpha = 1) {
 }
 
 function initializeDataListeners() {
-  const graficoRef = ref(database, 'CLAVE_STREAM_FB/GRAFICOS_TIEMPO_REAL');
+  const graficoRef = ref(database, 'CLAVE_STREAM_FB/STREAM_LIVE');
 
   // Escuchar los cambios en los datos de Firebase
   onValue(graficoRef, (snapshot) => {
