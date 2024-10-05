@@ -83,10 +83,10 @@ function initializeDataListeners() {
       document.getElementById('rol').innerText = rol;
       document.getElementById('tema').innerText = tema;
 
-      const temaAlAire = data.Mostrar_Tema === true || data.Mostrar_Tema === "true";
-      const graficoAlAire = data.Mostrar_Invitado === true || data.Mostrar_Invitado === "true";
-      const logoAlAire = data.Mostrar_Logo === true || data.Mostrar_Logo === "true";
-      const publicidadAlAire = data.Mostrar_Publicidad === true || data.Mostrar_Publicidad === "true";
+      const temaAlAire  = (data.Mostrar_Tema === "true") ? true : (data.Mostrar_Tema === "false") ? false : data.Mostrar_Tema;
+      const graficoAlAire = (data.Mostrar_Invitado === "true") ? true : (data.Mostrar_Invitado === "false") ? false : data.Mostrar_Invitado;
+      const logoAlAire = (data.Mostrar_Logo === "true") ? true : (data.Mostrar_Logo === "false") ? false : data.Mostrar_Logo;
+      const publicidadAlAire = (data.Mostrar_Publicidad === "true") ? true : (data.Mostrar_Publicidad === "false") ? false : data.Mostrar_Publicidad;
 
       console.log('Estado de visibilidad:', { temaAlAire, graficoAlAire, logoAlAire, publicidadAlAire });
 
