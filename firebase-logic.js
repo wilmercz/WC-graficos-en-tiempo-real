@@ -42,10 +42,10 @@ function initializeDataListeners() {
       const colorFondo3 = data.colorFondo3 || 'rgba(240, 240, 240, 1)';
       const colorLetra3 = data.colorLetra3 || 'rgba(0, 0, 0, 1)';
 
-      // Aplicar colores al h1 y h2 de #grafico-invitado-rol
+      // Aplicar colores al h1 y h2 
       const graficoInvitadoRolH1 = document.querySelector('#grafico-invitado-rol h1');
       const graficoInvitadoRolH2 = document.querySelector('#grafico-invitado-rol h2');
-
+      
       if (graficoInvitadoRolH1) {
         graficoInvitadoRolH1.style.backgroundColor = colorFondo1;
         graficoInvitadoRolH1.style.color = colorLetra1;
@@ -115,8 +115,8 @@ function initializeDataListeners() {
 
       // Mostrar u ocultar el gráfico de invitado/rol
       if (graficoAlAire) {
+        graficoInvitadoRol.style.backgroundColor = colorFondo1 + ' !important';
         graficoInvitadoRol.style.display = 'block';
-        graficoInvitadoRol.style.backgroundColor = colorFondo1;
         graficoTema.style.display = 'none';
       } else {
         graficoInvitadoRol.style.display = 'none';
