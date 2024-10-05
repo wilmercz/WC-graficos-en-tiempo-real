@@ -65,6 +65,7 @@ bottom: 19px;
   display: flex;
   align-items: center; /* Center vertically */
     position: absolute; /* Position absolute to place near logo */
+  Width: 100%;
   left: 25px; /* Align with logo */
 bottom: 43px; /* Space from the bottom */
 }
@@ -77,7 +78,8 @@ bottom: 43px; /* Space from the bottom */
   margin: 0; /* Remove default margin */
   font-size: 19px; /* Tamaño de letra reducido para h1 */
   position: absolute;
-  left: 25px; 
+  left: 131px; 
+  Width: auto;
 }
 
 #status {
