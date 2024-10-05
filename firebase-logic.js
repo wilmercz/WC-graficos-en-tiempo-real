@@ -25,119 +25,31 @@ function hexToRgba(hex, alpha = 1) {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
-function initializeDataListeners() {
-  const graficoRef = ref(database, 'CLAVE_STREAM_FB/STREAM_LIVE/GRAFICOS');
+function applyColors(element, backgroundColor, textColor) {
+  if (element) {
+    element.style.backgroundColor = backgroundColor;
+    element.style.color = textColor;
+    console.log(`Aplicando colores a ${element.id}:`, { backgroundColor, textColor });
+  }
+}
 
-  // Escuchar los cambios en los datos de Firebase
-  onValue(graficoRef, (snapshot) => {
-    const data = snapshot.val();
-    console.log('Datos recibidos:', data);
+function updateVisibility(element, isVisible, animationFunction) {
+  if (isVisible) {
+    element.style.display = 'block';
+    animationFunction(element);
+  } else {
+    animationFunction(element);
+    setTimeout(() => { element.style.display = 'none'; }, 300);
+  }
+  console.log(`Actualizando visibilidad de ${element.id}:`, isVisible);
+}
 
-    if (data) {
-      // Leer los colores de Firebase
-      const colorFondo1 = data.colorFondo1 || 'rgba(220, 223, 220, 1)';
-      const colorLetra1 = data.colorLetra1 || 'rgba(22, 75, 131, 1)';
-      const colorFondo2 = data.colorFondo2 || 'rgba(255, 255, 255, 1)';
-      const colorLetra2 = data.colorLetra2 || 'rgba(0, 0, 0, 1)';
-      const colorFondo3 = data.colorFondo3 || 'rgba(240, 240, 240, 1)';
-      const colorLetra3 = data.colorLetra3 || 'rgba(0, 0, 0, 1)';
-
-      // Aplicar colores al h1 y h2 
-      const graficoInvitadoRolH1 = document.querySelector('#grafico-invitado-rol h1');
-      const graficoInvitadoRolH2 = document.querySelector('#grafico-invitado-rol h2');
-      
-      if (graficoInvitadoRolH1) {
-        graficoInvitadoRolH1.style.backgroundColor = colorFondo1;
-        graficoInvitadoRolH1.style.color = colorLetra1;
-        graficoInvitadoRolH1.style.left = '131px'; // Cambia el valor de left dinámicamente
-      }
-
-      if (graficoInvitadoRolH2) {
-        graficoInvitadoRolH2.style.backgroundColor = colorFondo2;
-        graficoInvitadoRolH2.style.color = colorLetra2;
-        graficoInvitadoRolH2.style.left = '131px';
-      }
-
-      // Aplicar colores a graficoTema
-      const graficoTemaH1 = document.querySelector('#grafico-tema h1');
-      if (graficoTemaH1) {
-        graficoTemaH1.style.backgroundColor = colorFondo3;
-        graficoTemaH1.style.color = colorLetra3;
-      }
-
-      // Eliminar las comillas extremas de los campos si las hay
-      const invitado = (data.Invitado || 'Sin Invitado').replace(/^"|"$/g, '');
-      const rol = (data.Rol || '-').replace(/^"|"$/g, '');
-      const tema = (data.Tema || '-').replace(/^"|"$/g, '');
-
-      // Actualizar textos de Invitado, Rol y Tema
-      document.getElementById('invitado').innerText = invitado;
-      document.getElementById('rol').innerText = rol;
-      document.getElementById('tema').innerText = tema;
-
-      
-      const graficoInvitadoRol = document.getElementById('grafico-invitado-rol');
-      const graficoTema = document.getElementById('grafico-tema');
-      const logo = document.getElementById('logo');
-      const graficoPublicidad = document.getElementById('grafico-publicidad');
-      const publicidadImg = document.getElementById('publicidad-img');
-
-      // Convertir explícitamente las cadenas "true" y "false" a booleanos
-      //const temaAlAire = data.TEMA_AL_AIRE === "true";
-      //const graficoAlAire = data.GRAFICO_AL_AIRE === "true";
-      //const logoAlAire = data.LOGO_AL_AIRE === "true";
-      //const publicidadAlAire = data.GRAFICO_1_ALAIRE === "true";
-// Convertir explícitamente las cadenas "true" y "false" a booleanos
-      const temaAlAire = (data.Mostrar_Tema === "true") ? true : (data.Mostrar_Tema === "false") ? false : data.Mostrar_Tema;
-      const graficoAlAire = (data.Mostrar_Invitado === "true") ? true : (data.Mostrar_Invitado === "false") ? false : data.Mostrar_Invitado;
-      const logoAlAire = (data.Mostrar_Logo === "true") ? true : (data.Mostrar_Logo === "false") ? false : data.Mostrar_Logo;
-      const publicidadAlAire = (data.Mostrar_Publicidad === "true") ? true : (data.Mostrar_Publicidad === "false") ? false : data.Mostrar_Publicidad;
-
-      console.log('Invitado:', invitado);
-      
-      // Leer la URL del logo y de la publicidad desde Firebase
-      const logoUrl = (data.urlLogo || 'https://raw.githubusercontent.com/wilmercz/WC-graficos-en-tiempo-real/main/imagenes/LOGOS%20ARKIMEDES%204.png')
-        .trim()
-        .replace(/^"|"$/g, '');
-      
-      const publicidadUrl = (data.urlImagenPublicidad || '')
-        .trim()
-        .replace(/^"|"$/g, '');
-//document.getElementById('status').innerText = 'PASO 4';
-      
-           // Mostrar u ocultar el gráfico del tema
-      if (temaAlAire) {
-        graficoTema.style.display = 'block';
-        graficoInvitadoRol.style.display = 'none';
-        //logo.style.backgroundColor = colorFondo1;
-      } else {
-        graficoTema.style.display = 'none';
-        
-      }
-
-      // Mostrar u ocultar el gráfico de invitado/rol
-      if (graficoAlAire) {
-      /*  logo.style.backgroundColor = colorFondo1;*/
-        graficoInvitadoRol.style.backgroundColor = colorFondo1 + ' !important';
-        /*graficoInvitadoRol.style.display = 'block';*/
-        graficoTema.style.display = 'none';
-      } else {
-        graficoInvitadoRol.style.display = 'none';
-       /* logo.style.backgroundColor = transparent;*/
-      }
-
-     // console.log('LOGO Estado:', logoAlAire);
-     // console.log('LOGO URL:', logoUrl);
-      if (logoAlAire && logoUrl) {
-        logo.src = logoUrl;
-        logo.style.display = 'block';
-        
 function initializeDataListeners() {
   const graficoRef = ref(database, 'CLAVE_STREAM_FB/STREAM_LIVE/GRAFICOS');
 
   onValue(graficoRef, (snapshot) => {
     const data = snapshot.val();
-    console.log('Datos recibidos:', data);
+    console.log('Datos recibidos de Firebase:', data);
 
     if (data) {
       const colorFondo1 = data.colorFondo1 || 'rgba(220, 223, 220, 1)';
@@ -147,8 +59,7 @@ function initializeDataListeners() {
       const colorFondo3 = data.colorFondo3 || 'rgba(240, 240, 240, 1)';
       const colorLetra3 = data.colorLetra3 || 'rgba(0, 0, 0, 1)';
 
-      console.log('colorFondo1:', colorFondo1);
-      console.log('colorFondo2:', colorFondo2);
+      console.log('Colores aplicados:', { colorFondo1, colorLetra1, colorFondo2, colorLetra2, colorFondo3, colorLetra3 });
 
       const graficoInvitadoRol = document.getElementById('grafico-invitado-rol');
       const graficoInvitadoRolH1 = document.querySelector('#grafico-invitado-rol h1');
@@ -159,22 +70,10 @@ function initializeDataListeners() {
       const graficoPublicidad = document.getElementById('grafico-publicidad');
       const publicidadImg = document.getElementById('publicidad-img');
 
-      // Aplicar estilos usando setProperty
-      if (graficoInvitadoRol) {
-        graficoInvitadoRol.style.setProperty('background-color', colorFondo1, 'important');
-      }
-      if (graficoInvitadoRolH1) {
-        graficoInvitadoRolH1.style.setProperty('background-color', colorFondo1, 'important');
-        graficoInvitadoRolH1.style.setProperty('color', colorLetra1, 'important');
-      }
-      if (graficoInvitadoRolH2) {
-        graficoInvitadoRolH2.style.setProperty('background-color', colorFondo2, 'important');
-        graficoInvitadoRolH2.style.setProperty('color', colorLetra2, 'important');
-      }
-      if (graficoTemaH1) {
-        graficoTemaH1.style.setProperty('background-color', colorFondo3, 'important');
-        graficoTemaH1.style.setProperty('color', colorLetra3, 'important');
-      }
+      applyColors(graficoInvitadoRol, colorFondo1, colorLetra1);
+      applyColors(graficoInvitadoRolH1, colorFondo1, colorLetra1);
+      applyColors(graficoInvitadoRolH2, colorFondo2, colorLetra2);
+      applyColors(graficoTemaH1, colorFondo3, colorLetra3);
 
       const invitado = (data.Invitado || 'Sin Invitado').replace(/^"|"$/g, '');
       const rol = (data.Rol || '-').replace(/^"|"$/g, '');
@@ -184,24 +83,17 @@ function initializeDataListeners() {
       document.getElementById('rol').innerText = rol;
       document.getElementById('tema').innerText = tema;
 
-      const temaAlAire = data.Mostrar_Tema === "true";
-      const graficoAlAire = data.Mostrar_Invitado === "true";
-      const logoAlAire = data.Mostrar_Logo === "true";
-      const publicidadAlAire = data.Mostrar_Publicidad === "true";
+      const temaAlAire = data.Mostrar_Tema === true || data.Mostrar_Tema === "true";
+      const graficoAlAire = data.Mostrar_Invitado === true || data.Mostrar_Invitado === "true";
+      const logoAlAire = data.Mostrar_Logo === true || data.Mostrar_Logo === "true";
+      const publicidadAlAire = data.Mostrar_Publicidad === true || data.Mostrar_Publicidad === "true";
 
-      if (temaAlAire) {
-        slideIn(graficoTema);
-        fadeOut(graficoInvitadoRol);
-      } else {
-        slideOut(graficoTema);
-      }
+      console.log('Estado de visibilidad:', { temaAlAire, graficoAlAire, logoAlAire, publicidadAlAire });
 
-      if (graficoAlAire) {
-        slideIn(graficoInvitadoRol);
-        fadeOut(graficoTema);
-      } else {
-        slideOut(graficoInvitadoRol);
-      }
+      updateVisibility(graficoTema, temaAlAire, temaAlAire ? slideIn : slideOut);
+      updateVisibility(graficoInvitadoRol, graficoAlAire, graficoAlAire ? slideIn : slideOut);
+      updateVisibility(logo, logoAlAire, logoAlAire ? fadeIn : fadeOut);
+      updateVisibility(graficoPublicidad, publicidadAlAire, publicidadAlAire ? fadeIn : fadeOut);
 
       const logoUrl = (data.urlLogo || 'https://raw.githubusercontent.com/wilmercz/WC-graficos-en-tiempo-real/main/imagenes/LOGOS%20ARKIMEDES%204.png')
         .trim()
@@ -213,18 +105,10 @@ function initializeDataListeners() {
 
       if (logoAlAire && logoUrl) {
         logo.src = logoUrl;
-        fadeIn(logo);
-      } else {
-        fadeOut(logo);
       }
 
       if (publicidadAlAire && publicidadUrl) {
         publicidadImg.src = publicidadUrl;
-        fadeIn(graficoPublicidad);
-        fadeOut(graficoInvitadoRol);
-        fadeOut(graficoTema);
-      } else {
-        fadeOut(graficoPublicidad);
       }
 
     } else {
