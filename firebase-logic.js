@@ -116,8 +116,7 @@ function initializeDataListeners() {
       // Mostrar u ocultar el gráfico de invitado/rol
       if (graficoAlAire) {
         graficoInvitadoRol.style.display = 'block';
-        graficoInvitadoRol.style
-        backgroundColor = colorFondo1;
+        graficoInvitadoRol.style.backgroundColor = colorFondo1;
         graficoTema.style.display = 'none';
       } else {
         graficoInvitadoRol.style.display = 'none';
