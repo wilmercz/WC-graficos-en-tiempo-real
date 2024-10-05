@@ -9,28 +9,26 @@
 <body>
   <img id="logo" src="https://raw.githubusercontent.com/wilmercz/WC-graficos-en-tiempo-real/main/imagenes/LOGOS%20ARKIMEDES%204.png" alt="Logo">
   
-  <!-- Recuadro para Invitado y Rol -->
-  <div id="grafico-invitado-rol" style="display: none;"> <!-- Oculto por defecto -->
+  <!-- Añadimos clases para animaciones -->
+  <div id="grafico-invitado-rol" class="animated-element">
     <h1 id="invitado">INVITADO</h1>
     <h2 id="rol">.</h2>
   </div>
   
-  <!-- Recuadro para el Tema -->
-  <div id="grafico-tema" style="display: none;"> <!-- Oculto por defecto -->
+  <div id="grafico-tema" class="animated-element">
     <h1 id="tema">.</h1>
-    <!-- <div id="tema">.</div> -->
   </div>
 
-   <!-- Recuadro PUBLICIDAD -->
-<div id="grafico-publicidad" style="display: none;"> <!-- Oculto por defecto -->
-  <img id="publicidad-img" src="" alt="Publicidad"> <!-- La imagen será cargada dinámicamente -->
-</div>
+  <div id="grafico-publicidad" class="animated-element">
+    <img id="publicidad-img" src="" alt="Publicidad">
+  </div>
 
-     <!-- Recuadro Estado-->
-<div id="status" style="display: block;"> <!-- Oculto por defecto -->
-</div>
+  <div id="status" class="animated-element">
+  </div>
   
-  <script type="module" src="firebase-logic.js"></script> <!-- Importar lógica de Firebase -->
+  <script type="module" src="firebase-logic.js"></script>
+  <!-- Añadimos un nuevo archivo JS para animaciones -->
+  <script src="animations.js"></script>
 </body>
 </html>
 
