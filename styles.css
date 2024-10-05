@@ -29,6 +29,7 @@ body {
 #grafico-invitado-rol h1, #grafico-invitado-rol h2 {
   position: absolute;
   left: 131px; /* Set left position for text */
+  bottom: 27px;
 }
 
 #grafico-invitado-rol h1 {
