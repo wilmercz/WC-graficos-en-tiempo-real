@@ -109,17 +109,21 @@ function initializeDataListeners() {
       if (temaAlAire) {
         graficoTema.style.display = 'block';
         graficoInvitadoRol.style.display = 'none';
+        //logo.style.backgroundColor = colorFondo1;
       } else {
         graficoTema.style.display = 'none';
+        
       }
 
       // Mostrar u ocultar el gráfico de invitado/rol
       if (graficoAlAire) {
+        logo.style.backgroundColor = colorFondo1;
         graficoInvitadoRol.style.backgroundColor = colorFondo1 + ' !important';
         graficoInvitadoRol.style.display = 'block';
         graficoTema.style.display = 'none';
       } else {
         graficoInvitadoRol.style.display = 'none';
+        logo.style.backgroundColor = transparent;
       }
 
      // console.log('LOGO Estado:', logoAlAire);
@@ -127,6 +131,7 @@ function initializeDataListeners() {
       if (logoAlAire && logoUrl) {
         logo.src = logoUrl;
         logo.style.display = 'block';
+        
         //document.getElementById('status').innerText = 'logo visible';
       } else {
         logo.style.display = 'none';
