@@ -52,7 +52,7 @@ bottom: 41px;
   border-radius: 0 0 5px 5px; /* Bordes redondeados inferiores */
   margin: 0; /* Remove default margin */
   font-size: 13px; /* Tamaño de letra reducido para h2 */
-bottom: 21px;
+bottom: 19px;
 }
 
 #grafico-tema {
@@ -87,10 +87,10 @@ bottom: 43px; /* Space from the bottom */
   left: 10px;
 }
 
-#grafico-invitado-rol.show, #grafico-tema.show {
+/*#grafico-invitado-rol.show, #grafico-tema.show {
   opacity: 0;
   transform: translateY(0);
-}
+}*/
 
 
 #grafico-publicidad {
