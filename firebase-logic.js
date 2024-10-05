@@ -49,11 +49,13 @@ function initializeDataListeners() {
       if (graficoInvitadoRolH1) {
         graficoInvitadoRolH1.style.backgroundColor = colorFondo1;
         graficoInvitadoRolH1.style.color = colorLetra1;
+        graficoInvitadoRolH1.style.left = '131px'; // Cambia el valor de left dinámicamente
       }
 
       if (graficoInvitadoRolH2) {
         graficoInvitadoRolH2.style.backgroundColor = colorFondo2;
         graficoInvitadoRolH2.style.color = colorLetra2;
+        graficoInvitadoRolH2.style.left = '131px';
       }
 
       // Aplicar colores a graficoTema
@@ -114,6 +116,8 @@ function initializeDataListeners() {
       // Mostrar u ocultar el gráfico de invitado/rol
       if (graficoAlAire) {
         graficoInvitadoRol.style.display = 'block';
+        graficoInvitadoRol.style
+        backgroundColor = colorFondo1;
         graficoTema.style.display = 'none';
       } else {
         graficoInvitadoRol.style.display = 'none';
