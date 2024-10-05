@@ -132,39 +132,105 @@ function initializeDataListeners() {
         logo.src = logoUrl;
         logo.style.display = 'block';
         
-        //document.getElementById('status').innerText = 'logo visible';
-      } else {
-        logo.style.display = 'none';
-        //document.getElementById('status').innerText = 'Logo invisible';
+function initializeDataListeners() {
+  const graficoRef = ref(database, 'CLAVE_STREAM_FB/STREAM_LIVE/GRAFICOS');
+
+  onValue(graficoRef, (snapshot) => {
+    const data = snapshot.val();
+    console.log('Datos recibidos:', data);
+
+    if (data) {
+      const colorFondo1 = data.colorFondo1 || 'rgba(220, 223, 220, 1)';
+      const colorLetra1 = data.colorLetra1 || 'rgba(22, 75, 131, 1)';
+      const colorFondo2 = data.colorFondo2 || 'rgba(255, 255, 255, 1)';
+      const colorLetra2 = data.colorLetra2 || 'rgba(0, 0, 0, 1)';
+      const colorFondo3 = data.colorFondo3 || 'rgba(240, 240, 240, 1)';
+      const colorLetra3 = data.colorLetra3 || 'rgba(0, 0, 0, 1)';
+
+      console.log('colorFondo1:', colorFondo1);
+      console.log('colorFondo2:', colorFondo2);
+
+      const graficoInvitadoRol = document.getElementById('grafico-invitado-rol');
+      const graficoInvitadoRolH1 = document.querySelector('#grafico-invitado-rol h1');
+      const graficoInvitadoRolH2 = document.querySelector('#grafico-invitado-rol h2');
+      const graficoTema = document.getElementById('grafico-tema');
+      const graficoTemaH1 = document.querySelector('#grafico-tema h1');
+      const logo = document.getElementById('logo');
+      const graficoPublicidad = document.getElementById('grafico-publicidad');
+      const publicidadImg = document.getElementById('publicidad-img');
+
+      // Aplicar estilos usando setProperty
+      if (graficoInvitadoRol) {
+        graficoInvitadoRol.style.setProperty('background-color', colorFondo1, 'important');
+      }
+      if (graficoInvitadoRolH1) {
+        graficoInvitadoRolH1.style.setProperty('background-color', colorFondo1, 'important');
+        graficoInvitadoRolH1.style.setProperty('color', colorLetra1, 'important');
+      }
+      if (graficoInvitadoRolH2) {
+        graficoInvitadoRolH2.style.setProperty('background-color', colorFondo2, 'important');
+        graficoInvitadoRolH2.style.setProperty('color', colorLetra2, 'important');
+      }
+      if (graficoTemaH1) {
+        graficoTemaH1.style.setProperty('background-color', colorFondo3, 'important');
+        graficoTemaH1.style.setProperty('color', colorLetra3, 'important');
       }
 
-            // Mostrar u ocultar el logo basado en el valor de Mostar_Logo
-      //if (logoAlAire) {
-       // logo.src = logoUrl;
-       // logo.style.display = 'block';
-       // console.log('Logo Visible segundo bloque', logoAlAire);
-      //} else {
-      //  logo.style.display = 'none';
-     // }
+      const invitado = (data.Invitado || 'Sin Invitado').replace(/^"|"$/g, '');
+      const rol = (data.Rol || '-').replace(/^"|"$/g, '');
+      const tema = (data.Tema || '-').replace(/^"|"$/g, '');
 
+      document.getElementById('invitado').innerText = invitado;
+      document.getElementById('rol').innerText = rol;
+      document.getElementById('tema').innerText = tema;
+
+      const temaAlAire = data.Mostrar_Tema === "true";
+      const graficoAlAire = data.Mostrar_Invitado === "true";
+      const logoAlAire = data.Mostrar_Logo === "true";
+      const publicidadAlAire = data.Mostrar_Publicidad === "true";
+
+      if (temaAlAire) {
+        slideIn(graficoTema);
+        fadeOut(graficoInvitadoRol);
+      } else {
+        slideOut(graficoTema);
+      }
+
+      if (graficoAlAire) {
+        slideIn(graficoInvitadoRol);
+        fadeOut(graficoTema);
+      } else {
+        slideOut(graficoInvitadoRol);
+      }
+
+      const logoUrl = (data.urlLogo || 'https://raw.githubusercontent.com/wilmercz/WC-graficos-en-tiempo-real/main/imagenes/LOGOS%20ARKIMEDES%204.png')
+        .trim()
+        .replace(/^"|"$/g, '');
       
+      const publicidadUrl = (data.urlImagenPublicidad || '')
+        .trim()
+        .replace(/^"|"$/g, '');
+
+      if (logoAlAire && logoUrl) {
+        logo.src = logoUrl;
+        fadeIn(logo);
+      } else {
+        fadeOut(logo);
+      }
+
       if (publicidadAlAire && publicidadUrl) {
         publicidadImg.src = publicidadUrl;
-        graficoPublicidad.style.display = 'block';
-        graficoInvitadoRol.style.display = 'none';
-        graficoTema.style.display = 'none';
+        fadeIn(graficoPublicidad);
+        fadeOut(graficoInvitadoRol);
+        fadeOut(graficoTema);
       } else {
-        graficoPublicidad.style.display = 'none';
+        fadeOut(graficoPublicidad);
       }
 
-      //document.getElementById('status').innerText = 'Estado de la conexión: Conectado y actualizado';
-       console.log('proceso 13, PUBLICIDAD ESTADO:', publicidadAlAire);
     } else {
       console.log('No se recibieron datos');
-      //document.getElementById('status').innerText = 'Estado de la conexión: Conectado, pero sin datos';
     }
   }, (error) => {
     console.error('Error al leer datos:', error);
-   //document.getElementById('status').innerText = 'Error al leer datos: ' + error.message;
   });
 }
