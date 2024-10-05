@@ -25,13 +25,13 @@ body {
   position: absolute; /* Position absolute to place near logo */
   left: 25px; /* Align with logo */
   bottom: 27px; /* Space from the bottom */
-  With: 600px
+  Width: 100%;
 }
 
 #grafico-invitado-rol h1, #grafico-invitado-rol h2 {
   position: absolute;
   left: 131px; /* Set left position for text */
-  
+  Width: auto;
 }
 
 #grafico-invitado-rol h1 {
