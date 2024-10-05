@@ -117,13 +117,13 @@ function initializeDataListeners() {
 
       // Mostrar u ocultar el gráfico de invitado/rol
       if (graficoAlAire) {
-        logo.style.backgroundColor = colorFondo1;
+      /*  logo.style.backgroundColor = colorFondo1;*/
         graficoInvitadoRol.style.backgroundColor = colorFondo1 + ' !important';
-        graficoInvitadoRol.style.display = 'block';
+        /*graficoInvitadoRol.style.display = 'block';*/
         graficoTema.style.display = 'none';
       } else {
         graficoInvitadoRol.style.display = 'none';
-        logo.style.backgroundColor = transparent;
+       /* logo.style.backgroundColor = transparent;*/
       }
 
      // console.log('LOGO Estado:', logoAlAire);
