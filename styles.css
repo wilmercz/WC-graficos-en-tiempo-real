@@ -25,14 +25,17 @@ body {
   bottom: 27px; /* Space from the bottom */
 }
 
+#grafico-invitado-rol h1, #grafico-invitado-rol h2 {
+  left: 131px; /* Set left position for text */
+}
+
 #grafico-invitado-rol h1 {
   background-color: rgba(220, 223, 120, 1); /* Fondo blanco para h1 */
   color: rgba(22, 75, 131, 1); /* Color de letra para h1 */
   padding: 8px 10px; /* Padding para h1 */
   border-radius: 5px 5px 0 0; /* Bordes redondeados superiores */
   margin: 0; /* Remove default margin */
-  font-size: 40px; /* Tamaño de letra reducido para h1 */
-   left: 131px;
+  font-size: 23px; /* Tamaño de letra reducido para h1 */
 }
 
 #grafico-invitado-rol h2 {
@@ -42,7 +45,6 @@ body {
   border-radius: 0 0 5px 5px; /* Bordes redondeados inferiores */
   margin: 0; /* Remove default margin */
   font-size: 12px; /* Tamaño de letra reducido para h2 */
-   left: 131px;
 }
 
 #grafico-tema {
