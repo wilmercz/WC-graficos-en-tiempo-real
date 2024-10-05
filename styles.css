@@ -21,8 +21,8 @@ body {
   display: flex;
   flex-direction: column; /* Align items vertically */
   position: absolute; /* Position absolute to place near logo */
-  left: 131px; /* Align with logo */
-  bottom: 37px; /* Space from the bottom */
+  left: 25px; /* Align with logo */
+  bottom: 27px; /* Space from the bottom */
 }
 
 #grafico-invitado-rol h1 {
@@ -32,6 +32,7 @@ body {
   border-radius: 5px 5px 0 0; /* Bordes redondeados superiores */
   margin: 0; /* Remove default margin */
   font-size: 40px; /* Tamaño de letra reducido para h1 */
+   left: 131px;
 }
 
 #grafico-invitado-rol h2 {
@@ -41,6 +42,7 @@ body {
   border-radius: 0 0 5px 5px; /* Bordes redondeados inferiores */
   margin: 0; /* Remove default margin */
   font-size: 12px; /* Tamaño de letra reducido para h2 */
+   left: 131px;
 }
 
 #grafico-tema {
