@@ -6,7 +6,7 @@ body {
   position: relative;
   height: 100vh; /* Full height for the body */
   overflow: hidden; /* Hide overflow */
-  z-index = 1000; 
+  
 }
 
 #logo {
@@ -16,6 +16,7 @@ body {
   left: 30px; /* Position from the left */
   width: 97px; /* Width of your logo */
   height: auto; /* Maintain aspect ratio */
+  z-index = 1000; 
 }
 
 #grafico-invitado-rol {
@@ -24,6 +25,7 @@ body {
   position: absolute; /* Position absolute to place near logo */
   left: 25px; /* Align with logo */
   bottom: 27px; /* Space from the bottom */
+  With: 600px
 }
 
 #grafico-invitado-rol h1, #grafico-invitado-rol h2 {
