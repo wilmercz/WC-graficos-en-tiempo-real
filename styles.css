@@ -20,12 +20,12 @@ body {
 }
 
 #grafico-invitado-rol {
- background-color: transparent; /*rgba(220, 223, 120, 1); */
-  display: flex;
+ background-color: rgba(220, 223, 120, 1);
+  /*display: flex;*/
   flex-direction: column; /* Align items vertically */
   position: absolute; /* Position absolute to place near logo */
   left: 25px; /* Align with logo */
-  bottom: 27px; /* Space from the bottom */
+  bottom: 24px; /* Space from the bottom */
   Width: 100%;
 }
 
@@ -42,7 +42,7 @@ body {
   border-radius: 5px 5px 0 0; /* Bordes redondeados superiores */
   margin: 0; /* Remove default margin */
   font-size: 23px; /* Tamaño de letra reducido para h1 */
-bottom: 43px;
+bottom: 41px;
 }
 
 #grafico-invitado-rol h2 {
@@ -52,7 +52,7 @@ bottom: 43px;
   border-radius: 0 0 5px 5px; /* Bordes redondeados inferiores */
   margin: 0; /* Remove default margin */
   font-size: 12px; /* Tamaño de letra reducido para h2 */
-bottom: 24px;
+bottom: 22px;
 }
 
 #grafico-tema {
