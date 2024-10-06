@@ -2,6 +2,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/fireba
 import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js";
 import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
 import { firebaseConfig } from './firebase-config.js'; // Importa la configuración de Firebase
+import { slideIn, slideOut, fadeIn, fadeOut } from './animations.js'; // Importa las funciones de animación
 
 const app = initializeApp(firebaseConfig); // Usa la configuración importada
 const auth = getAuth(app);
