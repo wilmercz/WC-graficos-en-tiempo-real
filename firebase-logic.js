@@ -65,16 +65,18 @@ function initializeDataListeners() {
       const graficoInvitadoRol = document.getElementById('grafico-invitado-rol');
       const graficoInvitadoRolH1 = document.querySelector('#grafico-invitado-rol h1');
       const graficoInvitadoRolH2 = document.querySelector('#grafico-invitado-rol h2');
+      const graficoInvitadoRolH3 = document.querySelector('#grafico-invitado-rol h3');
       const graficoTema = document.getElementById('grafico-tema');
       const graficoTemaH1 = document.querySelector('#grafico-tema h1');
+      const graficoTemaH2 = document.querySelector('#grafico-tema h2');
       const logo = document.getElementById('logo');
       const graficoPublicidad = document.getElementById('grafico-publicidad');
       const publicidadImg = document.getElementById('publicidad-img');
 
-      applyColors(graficoInvitadoRol, colorFondo1, colorLetra1);
+      applyColors(graficoInvitadoRolH3, colorFondo1, colorLetra1);
       applyColors(graficoInvitadoRolH1, colorFondo1, colorLetra1);
       applyColors(graficoInvitadoRolH2, colorFondo2, colorLetra2);
-      applyColors(graficoTema, colorFondo3, colorLetra3);
+      applyColors(graficoTemaH2, colorFondo3, colorLetra3);
       applyColors(graficoTemaH1, colorFondo3, colorLetra3);
 
       const invitado = (data.Invitado || 'Sin Invitado').replace(/^"|"$/g, '');
