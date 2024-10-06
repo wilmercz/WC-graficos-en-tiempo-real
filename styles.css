@@ -70,6 +70,7 @@ body {
   font-size: 13px;
   left: 25px;
   height: 85px;
+  width: 100px;
   bottom: 12px;
 }
 
@@ -102,7 +103,7 @@ body {
   bottom: 15px;
   transition: all 0.3s ease-in-out;
 }
-#grafico-tema h3 {
+#grafico-tema h2 {
   background-color: transparent;
   color: rgba(22, 75, 131, 1);
   padding: 10px 10px;
