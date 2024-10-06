@@ -132,3 +132,29 @@ body {
   transform: translateY(100%);
   transition: transform 0.3s ease-in-out;
 }
+
+/* Para h1: aparece desde la izquierda y desaparece hacia la izquierda */
+.slide-in-left {
+  opacity: 1;
+  transform: translateX(0);  /* Posición normal */
+  transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;  /* Control de opacidad y posición */
+}
+
+.slide-out-left {
+  opacity: 0;
+  transform: translateX(-100%);  /* Se mueve hacia la izquierda para desaparecer */
+  transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+}
+
+/* Para h2: aparece desde arriba y desaparece hacia arriba */
+.slide-in-top {
+  opacity: 1;
+  transform: translateY(0);  /* Aparece en su posición normal */
+  transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+}
+
+.slide-out-top {
+  opacity: 0;
+  transform: translateY(-20px);  /* Se mueve unos píxeles hacia arriba para desaparecer */
+  transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+}
