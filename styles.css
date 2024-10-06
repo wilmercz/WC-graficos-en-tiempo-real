@@ -68,7 +68,7 @@ body {
   align-items: center;
   position: absolute;
   left: 25px;
-  bottom: 43px;
+  bottom:22px;
   transition: all 0.3s ease-in-out;
 }
 
@@ -81,7 +81,7 @@ body {
   font-size: 19px;
   position: absolute;
   left: 131px;
-  bottom: 43px;
+  bottom: 22px;
   transition: all 0.3s ease-in-out;
 }
 
