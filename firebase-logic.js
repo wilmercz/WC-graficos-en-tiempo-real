@@ -34,16 +34,25 @@ function applyColors(element, backgroundColor, textColor) {
   }
 }
 
-function updateVisibility(element, isVisible, animationFunction) {
+function updateVisibility(element, isVisible, animationFunctionIn = null, animationFunctionOut = null) {
   if (isVisible) {
-    element.style.display = 'block';
-    animationFunction(element);
+    element.style.display = 'block';  // Muestra el elemento
+    if (animationFunctionIn) {
+      animationFunctionIn(element);  // Aplica la animación de entrada si se especifica
+    }
   } else {
-    animationFunction(element);
-    setTimeout(() => { element.style.display = 'none'; }, 700);
+    if (animationFunctionOut) {
+      animationFunctionOut(element);  // Aplica la animación de salida si se especifica
+      setTimeout(() => { 
+        element.style.display = 'none';  // Oculta después de la animación
+      }, 700);  // Duración de la animación
+    } else {
+      element.style.display = 'none';  // Oculta inmediatamente si no hay animación
+    }
   }
   console.log(`Actualizando visibilidad de ${element.id}:`, isVisible);
 }
+
 
 function initializeDataListeners() {
   const graficoRef = ref(database, 'CLAVE_STREAM_FB/STREAM_LIVE/GRAFICOS');
@@ -95,8 +104,13 @@ function initializeDataListeners() {
       console.log('Estado de visibilidad:', { temaAlAire, graficoAlAire, logoAlAire, publicidadAlAire });
 
       updateVisibility(graficoTema, temaAlAire, temaAlAire ? slideIn : slideOut);
-      //updateVisibility(graficoInvitadoRol, graficoAlAire, graficoAlAire ? slideIn : slideOut);
-      updateVisibility(graficoInvitadoRol, graficoAlAire, graficoAlAire ? slideInLeft : slideOutLeft);
+      //BLOQUES DE INVITADO
+      updateVisibility(graficoInvitadoRol, graficoAlAire);  // Sin animaciones
+      updateVisibility(graficoInvitadoRolH3, graficoAlAire, graficoAlAire ? slideInLeft : slideOutLeft);
+      updateVisibility(graficoInvitadoRolH1, graficoAlAire, graficoAlAire ? slideInLeft : slideOutLeft);
+       updateVisibility(graficoInvitadoRolH2, graficoAlAire, graficoAlAire ? slideInLeft : slideOutLeft);
+      //FIN BLOQUES INVITADO
+      
       updateVisibility(logo, logoAlAire, logoAlAire ? fadeIn : fadeOut);
       updateVisibility(graficoPublicidad, publicidadAlAire, publicidadAlAire ? fadeIn : fadeOut);
 
