@@ -2,7 +2,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/fireba
 import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js";
 import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
 import { firebaseConfig } from './firebase-config.js'; // Importa la configuración de Firebase
-import { slideIn, slideOut, fadeIn, fadeOut } from './animations.js'; // Importa las funciones de animación
+import { slideIn, slideOut, fadeIn, fadeOut, slideInLeft, slideOutLeft, slideInTop, slideOutTop } from './animations.js'; // Importa las funciones de animación
 
 const app = initializeApp(firebaseConfig); // Usa la configuración importada
 const auth = getAuth(app);
@@ -74,6 +74,7 @@ function initializeDataListeners() {
       applyColors(graficoInvitadoRol, colorFondo1, colorLetra1);
       applyColors(graficoInvitadoRolH1, colorFondo1, colorLetra1);
       applyColors(graficoInvitadoRolH2, colorFondo2, colorLetra2);
+      applyColors(graficoTema, colorFondo3, colorLetra3);
       applyColors(graficoTemaH1, colorFondo3, colorLetra3);
 
       const invitado = (data.Invitado || 'Sin Invitado').replace(/^"|"$/g, '');
@@ -92,7 +93,8 @@ function initializeDataListeners() {
       console.log('Estado de visibilidad:', { temaAlAire, graficoAlAire, logoAlAire, publicidadAlAire });
 
       updateVisibility(graficoTema, temaAlAire, temaAlAire ? slideIn : slideOut);
-      updateVisibility(graficoInvitadoRol, graficoAlAire, graficoAlAire ? slideIn : slideOut);
+      //updateVisibility(graficoInvitadoRol, graficoAlAire, graficoAlAire ? slideIn : slideOut);
+      updateVisibility(graficoInvitadoRol, graficoAlAire, graficoAlAire ? slideInLeft : slideOutLeft);
       updateVisibility(logo, logoAlAire, logoAlAire ? fadeIn : fadeOut);
       updateVisibility(graficoPublicidad, publicidadAlAire, publicidadAlAire ? fadeIn : fadeOut);
 
