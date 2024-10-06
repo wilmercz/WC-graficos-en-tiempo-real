@@ -21,14 +21,14 @@ body {
 }
 
 #grafico-invitado-rol {
-  background-color: rgba(220, 223, 120, 1);
+  background-color: trasparent;
   display: flex;
   /*flex-direction: column;*/
   position: absolute;
-  left: 25px;
+  left: 0px;
   bottom: 17px;
   width: 120px;
-  height: 85px;
+  height: 90px;
   transition: all 0.3s ease-in-out;
   border-radius: 5px 5px 0 0;
 }
@@ -67,6 +67,8 @@ body {
   border-radius: 0 0 5px 5px;
   margin: 0;
   font-size: 13px;
+  left: 25px;
+  height: 85px;
   bottom: 12px;
 }
 
