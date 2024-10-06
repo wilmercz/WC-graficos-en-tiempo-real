@@ -41,7 +41,7 @@ export function slideOutLeft(element) {
   element.classList.add('slide-out-left');
   setTimeout(() => {
     element.style.display = 'none';  // Oculta el elemento después de la animación
-  }, 300);  // Duración de la animación
+  }, 700);  // Duración de la animación
 }
 
 
@@ -56,5 +56,5 @@ export function slideOutTop(element) {
   element.classList.add('slide-out-top');
   setTimeout(() => {
     element.style.display = 'none';  // Oculta el elemento después de la animación
-  }, 300);  // Duración de la animación
+  }, 700);  // Duración de la animación
 }
