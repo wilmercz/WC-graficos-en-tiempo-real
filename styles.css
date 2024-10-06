@@ -57,7 +57,7 @@ body {
   border-radius: 0 0 5px 5px;
   margin: 0;
   font-size: 13px;
-  bottom: 12px;
+  bottom: 11px;
   left: 123px;
 }
 
@@ -68,10 +68,11 @@ body {
   border-radius: 0 0 5px 5px;
   margin: 0;
   font-size: 13px;
-  left: 25px;
-  height: 85px;
+  left: 26px;
+  height: 78px;
   width: 100px;
   bottom: 12px;
+  border-radius: 5px 5px 0 0;
 }
 
 #grafico-tema {
