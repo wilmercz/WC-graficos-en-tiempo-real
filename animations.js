@@ -29,3 +29,32 @@ export function slideOut(element) {
     element.style.display = 'none';
   }, 300); // Corresponde a la duración de la transición en CSS
 }
+
+export function slideInLeft(element) {
+  element.classList.remove('slide-out-left');
+  element.classList.add('slide-in-left');
+  element.style.display = 'block';  // Asegúrate de que el elemento sea visible
+}
+
+export function slideOutLeft(element) {
+  element.classList.remove('slide-in-left');
+  element.classList.add('slide-out-left');
+  setTimeout(() => {
+    element.style.display = 'none';  // Oculta el elemento después de la animación
+  }, 300);  // Duración de la animación
+}
+
+
+export function slideInTop(element) {
+  element.classList.remove('slide-out-top');
+  element.classList.add('slide-in-top');
+  element.style.display = 'block';  // Asegúrate de que el elemento sea visible
+}
+
+export function slideOutTop(element) {
+  element.classList.remove('slide-in-top');
+  element.classList.add('slide-out-top');
+  setTimeout(() => {
+    element.style.display = 'none';  // Oculta el elemento después de la animación
+  }, 300);  // Duración de la animación
+}
