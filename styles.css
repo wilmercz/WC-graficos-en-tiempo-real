@@ -69,10 +69,10 @@ body {
   display: flex;
   align-items: center;
   position: absolute;
-  /*width: 100%;*/
+  width: 100%; /* *tenemos que dejar el 100 porqque si no las letras se recogen/
   left: 25px;
   bottom: 17px;
-  width: 120px;
+  /*width: 120px;*/
   height: 85px;
   transition: all 0.3s ease-in-out;
 }
