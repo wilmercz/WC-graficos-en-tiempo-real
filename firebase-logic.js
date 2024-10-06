@@ -40,7 +40,7 @@ function updateVisibility(element, isVisible, animationFunction) {
     animationFunction(element);
   } else {
     animationFunction(element);
-    setTimeout(() => { element.style.display = 'none'; }, 400);
+    setTimeout(() => { element.style.display = 'none'; }, 700);
   }
   console.log(`Actualizando visibilidad de ${element.id}:`, isVisible);
 }
