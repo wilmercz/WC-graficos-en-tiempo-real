@@ -47,7 +47,7 @@ body {
   border-radius: 5px 5px 0 0;
   margin: 0;
   font-size: 23px;
-  bottom: 35px;
+  bottom: 37px;
 }
 
 #grafico-invitado-rol h2 {
@@ -58,6 +58,7 @@ body {
   margin: 0;
   font-size: 13px;
   bottom: 12px;
+  left: 123px;
 }
 
 #grafico-invitado-rol h3 {
