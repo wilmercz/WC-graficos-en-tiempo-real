@@ -106,7 +106,7 @@ function initializeDataListeners() {
       updateVisibility(graficoTema, temaAlAire, temaAlAire ? slideIn : slideOut);
       //BLOQUES DE INVITADO
       updateVisibility(graficoInvitadoRol, graficoAlAire);  // Sin animaciones
-      updateVisibility(graficoInvitadoRolH3, graficoAlAire, graficoAlAire ? slideInLeft : slideOutLeft);
+      updateVisibility(graficoInvitadoRolH3, graficoAlAire, graficoAlAire ? fadeIn : fadeOut);
       updateVisibility(graficoInvitadoRolH1, graficoAlAire, graficoAlAire ? slideInLeft : slideOutLeft);
        updateVisibility(graficoInvitadoRolH2, graficoAlAire, graficoAlAire ? slideInLeft : slideOutLeft);
       //FIN BLOQUES INVITADO
