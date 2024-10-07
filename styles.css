@@ -44,20 +44,23 @@ z-index: 1;
 #grafico-invitado-rol h1 {
   background-color: rgba(16, 102, 255, 1);
   color: rgba(255, 255, 255, 1);
-  padding: 7px 30px 7px 30px; /* Arriba: 7px, Derecha: 30px, Abajo: 7px, Izquierda: 10px */
-  border-radius: 5px 5px 5px 5px;
+  padding: 7px 40px 7px 30px; /* Arriba: 7px, Derecha: 30px, Abajo: 7px, Izquierda: 10px */
+  /* Hacemos que las esquinas tengan bordes irregulares */
+  border-radius: 0px 20px 20px 0px; /* top-left, top-right, bottom-right, bottom-left */
   margin: 0;
   font-size: 29px;
   left: 100px;
-  bottom: 33px;
+  bottom: 34px;
 z-index: 2;
 }
 
 #grafico-invitado-rol h2 {
   background-color: rgba(240, 131, 19, 1);
   color: white;
-  padding: 7px 30px 7px 30px; /* Arriba: 7px, Derecha: 30px, Abajo: 7px, Izquierda: 10px */
-  border-radius: 0 0 5px 5px;
+  padding: 7px 35px 7px 35px; /* Arriba: 7px, Derecha: 30px, Abajo: 7px, Izquierda: 35px */
+  /*border-radius: 0 0 5px 5px;*/
+/* Hacemos que las esquinas tengan bordes irregulares */
+  border-radius: 0px 0px 30px 0px; /* top-left, top-right, bottom-right, bottom-left */
   margin: 0;
   font-size: 13px;
   bottom: 7px;
