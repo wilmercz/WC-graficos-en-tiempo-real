@@ -96,7 +96,7 @@ z-index: 4;
   align-items: center;
   position: absolute;
   width: 100%; /* *tenemos que dejar el 100 porqque si no las letras se recogen*/
-  left: 25px;
+  left: 0px;
   bottom: 17px;
   /*width: 120px;*/
   height: 85px;
