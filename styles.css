@@ -62,7 +62,7 @@ z-index: 2;
 /* Hacemos que las esquinas tengan bordes irregulares */
   border-radius: 0px 0px 30px 0px; /* top-left, top-right, bottom-right, bottom-left */
   margin: 0;
-  font-size: 13px;
+  font-size: 15px;
   bottom: 7px;
   left: 100px;
 z-index: 3;
