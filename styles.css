@@ -12,9 +12,9 @@ body {
 #logo {
   background-color: transparent;
   position: absolute;
-  bottom: 38px;
-  left: 49px;
-  width: 55px;
+  bottom: 37px;
+  left: 45px;
+  width: 65px;
   height: auto;
   z-index: 1000;
   transition: opacity 0.3s ease-in-out;
@@ -31,48 +31,56 @@ body {
   height: 90px;
   transition: all 0.3s ease-in-out;
   border-radius: 5px 0 5px 0;
+z-index: 1;
 }
 
 #grafico-invitado-rol h1, #grafico-invitado-rol h2 {
   position: absolute;
-  left: 120px;
+
   width: auto;
   transition: all 0.3s ease-in-out;
 }
 
 #grafico-invitado-rol h1 {
-  background-color: rgba(220, 223, 120, 1);
-  color: rgba(22, 75, 131, 1);
-  padding: 8px 10px;
-    border-radius: 5px 5px 5px 5px;
+  background-color: rgba(16, 102, 255, 1);
+  color: rgba(255, 255, 255, 1);
+  padding: 7px 30px 7px 30px; /* Arriba: 7px, Derecha: 30px, Abajo: 7px, Izquierda: 10px */
+  border-radius: 5px 5px 5px 5px;
   margin: 0;
   font-size: 29px;
+  left: 100px;
   bottom: 33px;
+z-index: 2;
 }
 
 #grafico-invitado-rol h2 {
-  background-color: rgba(22, 75, 131, 1);
+  background-color: rgba(240, 131, 19, 1);
   color: white;
-  padding: 7px 10px;
+  padding: 7px 30px 7px 30px; /* Arriba: 7px, Derecha: 30px, Abajo: 7px, Izquierda: 10px */
   border-radius: 0 0 5px 5px;
   margin: 0;
   font-size: 13px;
   bottom: 7px;
-  left: 135px;
+  left: 100px;
+z-index: 3;
 }
 
 #grafico-invitado-rol h3 {
-  background-color: rgba(22, 75, 131, 1);
+  background-color: rgba(16, 102, 255, 1);
   color: white;
   padding: 7px 10px;
   position: absolute;
   margin: 0;
   font-size: 13px;
-   left: 26px;
-  height: 60px;
-  width: 100px;
-  bottom: 8px;
-  border-radius: 10px 10PX 10px 10PX;
+left: 30px;
+  /*left: 26px;*/
+  height: 75px;
+  width: 75px;
+ /*width: auto;*/
+  bottom: 2px;
+  /*border-radius: 10px 10PX 10px 10PX;*/
+border-radius: 50%; /* Hace que el h2 sea completamente redondo */
+z-index: 4;
 }
 
 #grafico-tema {
