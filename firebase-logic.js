@@ -111,8 +111,7 @@ function initializeDataListeners() {
        updateVisibility(graficoInvitadoRolH2, graficoAlAire, graficoAlAire ? slideInTop : slideOutTop);
       //FIN BLOQUES INVITADO
       
-      updateVisibility(logo, logoAlAire, logoAlAire ? fadeIn : fadeOut);
-      updateVisibility(graficoPublicidad, publicidadAlAire, publicidadAlAire ? fadeIn : fadeOut);
+
 
       const logoUrl = (data.urlLogo || '')
         .trim()
@@ -121,8 +120,11 @@ function initializeDataListeners() {
       const publicidadUrl = (data.urlImagenPublicidad || '')
         .trim()
         .replace(/^"|"$/g, '');
-      console.log('URL LOGO y PULICIDAD:', { logoUrl, publicidadUrl});
-      if (logoAlAire && logoUrl) {
+
+      console.log('La URL del logo es válida:', logoUrl);
+      
+     // if (logoAlAire && logoUrl) {
+      if (logoUrl) {
         logo.src = logoUrl;
         console.log('logo cargado');
       } else {
@@ -133,6 +135,10 @@ function initializeDataListeners() {
         publicidadImg.src = publicidadUrl;
       }
 
+      //BLOQUES DE VISIBILIDAD DEL LOGO Y PUBLICIDAD
+      updateVisibility(logo, logoAlAire, logoAlAire ? fadeIn : fadeOut);
+      updateVisibility(graficoPublicidad, publicidadAlAire, publicidadAlAire ? fadeIn : fadeOut);
+      
     } else {
       console.log('No se recibieron datos');
     }
