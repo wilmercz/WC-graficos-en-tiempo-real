@@ -12,9 +12,9 @@ body {
 #logo {
   background-color: transparent;
   position: absolute;
-  bottom: 28px;
-  left: 33px;
-  width: 70px;
+  bottom: 38px;
+  left: 49px;
+  width: 55px;
   height: auto;
   z-index: 1000;
   transition: opacity 0.3s ease-in-out;
@@ -44,10 +44,10 @@ body {
   background-color: rgba(220, 223, 120, 1);
   color: rgba(22, 75, 131, 1);
   padding: 8px 10px;
-  border-radius: 5px 5px 0 0;
+    border-radius: 5px 5px 5px 5px;
   margin: 0;
-  font-size: 25px;
-  bottom: 37px;
+  font-size: 29px;
+  bottom: 33px;
 }
 
 #grafico-invitado-rol h2 {
@@ -57,8 +57,8 @@ body {
   border-radius: 0 0 5px 5px;
   margin: 0;
   font-size: 13px;
-  bottom: 9px;
-  left: 125px;
+  bottom: 7px;
+  left: 135px;
 }
 
 #grafico-invitado-rol h3 {
@@ -68,11 +68,11 @@ body {
   position: absolute;
   margin: 0;
   font-size: 13px;
-  left: 26px;
+   left: 26px;
   height: 60px;
   width: 100px;
-  bottom: 19px;
-  border-radius: 10px 0 10px 0;
+  bottom: 8px;
+  border-radius: 10px 10PX 10px 10PX;
 }
 
 #grafico-tema {
