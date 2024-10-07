@@ -114,16 +114,17 @@ function initializeDataListeners() {
       updateVisibility(logo, logoAlAire, logoAlAire ? fadeIn : fadeOut);
       updateVisibility(graficoPublicidad, publicidadAlAire, publicidadAlAire ? fadeIn : fadeOut);
 
-      const logoUrl = (data.urlLogo || 'https://raw.githubusercontent.com/wilmercz/WC-graficos-en-tiempo-real/main/imagenes/LOGOS%20ARKIMEDES%204.png')
+      const logoUrl = (data.urlLogo || '')
         .trim()
         .replace(/^"|"$/g, '');
-      
+       
       const publicidadUrl = (data.urlImagenPublicidad || '')
         .trim()
         .replace(/^"|"$/g, '');
-
+      console.log('URL LOGO y PULICIDAD:', { logoUrl, publicidadUrl});
       if (logoAlAire && logoUrl) {
         logo.src = logoUrl;
+        console.log('logo cargado');
       }
 
       if (publicidadAlAire && publicidadUrl) {
