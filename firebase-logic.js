@@ -125,6 +125,8 @@ function initializeDataListeners() {
       if (logoAlAire && logoUrl) {
         logo.src = logoUrl;
         console.log('logo cargado');
+      } else {
+        console.log('El logo no se cargó: logoAlAire =', logoAlAire, ', logoUrl =', logoUrl);
       }
 
       if (publicidadAlAire && publicidadUrl) {
