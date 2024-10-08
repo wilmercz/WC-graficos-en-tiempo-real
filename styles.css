@@ -187,14 +187,17 @@ left: 30px;
 .slide-in-left {
   opacity: 1;
   transform: translateX(0);  /* Posición normal */
-  transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;  /* Control de opacidad y posición */
+  transition: opacity 0.60s ease-in-out, transform 0.60s ease-in-out;  /* Control de opacidad y posición */
 }
 
 .slide-out-left {
   opacity: 0;
   transform: translateX(-100%);  /* Se mueve hacia la izquierda para desaparecer */
-  transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+  transition: opacity 0.60s ease-in-out, transform 0.60s ease-in-out;
 }
+
+
+
 
 /* Para h2: aparece desde arriba y desaparece hacia arriba */
 .slide-in-top {
