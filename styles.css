@@ -149,14 +149,15 @@ left: 30px;
   display: flex;
   justify-content: center;
   position: absolute;
-  left: 120px;
-  bottom: 12px;
+  left: 0px;
+  bottom: 0px;
   transition: all 0.3s ease-in-out;
+  width: 100%;
 }
 
 #grafico-publicidad img {
-  width: auto;
-  height: 65px;
+  width: 100%;
+  height: auto;
   border-radius: 5px;
   object-fit: contain;
   transition: all 0.3s ease-in-out;
