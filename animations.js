@@ -30,7 +30,8 @@ export function slideOut(element) {
   }, 300); // Corresponde a la duración de la transición en CSS
 }
 
-xport function slideInLeft(element) {
+
+export function slideInLeft(element) {
   element.classList.remove('slide-out-left');
   element.classList.add('slide-in-left');
   element.style.display = 'block';  // Asegúrate de que el elemento sea visible
@@ -44,15 +45,6 @@ export function slideOutLeft(element) {
   }, 1000);  // Duración de la animación
 }
 
-export function slideOutLeft(element) {
-  element.classList.remove('slide-in-left');
-  element.classList.add('slide-out-left');
-  setTimeout(() => {
-    element.style.display = 'none';  // Oculta el elemento después de la animación
-  }, 700);  // Duración de la animación
-}t.style.display = 'none';  // Oculta el elemento después de la animación
-  }, 700);  // Duración de la animación
-}
 
 
 export function slideInTop(element) {
