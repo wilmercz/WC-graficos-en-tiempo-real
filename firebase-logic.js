@@ -54,6 +54,89 @@ function updateVisibility(element, isVisible, animationFunctionIn = null, animat
 }
 
 
+function LowerThirdsInvitado(graficoInvitadoRol, graficoInvitadoRolH3, graficoInvitadoRolH1, graficoInvitadoRolH2, isVisible) {
+  // Primero muestra el contenedor inmediatamente
+  if (isVisible) {
+      updateVisibility(graficoInvitadoRol, isVisible);
+  }
+
+  // Luego, muestra el h3 con fadeIn si es visible
+  if (isVisible) {
+    setTimeout(() => {
+      updateVisibility(graficoInvitadoRolH3, true, fadeIn);
+    }, 0); // Inmediatamente
+
+    // Después de 300ms muestra el h1 con slideInLeft
+    setTimeout(() => {
+      updateVisibility(graficoInvitadoRolH1, true, slideInLeft);
+    }, 100); // Después de 300ms
+
+    // Después de 600ms muestra el h2 con slideInTop
+    setTimeout(() => {
+      updateVisibility(graficoInvitadoRolH2, true, slideInTop);
+    }, 250); // Después de 600ms
+  } else {
+    // Si no es visible, oculta todos los elementos con sus animaciones de salida
+    setTimeout(() => {
+      updateVisibility(graficoInvitadoRolH2, false, slideOutTop);
+    }, 100); // Después de 600ms
+    
+    setTimeout(() => {
+      updateVisibility(graficoInvitadoRolH1, false, slideOutLeft);
+    }, 200); // Después de 300ms
+
+    setTimeout(() => {
+    updateVisibility(graficoInvitadoRolH3, false, fadeOut);
+    }, 400); // Después de 300ms
+
+    setTimeout(() => {
+      if (isVisible === false) {
+        updateVisibility(graficoInvitadoRol, isVisible);
+      }
+    }, 600); // Después de 600ms
+  } // Cierre del bloque else
+} // Cierre de la función
+
+function LowerThirdsTema(graficoTema, graficoTemaH1, graficoTemaH2, isVisible) {
+  // Primero muestra el contenedor inmediatamente
+  if (isVisible) {
+      updateVisibility(graficoTema, isVisible);
+  }
+
+  // Luego, muestra el h3 con fadeIn si es visible
+  if (isVisible) {
+    setTimeout(() => {
+      updateVisibility(graficoTemaH2, true, fadeIn);
+    }, 0); // Inmediatamente
+
+    // Después de 300ms muestra el h1 con slideInLeft
+    setTimeout(() => {
+      updateVisibility(graficoTemaH1, true, slideInLeft);
+    }, 100); // Después de 300ms
+
+    
+  } else {
+    // Si no es visible, oculta todos los elementos con sus animaciones de salida
+    setTimeout(() => {
+      updateVisibility(graficoTemaH1, false, slideOutTop);
+    }, 100); // Después de 600ms
+   
+
+    setTimeout(() => {
+    updateVisibility(graficoTemaH2, false, fadeOut);
+    }, 400); // Después de 300ms
+
+    setTimeout(() => {
+      if (isVisible === false) {
+        updateVisibility(graficoTema, isVisible);
+      }
+    }, 600); // Después de 600ms
+  } // Cierre del bloque else
+} // Cierre
+
+
+
+
 function initializeDataListeners() {
   const graficoRef = ref(database, 'CLAVE_STREAM_FB/STREAM_LIVE/GRAFICOS');
 
@@ -103,13 +186,17 @@ function initializeDataListeners() {
 
       console.log('Estado de visibilidad:', { temaAlAire, graficoAlAire, logoAlAire, publicidadAlAire });
 
-      updateVisibility(graficoTema, temaAlAire, temaAlAire ? slideIn : slideOut);
+
+      LowerThirdsTema(graficoTema, graficoTemaH1, graficoTemaH2, temaAlAire);
+      //updateVisibility(graficoTema, temaAlAire, temaAlAire ? slideIn : slideOut);
       //BLOQUES DE INVITADO
-      updateVisibility(graficoInvitadoRol, graficoAlAire);  // Sin animaciones
-      updateVisibility(graficoInvitadoRolH3, graficoAlAire, graficoAlAire ? fadeIn : fadeOut);
-      updateVisibility(graficoInvitadoRolH1, graficoAlAire, graficoAlAire ? slideInLeft : slideOutLeft);
-       updateVisibility(graficoInvitadoRolH2, graficoAlAire, graficoAlAire ? slideInTop : slideOutTop);
+      LowerThirdsInvitado(graficoInvitadoRol, graficoInvitadoRolH3, graficoInvitadoRolH1, graficoInvitadoRolH2, graficoAlAire);
+      //updateVisibility(graficoInvitadoRol, graficoAlAire);  // Sin animaciones
+      //updateVisibility(graficoInvitadoRolH3, graficoAlAire, graficoAlAire ? fadeIn : fadeOut);
+      //updateVisibility(graficoInvitadoRolH1, graficoAlAire, graficoAlAire ? slideInLeft : slideOutLeft);
+      // updateVisibility(graficoInvitadoRolH2, graficoAlAire, graficoAlAire ? slideInTop : slideOutTop);
       //FIN BLOQUES INVITADO
+    
       
 
 
