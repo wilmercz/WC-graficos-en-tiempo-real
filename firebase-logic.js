@@ -165,12 +165,15 @@ function initializeDataListeners() {
       const graficoPublicidad = document.getElementById('grafico-publicidad');
       const publicidadImg = document.getElementById('publicidad-img');
 
-      applyColors(graficoInvitadoRolH3, colorFondo1, colorLetra1);
-      applyColors(graficoInvitadoRolH1, colorFondo1, colorLetra1);
-      applyColors(graficoInvitadoRolH2, colorFondo2, colorLetra2);
-      applyColors(graficoTemaH2, colorFondo3, colorLetra3);
-      applyColors(graficoTemaH1, colorFondo3, colorLetra3);
 
+
+      applyColors(graficoInvitadoRolH3, colorFondo1, colorLetra1); //fondo del logo
+      applyColors(graficoInvitadoRolH1, colorFondo2, colorLetra2); //NOMBRE INVITADO
+      applyColors(graficoInvitadoRolH2, colorFondo3, colorLetra3); //ROL
+      applyColors(graficoTemaH2, colorFondo1, colorLetra1); //fondo del logo
+      applyColors(graficoTemaH1, colorFondo2, colorLetra2); //DESCRIPCION
+
+      
       const invitado = (data.Invitado || 'Sin Invitado').replace(/^"|"$/g, '');
       const rol = (data.Rol || '-').replace(/^"|"$/g, '');
       const tema = (data.Tema || '-').replace(/^"|"$/g, '');
