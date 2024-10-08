@@ -1,6 +1,7 @@
 body {
   font-family: Arial, sans-serif;
-  background-color: transparent;
+  background-color: rgba(0, 0, 0, 1);
+  /*background-color: transparent;*/
   margin: 0;
   padding: 0;
   position: relative;
@@ -14,7 +15,7 @@ body {
   position: absolute;
   bottom: 37px;
   left: 45px;
-  width: 65px;
+  width: 55px;
   height: auto;
   z-index: 1000;
   transition: opacity 0.3s ease-in-out;
@@ -26,7 +27,7 @@ body {
   /*flex-direction: column;*/
   position: absolute;
   left: 0px;
-  bottom: 17px;
+  bottom: 0px;
   width: 100%;
   height: 90px;
   transition: all 0.3s ease-in-out;
@@ -41,33 +42,7 @@ z-index: 1;
   transition: all 0.3s ease-in-out;
 }
 
-#grafico-invitado-rol h1 {
-  background-color: rgba(16, 102, 255, 1);
-  color: rgba(255, 255, 255, 1);
-  padding: 7px 40px 7px 30px; /* Arriba: 7px, Derecha: 30px, Abajo: 7px, Izquierda: 10px */
-  /* Hacemos que las esquinas tengan bordes irregulares */
-  border-radius: 0px 20px 20px 0px; /* top-left, top-right, bottom-right, bottom-left */
-  margin: 0;
-  font-size: 29px;
-  left: 100px;
-  bottom: 34px;
-z-index: 2;
-}
-
-#grafico-invitado-rol h2 {
-  background-color: rgba(240, 131, 19, 1);
-  color: white;
-  padding: 7px 35px 7px 35px; /* Arriba: 7px, Derecha: 30px, Abajo: 7px, Izquierda: 35px */
-  /*border-radius: 0 0 5px 5px;*/
-/* Hacemos que las esquinas tengan bordes irregulares */
-  border-radius: 0px 0px 30px 0px; /* top-left, top-right, bottom-right, bottom-left */
-  margin: 0;
-  font-size: 15px;
-  bottom: 7px;
-  left: 100px;
-z-index: 3;
-}
-
+/*FONDO DEL LOGO*/
 #grafico-invitado-rol h3 {
   background-color: rgba(16, 102, 255, 1);
   color: white;
@@ -75,16 +50,47 @@ z-index: 3;
   position: absolute;
   margin: 0;
   font-size: 13px;
-left: 30px;
+left: 35px;
   /*left: 26px;*/
-  height: 75px;
-  width: 75px;
+  height: 55px;
+  width: 55px;
  /*width: auto;*/
-  bottom: 2px;
+  bottom: 25px;
   /*border-radius: 10px 10PX 10px 10PX;*/
 border-radius: 50%; /* Hace que el h2 sea completamente redondo */
+
 z-index: 4;
 }
+
+#grafico-invitado-rol h1 {
+  background-color: rgba(16, 102, 255, 1);
+  color: rgba(255, 255, 255, 1);
+  padding: 7px 40px 7px 30px; /* Arriba: 7px, Derecha: 30px, Abajo: 7px, Izquierda: 10px */
+  /* Hacemos que las esquinas tengan bordes irregulares */
+  border-radius: 0px 20px 20px 0px; /* top-left, top-right, bottom-right, bottom-left */
+  margin: 0;
+  font-size: 18px;
+  left: 93px;
+  bottom: 53px;
+z-index: 2;
+}
+
+
+#grafico-invitado-rol h2 {
+  background-color: rgba(240, 131, 19, 1);
+  color: white;
+  padding: 5px 35px 5px 40px; /* Arriba, Derecha, Abajo, Izquierda: 35px */
+  /*border-radius: 0 0 5px 5px;*/
+/* Hacemos que las esquinas tengan bordes irregulares */
+  border-radius: 0px 0px 30px 0px; /* top-left, top-right, bottom-right, bottom-left */
+  margin: 0;
+  font-size: 12px;
+  bottom: 29px;
+  left: 90px;
+z-index: 3;
+}
+
+
 
 #grafico-tema {
   background-color: transparent;
@@ -97,7 +103,7 @@ z-index: 4;
   position: absolute;
   width: 100%; /* *tenemos que dejar el 100 porqque si no las letras se recogen*/
   left: 0px;
-  bottom: 17px;
+  bottom: 0px;
   /*width: 120px;*/
   height: 85px;
   transition: all 0.3s ease-in-out;
@@ -109,12 +115,14 @@ z-index: 4;
   padding: 18px 35px;
   border-radius: 0px 30px 30px 0px; /* top-left, top-right, bottom-right, bottom-left */
   margin: 0;
-  font-size: 25px;
+  font-size: 19px;
   position: absolute;
-  left: 100px;
-  bottom: 14px;
+  left: 93px;
+  bottom: 31px;
   transition: all 0.3s ease-in-out;
 }
+
+/*FONDO DEL LOGO*/
 #grafico-tema h2 {
 background-color: rgba(16, 102, 255, 1);
   color: white;
@@ -122,19 +130,18 @@ background-color: rgba(16, 102, 255, 1);
   position: absolute;
   margin: 0;
   font-size: 13px;
-left: 30px;
+  left: 35px;
   /*left: 26px;*/
-  height: 75px;
-  width: 75px;
+  height: 55px;
+  width: 55px;
  /*width: auto;*/
-  bottom: 2px;
+  bottom: 25px;
   /*border-radius: 10px 10PX 10px 10PX;*/
 	border-radius: 50%; /* Hace que el h2 sea completamente redondo */
 
 	z-index: 4;
   transition: all 0.3s ease-in-out;
 }
-
 #status {
   margin-top: 20px;
   font-size: 1.1em;
@@ -149,15 +156,14 @@ left: 30px;
   display: flex;
   justify-content: center;
   position: absolute;
-  left: 0px;
-  bottom: 0px;
+  left: 124px;
+  bottom: 100px;
   transition: all 0.3s ease-in-out;
-  width: 100%;
 }
 
 #grafico-publicidad img {
-  width: 100%;
-  height: auto;
+  width: auto;
+  height: 150px;
   border-radius: 5px;
   object-fit: contain;
   transition: all 0.3s ease-in-out;
@@ -197,18 +203,15 @@ left: 30px;
   transition: opacity 0.60s ease-in-out, transform 0.60s ease-in-out;
 }
 
-
-
-
 /* Para h2: aparece desde arriba y desaparece hacia arriba */
 .slide-in-top {
   opacity: 1;
   transform: translateY(0);  /* Aparece en su posición normal */
-  transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+  transition: opacity 0.30s ease-in-out, transform 0.30s ease-in-out;
 }
 
 .slide-out-top {
   opacity: 0;
   transform: translateY(-20px);  /* Se mueve unos píxeles hacia arriba para desaparecer */
-  transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+  transition: opacity 0.30s ease-in-out, transform 0.30s ease-in-out;
 }
