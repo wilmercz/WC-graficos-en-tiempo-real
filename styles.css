@@ -156,8 +156,8 @@ background-color: rgba(16, 102, 255, 1);
   display: flex;
   justify-content: center;
   position: absolute;
-  left: 124px;
-  bottom: 100px;
+  left: 0px;
+  bottom: 0px;
   transition: all 0.3s ease-in-out;
 }
 
