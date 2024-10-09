@@ -158,12 +158,13 @@ background-color: rgba(16, 102, 255, 1);
   position: absolute;
   left: 0px;
   bottom: 0px;
+width: 100%;
   transition: all 0.3s ease-in-out;
 }
 
 #grafico-publicidad img {
   width: auto;
-  height: 150px;
+  height: auto;
   border-radius: 5px;
   object-fit: contain;
   transition: all 0.3s ease-in-out;
