@@ -156,7 +156,7 @@ background-color: rgba(16, 102, 255, 1);
   display: flex;
   justify-content: center;
   position: absolute;
-  width: 100%;
+  width: auto;
   height: auto;
   left: 0px;
   bottom: 0px;
@@ -165,7 +165,7 @@ background-color: rgba(16, 102, 255, 1);
 
 #grafico-publicidad img {
   width: auto;
-  height:  150px;
+  height:  100px;
   border-radius: 0px;
   bottom: 0px;
   object-fit: contain;
