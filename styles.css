@@ -13,6 +13,7 @@ body {
 #logo {
   background-color: transparent;
   position: absolute;
+  bottom: 37px;
   top: 10px;
   left: 15px;
   width: 55px;
