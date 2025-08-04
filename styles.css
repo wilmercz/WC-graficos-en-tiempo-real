@@ -1,148 +1,134 @@
+/* ============================================
+   LOWER THIRDS - ESTÁNDARES BROADCAST
+   Medidas basadas en Safe Areas para 1920x1080
+   ============================================ */
+
 body {
-  font-family: Arial, sans-serif;
-  /*background-color: rgba(0, 0, 0, 1);*/
+  font-family: 'Arial', sans-serif;
   background-color: transparent;
   margin: 0;
   padding: 0;
   position: relative;
-  width: 100vw; /* 100% del ancho de la ventana del navegador */
-  height: 100vh; /* 100% de la altura de la ventana del navegador */
+  width: 100vw;
+  height: 100vh;
   overflow: hidden;
 }
 
+/* ============================================
+   LOGO - SIN CONTENEDOR CIRCULAR
+   Posición: Safe Area estándar
+   ============================================ */
 #logo {
   background-color: transparent;
   position: absolute;
-  bottom: 37px;
-  top: 10px;
-  left: 15px;
-  width: 55px;
+  bottom: 88px;          /* Safe area + separación */
+  left: 96px;            /* Title Safe 90% margin */
+  width: 44px;           /* Tamaño broadcast standard */
   height: auto;
   z-index: 1000;
-  transition: opacity 0.3s ease-in-out;
+  transition: opacity 0.4s ease-in-out;
+  border-radius: 0;      /* Sin efectos circulares */
 }
 
+/* ============================================
+   CONTENEDOR INVITADO - MEDIDAS ESTÁNDAR
+   Posición: Según especificaciones SMPTE
+   ============================================ */
 #grafico-invitado-rol {
   background-color: transparent;
   display: flex;
-  /*flex-direction: column;*/
   position: absolute;
-  left: 15px;
-  bottom: 0px;
-  width: 70%;
-  height: 90px;
-  transition: all 0.3s ease-in-out;
-  border-radius: 5px 0 5px 0;
+  left: 96px;            /* Safe area */
+  bottom: 68px;          /* Margen safe desde bottom */
+  width: 720px;          /* Ancho estándar broadcast */
+  height: 60px;          /* Altura optimizada */
+  transition: all 0.4s ease-in-out;
+  border-radius: 0;
   z-index: 1;
 }
 
+/* ELEMENTOS H1, H2 - POSICIONAMIENTO RELATIVO */
 #grafico-invitado-rol h1, #grafico-invitado-rol h2 {
   position: absolute;
-
   width: auto;
-  transition: all 0.3s ease-in-out;
+  transition: all 0.4s ease-in-out;
 }
 
-/*FONDO DEL LOGO*/
+/* ELIMINADO: Fondo circular del logo */
 #grafico-invitado-rol h3 {
-  background-color: rgba(16, 102, 255, 1);
-  color: white;
-  padding: 7px 10px;
-  position: absolute;
-  margin: 0;
-  font-size: 13px;
-left: 35px;
-  /*left: 26px;*/
-  height: 55px;
-  width: 55px;
- /*width: auto;*/
-  bottom: 25px;
-  /*border-radius: 10px 10PX 10px 10PX;*/
-border-radius: 50%; /* Hace que el h2 sea completamente redondo */
-
-z-index: 4;
+  display: none !important;  /* Ya no se usa contenedor circular */
 }
 
+/* NOMBRE INVITADO - TAMAÑO OPTIMIZADO */
 #grafico-invitado-rol h1 {
   background-color: rgba(16, 102, 255, 1);
   color: rgba(255, 255, 255, 1);
-  padding: 6px 38px 6px 28px; /* Arriba: 6px, Derecha: 38px, Abajo: 6px, Izquierda: 28px */
-  /* Hacemos que las esquinas tengan bordes irregulares */
-  border-radius: 0px 20px 20px 0px; /* top-left, top-right, bottom-right, bottom-left */
+  padding: 8px 25px;
+  border-radius: 0px 15px 15px 0px;
   margin: 0;
-  font-size: 16px;
-  left: 93px;
-  bottom: 53px;
-z-index: 2;
+  font-size: 15px;       /* REDUCIDO de 18px */
+  font-weight: 600;
+  left: 0px;             /* Alineado con contenedor */
+  top: 5px;              /* Desde arriba del contenedor */
+  z-index: 2;
 }
 
-
+/* ROL - POSICIÓN AJUSTADA */
 #grafico-invitado-rol h2 {
   background-color: rgba(240, 131, 19, 1);
   color: white;
-  padding: 4px 33px 4px 38px; /* Arriba, Derecha, Abajo, Izquierda */
-  /*border-radius: 0 0 5px 5px;*/
-/* Hacemos que las esquinas tengan bordes irregulares */
-  border-radius: 0px 0px 30px 0px; /* top-left, top-right, bottom-right, bottom-left */
+  padding: 5px 25px;
+  border-radius: 0px 0px 15px 0px;
   margin: 0;
-  font-size: 11px;
-  bottom: 29px;
-  left: 90px;
-z-index: 3;
+  font-size: 12px;       /* MANTENER tamaño */
+  font-weight: 500;
+  left: 0px;
+  top: 35px;             /* Debajo del nombre */
+  z-index: 3;
 }
 
-
-
+/* ============================================
+   CONTENEDOR TEMA - SIMPLIFICADO
+   ============================================ */
 #grafico-tema {
   background-color: transparent;
   color: rgba(22, 75, 131, 1);
-  padding: 7px 15px;
-  border-radius: 5px;
+  padding: 0;
+  border-radius: 0;
   text-align: left;
   display: flex;
   align-items: center;
   position: absolute;
-  width: 100%; /* *tenemos que dejar el 100 porqque si no las letras se recogen*/
-  left: 0px;
-  bottom: 0px;
-  /*width: 120px;*/
-  height: 85px;
-  transition: all 0.3s ease-in-out;
+  width: 720px;          /* Ancho estándar */
+  left: 96px;            /* Safe area */
+  bottom: 68px;          /* Margen safe */
+  height: 50px;          /* Más compacto */
+  transition: all 0.4s ease-in-out;
 }
 
+/* TÍTULO TEMA - TAMAÑO OPTIMIZADO */
 #grafico-tema h1 {
-  background-color:  rgba(16, 50, 100, 1);
+  background-color: rgba(16, 50, 100, 1);
   color: rgba(225, 255, 255, 1);
-  padding: 16px 32px;
-  border-radius: 0px 30px 30px 0px; /* top-left, top-right, bottom-right, bottom-left */
+  padding: 12px 25px;
+  border-radius: 0px 15px 15px 0px;
   margin: 0;
-  font-size: 16px;
+  font-size: 15px;       /* REDUCIDO de 19px */
+  font-weight: 600;
   position: absolute;
-  left: 93px;
-  bottom: 31px;
-  transition: all 0.3s ease-in-out;
+  left: 0px;
+  top: 5px;
+  transition: all 0.4s ease-in-out;
 }
 
-/*FONDO DEL LOGO*/
+/* ELIMINADO: Fondo circular del tema */
 #grafico-tema h2 {
-background-color: rgba(16, 102, 255, 1);
-  color: white;
-  padding: 6px 9px;
-  position: absolute;
-  margin: 0;
-  font-size: 11px;
-  left: 35px;
-  /*left: 26px;*/
-  height: 55px;
-  width: 55px;
- /*width: auto;*/
-  bottom: 25px;
-  /*border-radius: 10px 10PX 10px 10PX;*/
-	border-radius: 50%; /* Hace que el h2 sea completamente redondo */
-
-	z-index: 4;
-  transition: all 0.3s ease-in-out;
+  display: none !important;  /* Ya no se usa contenedor circular */
 }
+
+/* ============================================
+   STATUS
+   ============================================ */
 #status {
   margin-top: 20px;
   font-size: 1.1em;
@@ -150,72 +136,109 @@ background-color: rgba(16, 102, 255, 1);
   position: absolute;
   top: 10px;
   left: 10px;
-  transition: opacity 0.3s ease-in-out;
+  transition: opacity 0.4s ease-in-out;
 }
 
+/* ============================================
+   PUBLICIDAD - AJUSTADA A SAFE AREA
+   ============================================ */
 #grafico-publicidad {
   display: flex;
   justify-content: center;
   position: absolute;
   width: auto;
   height: auto;
-  left: 6px;
-  bottom: 0px;
-  transition: all 0.3s ease-in-out;
+  left: 96px;            /* Safe area */
+  bottom: 10px;          /* Cerca del borde pero visible */
+  transition: all 0.4s ease-in-out;
 }
 
 #grafico-publicidad img {
   width: auto;
-  height:  70px;
-  border-radius: 0px;
+  height: 50px;          /* REDUCIDO de 70px */
+  border-radius: 4px;
   bottom: 0px;
   object-fit: contain;
-  transition: all 0.3s ease-in-out;
+  transition: all 0.4s ease-in-out;
 }
 
-/* Clases para animaciones */
+/* ============================================
+   ANIMACIONES SIMPLIFICADAS
+   Solo 2 tipos esenciales para mejor performance
+   ============================================ */
+
+/* Fade básico */
 .fade-in {
   opacity: 1;
-  transition: opacity 0.3s ease-in-out;
+  transition: opacity 0.4s ease-in-out;
 }
 
 .fade-out {
   opacity: 0;
-  transition: opacity 0.3s ease-in-out;
+  transition: opacity 0.4s ease-in-out;
 }
 
+/* Slide unificado */
 .slide-in {
-  transform: translateY(0);
-  transition: transform 0.3s ease-in-out;
+  opacity: 1;
+  transform: translateX(0);
+  transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
 }
 
 .slide-out {
-  transform: translateY(100%);
-  transition: transform 0.3s ease-in-out;
-}
-
-/* Para h1: aparece desde la izquierda y desaparece hacia la izquierda */
-.slide-in-left {
-  opacity: 1;
-  transform: translateX(0);  /* Posición normal */
-  transition: opacity 0.30s ease-in-out, transform 0.30s ease-in-out;  /* Control de opacidad y posición */
-}
-
-.slide-out-left {
   opacity: 0;
-  transform: translateX(-100%);  /* Se mueve hacia la izquierda para desaparecer */
-  transition: opacity 0.30s ease-in-out, transform 0.30s ease-in-out;
+  transform: translateX(-30px);
+  transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
 }
 
-/* Para h2: aparece desde arriba y desaparece hacia arriba */
-.slide-in-top {
-  opacity: 1;
-  transform: translateY(0);  /* Aparece en su posición normal */
-  transition: opacity 0.30s ease-in-out, transform 0.30s ease-in-out;
+/* Estados iniciales */
+.hidden {
+  display: none !important;
 }
 
-.slide-out-top {
-  opacity: 0;
-  transform: translateY(-20px);  /* Se mueve unos píxeles hacia arriba para desaparecer */
-  transition: opacity 0.30s ease-in-out, transform 0.30s ease-in-out;
+/* ============================================
+   RESPONSIVE - MÓVILES
+   ============================================ */
+@media (max-width: 768px) {
+  #grafico-invitado-rol h1 {
+    font-size: 13px;
+    padding: 6px 20px;
+  }
+  
+  #grafico-invitado-rol h2 {
+    font-size: 11px;
+    padding: 4px 20px;
+  }
+  
+  #grafico-tema h1 {
+    font-size: 13px;
+    padding: 10px 20px;
+  }
+  
+  #logo {
+    width: 38px;
+  }
 }
+
+/* ============================================
+   DEBUG: GUÍAS VISUALES (remover en producción)
+   ============================================ */
+.debug-info {
+  position: absolute;
+  top: 50px;
+  right: 20px;
+  background: rgba(0,0,0,0.7);
+  color: white;
+  padding: 10px;
+  font-size: 10px;
+  font-family: monospace;
+  border-radius: 4px;
+  z-index: 9999;
+}
+
+/* ============================================
+   ELIMINADAS: Animaciones complejas anteriores
+   - slideInLeft/slideOutLeft
+   - slideInTop/slideOutTop  
+   - Múltiples setTimeout anidados
+   ============================================ */
