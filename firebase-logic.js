@@ -1,47 +1,22 @@
-/* ============================================
-   FIREBASE LOGIC - PROBLEMA LOGO CORREGIDO
-   ============================================ */
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
 import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js";
 import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
-import { firebaseConfig } from './firebase-config.js';
+import { firebaseConfig } from './firebase-config.js'; // Importa la configuración de Firebase
+import { slideIn, slideOut, fadeIn, fadeOut, slideInLeft, slideOutLeft, slideInTop, slideOutTop } from './animations.js'; // Importa las funciones de animación
 
-// Importar animaciones simplificadas
-import { 
-  fadeIn, 
-  fadeOut, 
-  slideIn, 
-  slideOut, 
-  animateElement,
-  toggleVisibility 
-} from './animations.js';
-
-// ============================================
-// INICIALIZACIÓN FIREBASE
-// ============================================
-const app = initializeApp(firebaseConfig);
+const app = initializeApp(firebaseConfig); // Usa la configuración importada
 const auth = getAuth(app);
 const database = getDatabase(app);
 
-// Variable para controlar estado inicial
-let isFirstLoad = true;
-
-// Autenticación anónima
 signInAnonymously(auth)
   .then(() => {
-    console.log("✅ Autenticación Firebase exitosa");
-    updateStatus('🟢 Conectado');
+    console.log("Autenticación anónima exitosa");
     initializeDataListeners();
   })
   .catch((error) => {
-    console.error("❌ Error de autenticación:", error);
-    updateStatus('❌ Error de conexión');
+    console.error("Error de autenticación:", error);
+    document.getElementById('status').innerText = 'Error de autenticación: ' + error.message;
   });
-
-// ============================================
-// FUNCIONES DE UTILIDAD
-// ============================================
 
 function hexToRgba(hex, alpha = 1) {
   if (!hex || typeof hex !== 'string') return null;
@@ -55,256 +30,209 @@ function applyColors(element, backgroundColor, textColor) {
   if (element) {
     element.style.backgroundColor = backgroundColor;
     element.style.color = textColor;
-    console.log(`🎨 Colores aplicados a ${element.id}:`, { backgroundColor, textColor });
+    console.log(`Aplicando colores a ${element.id}:`, { backgroundColor, textColor });
   }
 }
 
-function cleanText(text) {
-  return (text || '').toString().replace(/^"|"$/g, '').trim();
-}
-
-// ============================================
-// FUNCIONES PRINCIPALES DE LOWER THIRDS
-// ============================================
-
-function showLowerThirdsInvitado(isVisible) {
-  const graficoInvitadoRol = document.getElementById('grafico-invitado-rol');
-  
+function updateVisibility(element, isVisible, animationFunctionIn = null, animationFunctionOut = null) {
   if (isVisible) {
-    console.log("👤 Mostrando gráfico invitado");
-    slideIn(graficoInvitadoRol);
+    element.style.display = 'block';  // Muestra el elemento
+    if (animationFunctionIn) {
+      animationFunctionIn(element);  // Aplica la animación de entrada si se especifica
+    }
   } else {
-    console.log("👤 Ocultando gráfico invitado");
-    slideOut(graficoInvitadoRol);
+    if (animationFunctionOut) {
+      animationFunctionOut(element);  // Aplica la animación de salida si se especifica
+      setTimeout(() => { 
+        element.style.display = 'none';  // Oculta después de la animación
+      }, 700);  // Duración de la animación
+    } else {
+      element.style.display = 'none';  // Oculta inmediatamente si no hay animación
+    }
   }
+  console.log(`Actualizando visibilidad de ${element.id}:`, isVisible);
 }
 
-function showLowerThirdsTema(isVisible) {
-  const graficoTema = document.getElementById('grafico-tema');
-  
+
+function LowerThirdsInvitado(graficoInvitadoRol, graficoInvitadoRolH3, graficoInvitadoRolH1, graficoInvitadoRolH2, isVisible) {
+  // Primero muestra el contenedor inmediatamente
   if (isVisible) {
-    console.log("📋 Mostrando gráfico tema");
-    slideIn(graficoTema);
-  } else {
-    console.log("📋 Ocultando gráfico tema");
-    slideOut(graficoTema);
+      updateVisibility(graficoInvitadoRol, isVisible);
   }
-}
 
-function showLogo(isVisible) {
-  const logo = document.getElementById('logo');
-  
+  // Luego, muestra el h3 con fadeIn si es visible
   if (isVisible) {
-    console.log("🏛️ Mostrando logo");
-    fadeIn(logo);
-  } else {
-    console.log("🏛️ Ocultando logo");
-    fadeOut(logo);
-  }
-}
-
-function showPublicidad(isVisible) {
-  const graficoPublicidad = document.getElementById('grafico-publicidad');
-  
-  if (isVisible) {
-    console.log("📺 Mostrando publicidad");
-    fadeIn(graficoPublicidad);
-  } else {
-    console.log("📺 Ocultando publicidad");
-    fadeOut(graficoPublicidad);
-  }
-}
-
-// ============================================
-// LÓGICA PRINCIPAL DE DATOS
-// ============================================
-
-function processFirebaseData(data) {
-  if (!data) {
-    console.log("⚠️ No se recibieron datos de Firebase");
-    return;
-  }
-
-  console.log('📡 Datos recibidos de Firebase:', data);
-
-  // ============================================
-  // 1. PROCESAR COLORES
-  // ============================================
-  const colorFondo1 = data.colorFondo1 || 'rgba(16, 102, 255, 1)';
-  const colorLetra1 = data.colorLetra1 || 'rgba(255, 255, 255, 1)';
-  const colorFondo2 = data.colorFondo2 || 'rgba(16, 102, 255, 1)';
-  const colorLetra2 = data.colorLetra2 || 'rgba(255, 255, 255, 1)';
-  const colorFondo3 = data.colorFondo3 || 'rgba(240, 131, 19, 1)';
-  const colorLetra3 = data.colorLetra3 || 'rgba(255, 255, 255, 1)';
-
-  // ============================================
-  // 2. OBTENER ELEMENTOS DEL DOM
-  // ============================================
-  const graficoInvitadoRolH1 = document.querySelector('#grafico-invitado-rol h1');
-  const graficoInvitadoRolH2 = document.querySelector('#grafico-invitado-rol h2');
-  const graficoTemaH1 = document.querySelector('#grafico-tema h1');
-  const logo = document.getElementById('logo');
-  const publicidadImg = document.getElementById('publicidad-img');
-
-  // ============================================
-  // 3. APLICAR COLORES A ELEMENTOS
-  // ============================================
-  applyColors(graficoInvitadoRolH1, colorFondo2, colorLetra2); // NOMBRE INVITADO
-  applyColors(graficoInvitadoRolH2, colorFondo3, colorLetra3); // ROL
-  applyColors(graficoTemaH1, colorFondo1, colorLetra1);       // DESCRIPCIÓN TEMA
-
-  // ============================================
-  // 4. PROCESAR TEXTOS
-  // ============================================
-  const invitado = cleanText(data.Invitado) || 'Sin Invitado';
-  const rol = cleanText(data.Rol) || 'Sin Rol';
-  const tema = cleanText(data.Tema) || 'Sin Tema';
-
-  document.getElementById('invitado').innerText = invitado;
-  document.getElementById('rol').innerText = rol;
-  document.getElementById('tema').innerText = tema;
-
-  console.log('📝 Textos actualizados:', { invitado, rol, tema });
-
-  // ============================================
-  // 5. PROCESAR ESTADOS DE VISIBILIDAD
-  // ============================================
-  const temaAlAire = data.Mostrar_Tema === "true";
-  const graficoAlAire = data.Mostrar_Invitado === "true";
-  const logoAlAire = data.Mostrar_Logo === "true";
-  const publicidadAlAire = data.Mostrar_Publicidad === "true";
-
-  console.log('👀 Estados de visibilidad:', { 
-    temaAlAire, 
-    graficoAlAire, 
-    logoAlAire, 
-    publicidadAlAire 
-  });
-
-  // ============================================
-  // 6. APLICAR VISIBILIDAD CON ANIMACIONES
-  // ============================================
-  
-  // IMPORTANTE: Solo mostrar uno a la vez (tema O invitado)
-  if (temaAlAire && graficoAlAire) {
-    // Si ambos están activos, priorizar tema y ocultar invitado
-    console.log("⚠️ Conflicto: ambos gráficos activos, priorizando tema");
-    showLowerThirdsTema(true);
-    showLowerThirdsInvitado(false);
-  } else {
-    showLowerThirdsTema(temaAlAire);
-    showLowerThirdsInvitado(graficoAlAire);
-  }
-
-  // LOGO: Aplicar estado SOLO después de primera carga
-  if (isFirstLoad) {
-    // En primera carga, mostrar logo por defecto si no hay valor específico
-    const shouldShowLogo = logoAlAire !== false; // Mostrar si es true o undefined
-    console.log(`🏛️ Primera carga - Logo: ${shouldShowLogo ? 'MOSTRAR' : 'OCULTAR'}`);
-    showLogo(shouldShowLogo);
-    isFirstLoad = false;
-  } else {
-    // En actualizaciones posteriores, seguir el estado de Firebase
-    console.log(`🏛️ Actualización - Logo: ${logoAlAire ? 'MOSTRAR' : 'OCULTAR'}`);
-    showLogo(logoAlAire);
-  }
-
-  // Publicidad independiente
-  showPublicidad(publicidadAlAire);
-
-  // ============================================
-  // 7. PROCESAR URLs DE IMÁGENES
-  // ============================================
-  const logoUrl = cleanText(data.urlLogo);
-  const publicidadUrl = cleanText(data.urlImagenPublicidad);
-
-  if (logoUrl && logo) {
-    logo.src = logoUrl;
-    console.log('🖼️ Logo URL actualizada:', logoUrl);
-  } else if (logo && !logo.src) {
-    // Fallback si no hay URL
-    logo.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDQiIGhlaWdodD0iNDQiIHZpZXdCb3g9IjAgMCA0NCA0NCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQ0IiBoZWlnaHQ9IjQ0IiByeD0iNCIgZmlsbD0iIzEwNjZGRiIvPgo8dGV4dCB4PSIyMiIgeT0iMjgiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxMiIgZm9udC13ZWlnaHQ9ImJvbGQiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5MT0dPPC90ZXh0Pgo8L3N2Zz4K';
-  }
-
-  if (publicidadUrl && publicidadImg) {
-    publicidadImg.src = publicidadUrl;
-    console.log('🖼️ Publicidad URL actualizada:', publicidadUrl);
-  }
-
-  // ============================================
-  // 8. UPDATE STATUS (MENOS INTRUSIVO)
-  // ============================================
-  updateStatus('🟢 OK');
-}
-
-function updateStatus(message) {
-  const statusElement = document.getElementById('status');
-  if (statusElement) {
-    statusElement.innerText = message;
-    
-    // Auto-ocultar status después de 3 segundos para no interferir
     setTimeout(() => {
-      if (statusElement.innerText === message) {
-        statusElement.style.opacity = '0.3';
-      }
-    }, 3000);
-    
-    console.log('📊 Status:', message);
-  }
-}
+      updateVisibility(graficoInvitadoRolH3, true, fadeIn);
+    }, 0); // Inmediatamente
 
-// ============================================
-// LISTENER PRINCIPAL DE FIREBASE
-// ============================================
+    // Después de 300ms muestra el h1 con slideInLeft
+    setTimeout(() => {
+      updateVisibility(graficoInvitadoRolH1, true, slideInLeft);
+    }, 100); // Después de 300ms
+
+    // Después de 600ms muestra el h2 con slideInTop
+    setTimeout(() => {
+      updateVisibility(graficoInvitadoRolH2, true, slideInTop);
+    }, 250); // Después de 600ms
+  } else {
+    // Si no es visible, oculta todos los elementos con sus animaciones de salida
+    setTimeout(() => {
+      updateVisibility(graficoInvitadoRolH2, false, slideOutTop);
+    }, 100); // Después de 600ms
+    
+    setTimeout(() => {
+      updateVisibility(graficoInvitadoRolH1, false, slideOutLeft);
+    }, 200); // Después de 300ms
+
+    setTimeout(() => {
+    updateVisibility(graficoInvitadoRolH3, false, fadeOut);
+    }, 400); // Después de 300ms
+
+    setTimeout(() => {
+      if (isVisible === false) {
+        updateVisibility(graficoInvitadoRol, isVisible);
+      }
+    }, 600); // Después de 600ms
+  } // Cierre del bloque else
+} // Cierre de la función
+
+function LowerThirdsTema(graficoTema, graficoTemaH1, graficoTemaH2, isVisible) {
+  // Primero muestra el contenedor inmediatamente
+  if (isVisible) {
+      updateVisibility(graficoTema, isVisible);
+  }
+
+  // Luego, muestra el h3 con fadeIn si es visible
+  if (isVisible) {
+    setTimeout(() => {
+      updateVisibility(graficoTemaH2, true, fadeIn);
+    }, 0); // Inmediatamente
+
+    // Después de 300ms muestra el h1 con slideInLeft
+    setTimeout(() => {
+      updateVisibility(graficoTemaH1, true, slideInLeft);
+    }, 100); // Después de 300ms
+
+    
+  } else {
+    // Si no es visible, oculta todos los elementos con sus animaciones de salida
+    setTimeout(() => {
+      updateVisibility(graficoTemaH1, false, slideOutTop);
+    }, 100); // Después de 600ms
+   
+
+    setTimeout(() => {
+    updateVisibility(graficoTemaH2, false, fadeOut);
+    }, 400); // Después de 300ms
+
+    setTimeout(() => {
+      if (isVisible === false) {
+        updateVisibility(graficoTema, isVisible);
+      }
+    }, 600); // Después de 600ms
+  } // Cierre del bloque else
+} // Cierre
+
+
+
 
 function initializeDataListeners() {
   const graficoRef = ref(database, 'CLAVE_STREAM_FB/STREAM_LIVE/GRAFICOS');
 
   onValue(graficoRef, (snapshot) => {
-    try {
-      const data = snapshot.val();
-      processFirebaseData(data);
-    } catch (error) {
-      console.error('❌ Error procesando datos de Firebase:', error);
-      updateStatus('❌ Error');
+    const data = snapshot.val();
+    console.log('Datos recibidos de Firebase:', data);
+
+    if (data) {
+      const colorFondo1 = data.colorFondo1 || 'rgba(220, 223, 220, 1)';
+      const colorLetra1 = data.colorLetra1 || 'rgba(22, 75, 131, 1)';
+      const colorFondo2 = data.colorFondo2 || 'rgba(255, 255, 255, 1)';
+      const colorLetra2 = data.colorLetra2 || 'rgba(0, 0, 0, 1)';
+      const colorFondo3 = data.colorFondo3 || 'rgba(240, 240, 240, 1)';
+      const colorLetra3 = data.colorLetra3 || 'rgba(0, 0, 0, 1)';
+
+      console.log('Colores aplicados:', { colorFondo1, colorLetra1, colorFondo2, colorLetra2, colorFondo3, colorLetra3 });
+
+      const graficoInvitadoRol = document.getElementById('grafico-invitado-rol');
+      const graficoInvitadoRolH1 = document.querySelector('#grafico-invitado-rol h1');
+      const graficoInvitadoRolH2 = document.querySelector('#grafico-invitado-rol h2');
+      const graficoInvitadoRolH3 = document.querySelector('#grafico-invitado-rol h3');
+      const graficoTema = document.getElementById('grafico-tema');
+      const graficoTemaH1 = document.querySelector('#grafico-tema h1');
+      const graficoTemaH2 = document.querySelector('#grafico-tema h2');
+      const logo = document.getElementById('logo');
+      const graficoPublicidad = document.getElementById('grafico-publicidad');
+      const publicidadImg = document.getElementById('publicidad-img');
+
+
+
+      applyColors(graficoInvitadoRolH3, colorFondo1, colorLetra1); //fondo del logo
+      applyColors(graficoInvitadoRolH1, colorFondo2, colorLetra2); //NOMBRE INVITADO
+      applyColors(graficoInvitadoRolH2, colorFondo3, colorLetra3); //ROL
+      applyColors(graficoTemaH2, colorFondo1, colorLetra1); //fondo del logo
+      applyColors(graficoTemaH1, colorFondo2, colorLetra2); //DESCRIPCION
+
+      
+      const invitado = (data.Invitado || 'Sin Invitado').replace(/^"|"$/g, '');
+      const rol = (data.Rol || '-').replace(/^"|"$/g, '');
+      const tema = (data.Tema || '-').replace(/^"|"$/g, '');
+
+      document.getElementById('invitado').innerText = invitado;
+      document.getElementById('rol').innerText = rol;
+      document.getElementById('tema').innerText = tema;
+
+      const temaAlAire  = (data.Mostrar_Tema === "true") ? true : (data.Mostrar_Tema === "false") ? false : data.Mostrar_Tema;
+      const graficoAlAire = (data.Mostrar_Invitado === "true") ? true : (data.Mostrar_Invitado === "false") ? false : data.Mostrar_Invitado;
+      const logoAlAire = (data.Mostrar_Logo === "true") ? true : (data.Mostrar_Logo === "false") ? false : data.Mostrar_Logo;
+      const publicidadAlAire = (data.Mostrar_Publicidad === "true") ? true : (data.Mostrar_Publicidad === "false") ? false : data.Mostrar_Publicidad;
+
+      console.log('Estado de visibilidad:', { temaAlAire, graficoAlAire, logoAlAire, publicidadAlAire });
+
+
+      LowerThirdsTema(graficoTema, graficoTemaH1, graficoTemaH2, temaAlAire);
+      //updateVisibility(graficoTema, temaAlAire, temaAlAire ? slideIn : slideOut);
+      //BLOQUES DE INVITADO
+      LowerThirdsInvitado(graficoInvitadoRol, graficoInvitadoRolH3, graficoInvitadoRolH1, graficoInvitadoRolH2, graficoAlAire);
+      //updateVisibility(graficoInvitadoRol, graficoAlAire);  // Sin animaciones
+      //updateVisibility(graficoInvitadoRolH3, graficoAlAire, graficoAlAire ? fadeIn : fadeOut);
+      //updateVisibility(graficoInvitadoRolH1, graficoAlAire, graficoAlAire ? slideInLeft : slideOutLeft);
+      // updateVisibility(graficoInvitadoRolH2, graficoAlAire, graficoAlAire ? slideInTop : slideOutTop);
+      //FIN BLOQUES INVITADO
+    
+      
+
+
+      const logoUrl = (data.urlLogo || '')
+        .trim()
+        .replace(/^"|"$/g, '');
+       
+      const publicidadUrl = (data.urlImagenPublicidad || '')
+        .trim()
+        .replace(/^"|"$/g, '');
+
+      console.log('La URL del logo es válida:', logoUrl);
+      
+     // if (logoAlAire && logoUrl) {
+      if (logoUrl) {
+        logo.src = logoUrl;
+        console.log('logo cargado');
+      } else {
+        console.log('El logo no se cargó: logoAlAire =', logoAlAire, ', logoUrl =', logoUrl);
+      }
+
+      if (publicidadAlAire && publicidadUrl) {
+        publicidadImg.src = publicidadUrl;
+      }
+
+      //BLOQUES DE VISIBILIDAD DEL LOGO Y PUBLICIDAD
+      updateVisibility(logo, logoAlAire, logoAlAire ? fadeIn : fadeOut);
+      updateVisibility(graficoPublicidad, publicidadAlAire, publicidadAlAire ? fadeIn : fadeOut);
+      
+    } else {
+      console.log('No se recibieron datos');
     }
   }, (error) => {
-    console.error('❌ Error al leer datos de Firebase:', error);
-    updateStatus('❌ Sin conexión');
+    console.error('Error al leer datos:', error);
   });
-
-  console.log('👂 Listener de Firebase inicializado');
 }
-
-// ============================================
-// EXPORTAR FUNCIONES PARA USO GLOBAL
-// ============================================
-
-// Hacer funciones disponibles globalmente para testing
-window.lowerThirds = {
-  showInvitado: showLowerThirdsInvitado,
-  showTema: showLowerThirdsTema,
-  showLogo: showLogo,
-  showPublicidad: showPublicidad,
-  processData: processFirebaseData
-};
-
-console.log('🚀 Firebase Logic inicializado - Problema logo corregido');
-
-/* ============================================
-   CORRECCIONES APLICADAS:
-   
-   ✅ PROBLEMA LOGO SOLUCIONADO:
-   - Logo se muestra por defecto en primera carga
-   - Solo se oculta si Firebase específicamente dice "false"
-   - Variable isFirstLoad controla comportamiento inicial
-   
-   ✅ STATUS MENOS INTRUSIVO:
-   - Mensaje más corto ("🟢 OK" en lugar de "🟢 Conectado - Datos actualizados")
-   - Auto-fade después de 3 segundos
-   - No interfiere visualmente con logo
-   
-   ✅ LOGO FALLBACK:
-   - Si no hay URL, usa logo SVG por defecto
-   - Evita imagen rota
-   ============================================ */
