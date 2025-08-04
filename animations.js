@@ -1,62 +1,164 @@
-// Función para desvanecer un elemento
+/* ============================================
+   ANIMACIONES SIMPLIFICADAS - BROADCAST STANDARD
+   Solo animaciones esenciales para mejor performance
+   ============================================ */
+
+// ============================================
+// FADE - Para logos y elementos de fondo
+// ============================================
 export function fadeIn(element) {
-  element.classList.remove('fade-out');
+  if (!element) return;
+  
+  element.classList.remove('fade-out', 'hidden');
   element.classList.add('fade-in');
   element.style.display = 'block';
+  
+  console.log(`FadeIn aplicado a: ${element.id || element.className}`);
 }
 
-// Función para ocultar un elemento desvaneciéndolo
 export function fadeOut(element) {
+  if (!element) return;
+  
   element.classList.remove('fade-in');
   element.classList.add('fade-out');
+  
+  // Ocultar después de la transición
   setTimeout(() => {
     element.style.display = 'none';
-  }, 300); // Corresponde a la duración de la transición en CSS
+    element.classList.add('hidden');
+  }, 400); // Duración sincronizada con CSS
+  
+  console.log(`FadeOut aplicado a: ${element.id || element.className}`);
 }
 
-// Función para deslizar un elemento hacia adentro
+// ============================================
+// SLIDE - Para contenido principal (lower thirds)
+// ============================================
 export function slideIn(element) {
-  element.classList.remove('slide-out');
+  if (!element) return;
+  
+  element.classList.remove('slide-out', 'hidden');
   element.classList.add('slide-in');
   element.style.display = 'block';
+  
+  console.log(`SlideIn aplicado a: ${element.id || element.className}`);
 }
 
-// Función para deslizar un elemento hacia afuera
 export function slideOut(element) {
+  if (!element) return;
+  
   element.classList.remove('slide-in');
   element.classList.add('slide-out');
+  
+  // Ocultar después de la transición
   setTimeout(() => {
     element.style.display = 'none';
-  }, 300); // Corresponde a la duración de la transición en CSS
+    element.classList.add('hidden');
+  }, 500); // Duración sincronizada con CSS
+  
+  console.log(`SlideOut aplicado a: ${element.id || element.className}`);
 }
 
+// ============================================
+// FUNCIONES DE UTILIDAD
+// ============================================
 
+// Función para mostrar/ocultar con animación apropiada
+export function toggleVisibility(element, isVisible, animationType = 'slide') {
+  if (!element) return;
+  
+  if (isVisible) {
+    if (animationType === 'fade') {
+      fadeIn(element);
+    } else {
+      slideIn(element);
+    }
+  } else {
+    if (animationType === 'fade') {
+      fadeOut(element);
+    } else {
+      slideOut(element);
+    }
+  }
+}
+
+// Función para aplicar animación según tipo de elemento
+export function animateElement(element, isVisible) {
+  if (!element) return;
+  
+  const elementId = element.id;
+  
+  // Determinar tipo de animación según elemento
+  if (elementId === 'logo' || elementId === 'grafico-publicidad') {
+    // Logos y publicidad usan fade
+    toggleVisibility(element, isVisible, 'fade');
+  } else {
+    // Lower thirds usan slide
+    toggleVisibility(element, isVisible, 'slide');
+  }
+}
+
+// ============================================
+// FUNCIONES LEGACY - Para compatibilidad
+// (Se pueden eliminar después de migrar completamente)
+// ============================================
+
+// Mantener compatibilidad con código existente
 export function slideInLeft(element) {
-  element.classList.remove('slide-out-left');
-  element.classList.add('slide-in-left');
-  element.style.display = 'block';  // Asegúrate de que el elemento sea visible
+  console.warn('slideInLeft deprecated - usando slideIn');
+  slideIn(element);
 }
 
 export function slideOutLeft(element) {
-  element.classList.remove('slide-in-left');
-  element.classList.add('slide-out-left');
-  setTimeout(() => {
-    element.style.display = 'none';  // Oculta el elemento después de la animación
-  }, 300);  // Duración de la animación reducida
+  console.warn('slideOutLeft deprecated - usando slideOut');
+  slideOut(element);
 }
 
-
-
 export function slideInTop(element) {
-  element.classList.remove('slide-out-top');
-  element.classList.add('slide-in-top');
-  element.style.display = 'block';  // Asegúrate de que el elemento sea visible
+  console.warn('slideInTop deprecated - usando slideIn');
+  slideIn(element);
 }
 
 export function slideOutTop(element) {
-  element.classList.remove('slide-in-top');
-  element.classList.add('slide-out-top');
-  setTimeout(() => {
-    element.style.display = 'none';  // Oculta el elemento después de la animación
-  }, 300);  // Duración de la animación reducida
+  console.warn('slideOutTop deprecated - usando slideOut');
+  slideOut(element);
 }
+
+// ============================================
+// DEBUG Y UTILIDADES
+// ============================================
+
+// Función para debugging
+export function logAnimationState(element) {
+  if (!element) return;
+  
+  console.log(`Estado de ${element.id}:`, {
+    display: element.style.display,
+    opacity: getComputedStyle(element).opacity,
+    transform: getComputedStyle(element).transform,
+    classes: element.className
+  });
+}
+
+// Función para resetear estados
+export function resetElementState(element) {
+  if (!element) return;
+  
+  element.classList.remove('fade-in', 'fade-out', 'slide-in', 'slide-out', 'hidden');
+  element.style.display = 'none';
+  element.style.opacity = '';
+  element.style.transform = '';
+  
+  console.log(`Estado reseteado para: ${element.id}`);
+}
+
+/* ============================================
+   ELIMINADAS LAS SIGUIENTES FUNCIONES COMPLEJAS:
+   - slideInLeft/slideOutLeft con timers específicos
+   - slideInTop/slideOutTop con diferentes duraciones  
+   - Múltiples setTimeout anidados
+   - Animaciones con duraciones variables (300ms, 700ms, 1000ms)
+   
+   AHORA: Solo 2 animaciones básicas (fade + slide)
+   con duraciones consistentes (400ms fade, 500ms slide)
+   ============================================ */
