@@ -2,7 +2,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/fireba
 import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js";
 import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
 import { firebaseConfig } from './firebase-config.js'; // Importa la configuración de Firebase
-import { slideIn, slideOut, fadeIn, fadeOut, slideInLeft, slideOutLeft, slideInTop, slideOutTop } from './animations.js'; // Importa las funciones de animación
+import { slideIn, slideOut, fadeIn, fadeOut } from './animations.js'; // Importa las funciones de animación esenciales
 
 const app = initializeApp(firebaseConfig); // Usa la configuración importada
 const auth = getAuth(app);
@@ -54,85 +54,21 @@ function updateVisibility(element, isVisible, animationFunctionIn = null, animat
 }
 
 
-function LowerThirdsInvitado(graficoInvitadoRol, graficoInvitadoRolH3, graficoInvitadoRolH1, graficoInvitadoRolH2, isVisible) {
-  // Primero muestra el contenedor inmediatamente
+function LowerThirdsInvitado(graficoInvitadoRol, isVisible) {
   if (isVisible) {
-      updateVisibility(graficoInvitadoRol, isVisible);
-  }
-
-  // Luego, muestra el h3 con fadeIn si es visible
-  if (isVisible) {
-    setTimeout(() => {
-      updateVisibility(graficoInvitadoRolH3, true, fadeIn);
-    }, 0); // Inmediatamente
-
-    // Después de 300ms muestra el h1 con slideInLeft
-    setTimeout(() => {
-      updateVisibility(graficoInvitadoRolH1, true, slideInLeft);
-    }, 100); // Después de 300ms
-
-    // Después de 600ms muestra el h2 con slideInTop
-    setTimeout(() => {
-      updateVisibility(graficoInvitadoRolH2, true, slideInTop);
-    }, 250); // Después de 600ms
+    fadeIn(graficoInvitadoRol);
   } else {
-    // Si no es visible, oculta todos los elementos con sus animaciones de salida
-    setTimeout(() => {
-      updateVisibility(graficoInvitadoRolH2, false, slideOutTop);
-    }, 100); // Después de 600ms
-    
-    setTimeout(() => {
-      updateVisibility(graficoInvitadoRolH1, false, slideOutLeft);
-    }, 200); // Después de 300ms
-
-    setTimeout(() => {
-    updateVisibility(graficoInvitadoRolH3, false, fadeOut);
-    }, 400); // Después de 300ms
-
-    setTimeout(() => {
-      if (isVisible === false) {
-        updateVisibility(graficoInvitadoRol, isVisible);
-      }
-    }, 600); // Después de 600ms
-  } // Cierre del bloque else
-} // Cierre de la función
-
-function LowerThirdsTema(graficoTema, graficoTemaH1, graficoTemaH2, isVisible) {
-  // Primero muestra el contenedor inmediatamente
-  if (isVisible) {
-      updateVisibility(graficoTema, isVisible);
+    fadeOut(graficoInvitadoRol);
   }
+}
 
-  // Luego, muestra el h3 con fadeIn si es visible
+function LowerThirdsTema(graficoTema, isVisible) {
   if (isVisible) {
-    setTimeout(() => {
-      updateVisibility(graficoTemaH2, true, fadeIn);
-    }, 0); // Inmediatamente
-
-    // Después de 300ms muestra el h1 con slideInLeft
-    setTimeout(() => {
-      updateVisibility(graficoTemaH1, true, slideInLeft);
-    }, 100); // Después de 300ms
-
-    
+    slideIn(graficoTema);
   } else {
-    // Si no es visible, oculta todos los elementos con sus animaciones de salida
-    setTimeout(() => {
-      updateVisibility(graficoTemaH1, false, slideOutTop);
-    }, 100); // Después de 600ms
-   
-
-    setTimeout(() => {
-    updateVisibility(graficoTemaH2, false, fadeOut);
-    }, 400); // Después de 300ms
-
-    setTimeout(() => {
-      if (isVisible === false) {
-        updateVisibility(graficoTema, isVisible);
-      }
-    }, 600); // Después de 600ms
-  } // Cierre del bloque else
-} // Cierre
+    slideOut(graficoTema);
+  }
+}
 
 
 
@@ -190,15 +126,8 @@ function initializeDataListeners() {
       console.log('Estado de visibilidad:', { temaAlAire, graficoAlAire, logoAlAire, publicidadAlAire });
 
 
-      LowerThirdsTema(graficoTema, graficoTemaH1, graficoTemaH2, temaAlAire);
-      //updateVisibility(graficoTema, temaAlAire, temaAlAire ? slideIn : slideOut);
-      //BLOQUES DE INVITADO
-      LowerThirdsInvitado(graficoInvitadoRol, graficoInvitadoRolH3, graficoInvitadoRolH1, graficoInvitadoRolH2, graficoAlAire);
-      //updateVisibility(graficoInvitadoRol, graficoAlAire);  // Sin animaciones
-      //updateVisibility(graficoInvitadoRolH3, graficoAlAire, graficoAlAire ? fadeIn : fadeOut);
-      //updateVisibility(graficoInvitadoRolH1, graficoAlAire, graficoAlAire ? slideInLeft : slideOutLeft);
-      // updateVisibility(graficoInvitadoRolH2, graficoAlAire, graficoAlAire ? slideInTop : slideOutTop);
-      //FIN BLOQUES INVITADO
+      LowerThirdsTema(graficoTema, temaAlAire);
+      LowerThirdsInvitado(graficoInvitadoRol, graficoAlAire);
     
       
 
