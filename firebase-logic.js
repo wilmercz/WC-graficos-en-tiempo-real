@@ -1,6 +1,5 @@
 /* ============================================
-   FIREBASE LOGIC - BROADCAST STANDARD
-   Integración completa con animaciones optimizadas
+   FIREBASE LOGIC - PROBLEMA LOGO CORREGIDO
    ============================================ */
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
@@ -25,15 +24,19 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const database = getDatabase(app);
 
+// Variable para controlar estado inicial
+let isFirstLoad = true;
+
 // Autenticación anónima
 signInAnonymously(auth)
   .then(() => {
     console.log("✅ Autenticación Firebase exitosa");
+    updateStatus('🟢 Conectado');
     initializeDataListeners();
   })
   .catch((error) => {
     console.error("❌ Error de autenticación:", error);
-    document.getElementById('status').innerText = 'Error de autenticación: ' + error.message;
+    updateStatus('❌ Error de conexión');
   });
 
 // ============================================
@@ -134,12 +137,6 @@ function processFirebaseData(data) {
   const colorFondo3 = data.colorFondo3 || 'rgba(240, 131, 19, 1)';
   const colorLetra3 = data.colorLetra3 || 'rgba(255, 255, 255, 1)';
 
-  console.log('🎨 Colores procesados:', { 
-    colorFondo1, colorLetra1, 
-    colorFondo2, colorLetra2, 
-    colorFondo3, colorLetra3 
-  });
-
   // ============================================
   // 2. OBTENER ELEMENTOS DEL DOM
   // ============================================
@@ -199,8 +196,20 @@ function processFirebaseData(data) {
     showLowerThirdsInvitado(graficoAlAire);
   }
 
-  // Logo y publicidad independientes
-  showLogo(logoAlAire);
+  // LOGO: Aplicar estado SOLO después de primera carga
+  if (isFirstLoad) {
+    // En primera carga, mostrar logo por defecto si no hay valor específico
+    const shouldShowLogo = logoAlAire !== false; // Mostrar si es true o undefined
+    console.log(`🏛️ Primera carga - Logo: ${shouldShowLogo ? 'MOSTRAR' : 'OCULTAR'}`);
+    showLogo(shouldShowLogo);
+    isFirstLoad = false;
+  } else {
+    // En actualizaciones posteriores, seguir el estado de Firebase
+    console.log(`🏛️ Actualización - Logo: ${logoAlAire ? 'MOSTRAR' : 'OCULTAR'}`);
+    showLogo(logoAlAire);
+  }
+
+  // Publicidad independiente
   showPublicidad(publicidadAlAire);
 
   // ============================================
@@ -212,6 +221,9 @@ function processFirebaseData(data) {
   if (logoUrl && logo) {
     logo.src = logoUrl;
     console.log('🖼️ Logo URL actualizada:', logoUrl);
+  } else if (logo && !logo.src) {
+    // Fallback si no hay URL
+    logo.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDQiIGhlaWdodD0iNDQiIHZpZXdCb3g9IjAgMCA0NCA0NCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQ0IiBoZWlnaHQ9IjQ0IiByeD0iNCIgZmlsbD0iIzEwNjZGRiIvPgo8dGV4dCB4PSIyMiIgeT0iMjgiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxMiIgZm9udC13ZWlnaHQ9ImJvbGQiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5MT0dPPC90ZXh0Pgo8L3N2Zz4K';
   }
 
   if (publicidadUrl && publicidadImg) {
@@ -220,15 +232,23 @@ function processFirebaseData(data) {
   }
 
   // ============================================
-  // 8. UPDATE STATUS
+  // 8. UPDATE STATUS (MENOS INTRUSIVO)
   // ============================================
-  updateStatus('🟢 Conectado - Datos actualizados');
+  updateStatus('🟢 OK');
 }
 
 function updateStatus(message) {
   const statusElement = document.getElementById('status');
   if (statusElement) {
     statusElement.innerText = message;
+    
+    // Auto-ocultar status después de 3 segundos para no interferir
+    setTimeout(() => {
+      if (statusElement.innerText === message) {
+        statusElement.style.opacity = '0.3';
+      }
+    }, 3000);
+    
     console.log('📊 Status:', message);
   }
 }
@@ -246,39 +266,14 @@ function initializeDataListeners() {
       processFirebaseData(data);
     } catch (error) {
       console.error('❌ Error procesando datos de Firebase:', error);
-      updateStatus('❌ Error procesando datos');
+      updateStatus('❌ Error');
     }
   }, (error) => {
     console.error('❌ Error al leer datos de Firebase:', error);
-    updateStatus('❌ Error de conexión');
+    updateStatus('❌ Sin conexión');
   });
 
   console.log('👂 Listener de Firebase inicializado');
-}
-
-// ============================================
-// FUNCIONES DE DEBUG (opcional)
-// ============================================
-
-// Función para mostrar información de debug
-function showDebugInfo() {
-  const debugDiv = document.createElement('div');
-  debugDiv.className = 'debug-info';
-  debugDiv.innerHTML = `
-    <strong>🔧 DEBUG INFO</strong><br>
-    ✅ Safe Areas aplicadas<br>
-    ✅ Fuentes optimizadas (15px/12px)<br>
-    ✅ Sin contenedores circulares<br>
-    ✅ Animaciones simplificadas<br>
-    📐 Posición: 96px safe margin<br>
-    📏 Tamaño: 720x60px containers
-  `;
-  document.body.appendChild(debugDiv);
-}
-
-// Mostrar debug info si está en desarrollo
-if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-  document.addEventListener('DOMContentLoaded', showDebugInfo);
 }
 
 // ============================================
@@ -294,16 +289,22 @@ window.lowerThirds = {
   processData: processFirebaseData
 };
 
-console.log('🚀 Firebase Logic inicializado correctamente');
+console.log('🚀 Firebase Logic inicializado - Problema logo corregido');
 
 /* ============================================
-   CAMBIOS PRINCIPALES RESPECTO AL CÓDIGO ANTERIOR:
+   CORRECCIONES APLICADAS:
    
-   ✅ ELIMINADO: Funciones complejas LowerThirdsInvitado/LowerThirdsTema
-   ✅ SIMPLIFICADO: Solo 4 funciones show/hide básicas
-   ✅ OPTIMIZADO: Sin setTimeout anidados complejos
-   ✅ MEJORADO: Mejor manejo de errores y logging
-   ✅ ACTUALIZADO: Integración con animaciones simplificadas
-   ✅ CORREGIDO: Posicionamiento según safe areas
-   ✅ ELIMINADO: Referencias a elementos H3 circulares
+   ✅ PROBLEMA LOGO SOLUCIONADO:
+   - Logo se muestra por defecto en primera carga
+   - Solo se oculta si Firebase específicamente dice "false"
+   - Variable isFirstLoad controla comportamiento inicial
+   
+   ✅ STATUS MENOS INTRUSIVO:
+   - Mensaje más corto ("🟢 OK" en lugar de "🟢 Conectado - Datos actualizados")
+   - Auto-fade después de 3 segundos
+   - No interfiere visualmente con logo
+   
+   ✅ LOGO FALLBACK:
+   - Si no hay URL, usa logo SVG por defecto
+   - Evita imagen rota
    ============================================ */
