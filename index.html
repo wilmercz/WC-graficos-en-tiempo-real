@@ -1,37 +1,46 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gráficos en Tiempo Real</title>
-  <link rel="stylesheet" href="styles.css"> <!-- Enlace al archivo CSS -->
+  <title>Gráficos en Tiempo Real - Broadcast Standard</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+  <!-- LOGO SIN CONTENEDOR CIRCULAR -->
   <img id="logo" src="" alt="Logo">
   
-  <!-- Añadimos clases para animaciones -->
-  <div id="grafico-invitado-rol" class="animated-element" style="display: none;"> <!-- Oculto por defecto -->
-    <h3 id="circulo"></h3>
+  <!-- GRÁFICO INVITADO - ESTRUCTURA SIMPLIFICADA -->
+  <div id="grafico-invitado-rol" class="animated-element" style="display: none;">
+    <h3 id="circulo" style="display: none;"></h3> <!-- YA NO SE USA -->
     <h1 id="invitado">INVITADO</h1>
-    <h2 id="rol"></h2>
+    <h2 id="rol">ROL</h2>
   </div>
   
-  <div id="grafico-tema" class="animated-element" style="display: none;"> <!-- Oculto por defecto -->
-        <h2 id="circulo"></h2>
-    <h1 id="tema">.</h1>
+  <!-- GRÁFICO TEMA - ESTRUCTURA SIMPLIFICADA -->
+  <div id="grafico-tema" class="animated-element" style="display: none;">
+    <h2 id="circulo" style="display: none;"></h2> <!-- YA NO SE USA -->
+    <h1 id="tema">TEMA</h1>
   </div>
 
-  <div id="grafico-publicidad" class="animated-element" style="display: none;"> <!-- Oculto por defecto -->
+  <!-- PUBLICIDAD -->
+  <div id="grafico-publicidad" class="animated-element" style="display: none;">
     <img id="publicidad-img" src="" alt="Publicidad">
   </div>
 
-  <div id="status" class="animated-element">
-  </div>
+  <!-- STATUS -->
+  <div id="status" class="animated-element"></div>
   
+  <!-- SCRIPTS -->
   <script type="module" src="firebase-logic.js"></script>
-  <!-- Añadimos un nuevo archivo JS para animaciones -->
   <script src="animations.js"></script>
+
+  <!-- DEBUG: GUÍAS SAFE AREA (remover en producción) -->
+  <div id="debug-guides" style="position: absolute; pointer-events: none; z-index: 9998; opacity: 0.3;">
+    <!-- Title Safe 90% -->
+    <div style="position: absolute; left: 96px; top: 54px; width: 1728px; height: 972px; border: 2px dashed #00ff00;"></div>
+    <!-- Lower Third Area -->
+    <div style="position: absolute; left: 96px; bottom: 68px; width: 720px; height: 60px; border: 1px dashed #0066ff; background: rgba(0,102,255,0.1);"></div>
+  </div>
 </body>
 </html>
-
-
