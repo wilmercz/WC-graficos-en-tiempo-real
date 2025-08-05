@@ -79,7 +79,7 @@ z-index: 2;
 
 #grafico-invitado-rol h2 {
   background-color: rgba(16, 102, 255, 1);
-  color: white;
+  color: rgba(255, 255, 255, 1);
   padding: 3px 35px 3px 40px; /* Arriba, Derecha, Abajo, Izquierda: 35px */
   /*border-radius: 0 0 5px 5px;*/
 /* Hacemos que las esquinas tengan bordes irregulares */
