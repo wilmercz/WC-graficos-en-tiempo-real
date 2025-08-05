@@ -4,8 +4,8 @@ html, body {
   margin: 0;
   padding: 0;
   position: relative;
-  width: 1920px;   /* Tamaño fijo para pruebas */
-  height: 1080px;
+  width: 100vw;   /* Tamaño fijo para pruebas */
+  height: 100vh;
   overflow: hidden;
 }
 
