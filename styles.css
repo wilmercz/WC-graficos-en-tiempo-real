@@ -64,7 +64,7 @@ z-index: 1;
 /*}*/
 
 #grafico-invitado-rol h1 {
-  background-color: rgba(16, 102, 255, 1);
+  background-color: rgba(16, 102, 220, 1);
   color: rgba(255, 255, 255, 1);
   padding: 5px 40px 5px 30px; /* Arriba: 7px, Derecha: 30px, Abajo: 7px, Izquierda: 10px */
   /* Hacemos que las esquinas tengan bordes irregulares */
@@ -78,15 +78,15 @@ z-index: 2;
 
 
 #grafico-invitado-rol h2 {
-  background-color: rgba(240, 131, 19, 1);
+  background-color: rgba(255, 255, 255, 1);
   color: white;
-  padding: 5px 35px 5px 40px; /* Arriba, Derecha, Abajo, Izquierda: 35px */
+  padding: 4px 35px 4px 40px; /* Arriba, Derecha, Abajo, Izquierda: 35px */
   /*border-radius: 0 0 5px 5px;*/
 /* Hacemos que las esquinas tengan bordes irregulares */
-  border-radius: 0px 0px 30px 0px; /* top-left, top-right, bottom-right, bottom-left */
+  border-radius: 0px 0px 10px 0px; /* top-left, top-right, bottom-right, bottom-left */
   margin: 0;
-  font-size: 12px;
-  bottom: 29px;
+  font-size: 14px;
+  bottom: 31px;
   left: 90px;
 z-index: 3;
 }
