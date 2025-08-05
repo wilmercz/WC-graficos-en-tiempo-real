@@ -13,13 +13,13 @@ html, body {
 #logo {
   background-color: transparent;
   position: absolute;
-  bottom: 30px;
+  bottom: 34px;
   left: 45px;
-  width: 50px;
+  width: 51px;
   height: auto;
   z-index: 1000;
   transition: opacity 0.3s ease-in-out;
-  border-radius: 30%;
+  border-radius: 15%;
 }
 
 #grafico-invitado-rol {
@@ -44,24 +44,24 @@ z-index: 1;
 }
 
 /*FONDO DEL LOGO*/
-#grafico-invitado-rol h3 {
-  background-color: Tranaparent; /*rgba(16, 102, 255, 1);*/
-  color: white;
-  padding: 7px 10px;
-  position: absolute;
-  margin: 0;
-  font-size: 13px;
-left: 35px;
-  /*left: 26px;*/
-  height: 55px;
-  width: 55px;
- /*width: auto;*/
-  bottom: 25px;
+/*#grafico-invitado-rol h3 {
+/*  background-color: Tranaparent; /*rgba(16, 102, 255, 1);*/
+  /*color: white;
+  /*padding: 7px 10px;
+  /*position: absolute;
+  /*margin: 0;
+  /*font-size: 13px;
+/*left: 35px;
+  /* *****left: 26px;*/
+  /*height: 55px;
+  /*width: 55px;
+ /******width: auto;*/
+  /*bottom: 25px;
   /*border-radius: 10px 10PX 10px 10PX;*/
-border-radius: 50%; /* Hace que el h2 sea completamente redondo */
+/*border-radius: 50%; /* Hace que el h2 sea completamente redondo */
 
-z-index: 4;
-}
+/*z-index: 4;
+/*}*/
 
 #grafico-invitado-rol h1 {
   background-color: rgba(16, 102, 255, 1);
