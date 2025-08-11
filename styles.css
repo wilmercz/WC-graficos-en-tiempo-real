@@ -88,6 +88,10 @@ html, body {
   border-radius: var(--logo-radius);
 }
 
+#logo, #logo-img { will-change: clip-path, opacity; }
+#logo, #logo-container { overflow: hidden; }
+
+
 
 /*SECUENCIA INVITADO Y TEMA*/
 /* Mantener el alto del contenedor mientras dura la secuencia */
