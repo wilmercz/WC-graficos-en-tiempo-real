@@ -63,7 +63,7 @@ const CONFIG_DEFECTO = {
         animacion: {
             entrada: 'fadeIn',
             salida: 'fadeOut',
-            duracion: 300
+            duracion: 400
         }
     },
     textoPrincipal: {
@@ -1749,7 +1749,11 @@ function aplicarAnimacionDinamica(elemento, tipoElemento, mostrar) {
     const config = animacionConfig[tipoElemento];
     const animacion = mostrar ? config.entrada : config.salida;
     const duracion = config.duracion;
-    const delay = config.delay;
+    //const delay = config.delay;  //anterior
+    //const delay  = Number(cfg.delay)    || 600;
+     // 🔧 CORRECCIÓN: usar variables correctas
+    const delay = Number(config.delay ?? (tipoElemento === 'logo' ? 600 : 0));
+    
     const easing = TIPOS_EASING[config.easing] || 'ease-in-out';
     
     console.log(`🎬 Aplicando animación dinámica: ${tipoElemento}`, {
@@ -2294,3 +2298,61 @@ function limpiarContenedorSecuencia(contenedor) {
   contenedor.offsetHeight;
 }
 
+
+// 🔧 Fallback temporal de animaciones (mientras no llegue Firebase)
+window.ANIM_FALLBACK = {
+  invitadoRol: { delay: 100, duracion: 600, easing: 'EASE_IN_OUT', entrada: 'WIPE_IN_RIGHT',  salida: 'WIPE_OUT_LEFT'   },
+  tema:        { delay: 100, duracion: 600, easing: 'EASE_IN_OUT', entrada: 'WIPE_IN_LEFT',   salida: 'WIPE_OUT_RIGHT'  },
+  logo:        { delay: 600, duracion: 600, easing: 'EASE_IN_OUT', entrada: 'WIPE_IN_TOP',    salida: 'WIPE_OUT_BOTTOM' },
+  publicidad:  { delay: 0,   duracion: 400, easing: 'EASE_IN_OUT', entrada: 'WIPE_IN_BOTTOM', salida: 'WIPE_OUT_BOTTOM' }
+};
+
+// 🧠 Helper: devuelve config de Firebase si existe; si no, usa fallback
+function getAnimCfg(tipo) {
+    const configFirebase = (window.animacionConfig && window.animacionConfig[tipo]) || {};
+    const fallback = window.ANIM_FALLBACK?.[tipo] || {};
+    
+    const merged = { ...fallback, ...configFirebase };
+    
+    console.log(`🔧 Config animación para ${tipo}:`, {
+        fallback: fallback,
+        firebase: configFirebase,
+        final: merged
+    });
+    
+    return merged;
+}
+
+// 🔧 MEJORAR: función swapLogo con mejor logging
+function swapLogo(nextUrl, nextAlt = '') {
+    const logoEl = document.getElementById('logo-img') || document.getElementById('logo');
+    if (!logoEl || !nextUrl) {
+        console.warn('⚠️ swapLogo: elemento logo o URL faltante');
+        return;
+    }
+
+    const cfg = getAnimCfg('logo');
+    const tSwap = (Number(cfg.delay) || 0) + (Number(cfg.duracion) || 600) + 50;
+    
+    console.log(`🔄 swapLogo: ${logoEl.src} → ${nextUrl}`, {
+        delay: cfg.delay + 'ms',
+        duracion: cfg.duracion + 'ms',
+        tiempoTotal: tSwap + 'ms',
+        entrada: cfg.entrada,
+        salida: cfg.salida
+    });
+
+    // SALIDA (WIPE_OUT_BOTTOM por defecto)
+    aplicarAnimacionDinamica(logoEl, 'logo', false);
+
+    // Cambiar imagen cuando termina la salida
+    setTimeout(() => {
+        logoEl.src = nextUrl;
+        if (nextAlt) logoEl.alt = nextAlt;
+        
+        console.log(`✅ Logo cambiado a: ${nextAlt || 'Logo'}`);
+
+        // ENTRADA (WIPE_IN_TOP por defecto)
+        aplicarAnimacionDinamica(logoEl, 'logo', true);
+    }, tSwap);
+}
