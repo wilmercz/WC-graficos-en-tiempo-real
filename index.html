@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gráficos en Tiempo Real</title>
+  <title>Gráficos en Tiempo Real - Sistema Automatizado</title>
   <link rel="stylesheet" href="styles.css"> <!-- Enlace al archivo CSS -->
 </head>
 <body>
@@ -11,13 +11,11 @@
   
   <!-- Añadimos clases para animaciones -->
   <div id="grafico-invitado-rol" class="animated-element" style="display: none;"> <!-- Oculto por defecto -->
-    <h3 id="circulo"></h3>
     <h1 id="invitado">INVITADO</h1>
-    <h2 id="rol"></h2>
+    <h2 id="rol">ROL</h2>
   </div>
   
   <div id="grafico-tema" class="animated-element" style="display: none;"> <!-- Oculto por defecto -->
-        <h2 id="circulo"></h2>
     <h1 id="tema">.</h1>
   </div>
 
@@ -27,9 +25,136 @@
 
   <div id="status" class="animated-element">
   </div>
+
+  <!-- 🆕 PANEL DE DEBUG AUTOMÁTICO -->
+  <div id="debug-panel" class="debug-panel" style="display: none;">
+    <div class="debug-header">
+      <h4>🤖 Sistema Automático</h4>
+      <button id="toggle-debug" onclick="toggleDebugPanel()">❌</button>
+    </div>
+    <div class="debug-content">
+      <div class="debug-section">
+        <h5>⚙️ Configuración:</h5>
+        <div id="debug-config">Cargando...</div>
+      </div>
+      <div class="debug-section">
+        <h5>⏱️ Temporizadores Activos:</h5>
+        <div id="debug-timers">Ninguno</div>
+      </div>
+      <div class="debug-section">
+        <h5>🔄 Estado de Rotación:</h5>
+        <div id="debug-rotation">Desactivado</div>
+      </div>
+      <div class="debug-section">
+        <h5>🤝 Logos Disponibles:</h5>
+        <div id="debug-logos">Cargando...</div>
+      </div>
+    </div>
+    <div class="debug-controls">
+      <button onclick="testAutomaticSystem()">🧪 Test Sistema</button>
+      <button onclick="logAutomaticStatus()">📊 Log Estado</button>
+      <button onclick="clearAllTimers()">🗑️ Limpiar Timers</button>
+    </div>
+  </div>
+
+  <!-- 🆕 BOTÓN PARA MOSTRAR DEBUG -->
+  <div id="debug-toggle-btn" class="debug-toggle-btn" onclick="showDebugPanel()">
+    🔧
+  </div>
   
   <script type="module" src="firebase-logic.js"></script>
   <!-- Añadimos un nuevo archivo JS para animaciones -->
   <script src="animations.js"></script>
+  
+  <!-- 🆕 SCRIPT PARA FUNCIONES DE DEBUG -->
+  <script>
+    let debugVisible = false;
+    
+    function showDebugPanel() {
+      const panel = document.getElementById('debug-panel');
+      const toggleBtn = document.getElementById('debug-toggle-btn');
+      panel.style.display = 'block';
+      toggleBtn.style.display = 'none';
+      debugVisible = true;
+      updateDebugInfo();
+    }
+    
+    function toggleDebugPanel() {
+      const panel = document.getElementById('debug-panel');
+      const toggleBtn = document.getElementById('debug-toggle-btn');
+      panel.style.display = 'none';
+      toggleBtn.style.display = 'block';
+      debugVisible = false;
+    }
+    
+    function clearAllTimers() {
+      if (window.automaticTimers) {
+        Object.keys(window.automaticTimers).forEach(key => {
+          clearTimeout(window.automaticTimers[key]);
+          delete window.automaticTimers[key];
+        });
+        console.log('🗑️ Todos los temporizadores han sido limpiados');
+        updateDebugInfo();
+      }
+    }
+    
+    function updateDebugInfo() {
+      if (!debugVisible) return;
+      
+      // Configuración
+      const configDiv = document.getElementById('debug-config');
+      if (window.currentConfig) {
+        configDiv.innerHTML = `
+          <small>
+            Modo: ${window.currentConfig.modoAutomatico ? '🤖 Automático' : '📱 Manual'}<br>
+            Ocultamiento: ${window.currentConfig.habilitarOcultamientoAutomatico ? '✅' : '❌'}<br>
+            Rotación Logos: ${window.currentConfig.habilitarRotacionLogos ? '✅' : '❌'}
+          </small>
+        `;
+      } else {
+        configDiv.innerHTML = '<small style="color: orange;">No cargado</small>';
+      }
+      
+      // Temporizadores
+      const timersDiv = document.getElementById('debug-timers');
+      if (window.automaticTimers && Object.keys(window.automaticTimers).length > 0) {
+        timersDiv.innerHTML = '<small>' + Object.keys(window.automaticTimers).join(', ') + '</small>';
+      } else {
+        timersDiv.innerHTML = '<small style="color: #666;">Ninguno</small>';
+      }
+      
+      // Rotación
+      const rotationDiv = document.getElementById('debug-rotation');
+      if (window.logoRotationTimer) {
+        rotationDiv.innerHTML = '<small style="color: green;">🔄 Activa</small>';
+      } else {
+        rotationDiv.innerHTML = '<small style="color: #666;">🛑 Inactiva</small>';
+      }
+      
+      // Logos
+      const logosDiv = document.getElementById('debug-logos');
+      if (window.logosAliados && window.logosAliados.length > 0) {
+        logosDiv.innerHTML = '<small>' + window.logosAliados.length + ' logos aliados</small>';
+      } else {
+        logosDiv.innerHTML = '<small style="color: #666;">Solo logo principal</small>';
+      }
+    }
+    
+    // Actualizar info cada 2 segundos si el panel está visible
+    setInterval(() => {
+      if (debugVisible) {
+        updateDebugInfo();
+      }
+    }, 2000);
+
+    // Placeholder para funciones que serán definidas en firebase-logic.js
+    window.testAutomaticSystem = window.testAutomaticSystem || function() {
+      console.log('⚠️ Función testAutomaticSystem cargando...');
+    };
+    
+    window.logAutomaticStatus = window.logAutomaticStatus || function() {
+      console.log('⚠️ Función logAutomaticStatus cargando...');
+    };
+  </script>
 </body>
 </html>
