@@ -1,62 +1,114 @@
-// Función para desvanecer un elemento
-export function fadeIn(element) {
-  element.classList.remove('fade-out');
-  element.classList.add('fade-in');
-  element.style.display = 'block';
-}
+// animations.js (modo script clásico, sin 'export')
+(() => {
+  'use strict';
 
-// Función para ocultar un elemento desvaneciéndolo
-export function fadeOut(element) {
-  element.classList.remove('fade-in');
-  element.classList.add('fade-out');
-  setTimeout(() => {
-    element.style.display = 'none';
-  }, 300); // Corresponde a la duración de la transición en CSS
-}
+  // ⏱ Ajusta estos tiempos para que coincidan con tu CSS
+  const DURATIONS = {
+    fadeOut: 300,
+    slideOut: 300,
+    slideOutLeft: 1000,
+    slideOutTop: 700,
+  };
 
-// Función para deslizar un elemento hacia adentro
-export function slideIn(element) {
-  element.classList.remove('slide-out');
-  element.classList.add('slide-in');
-  element.style.display = 'block';
-}
+  // Conjunto de clases que usamos, para limpiar estados previos
+  const ALL_CLASSES = [
+    'fade-in', 'fade-out',
+    'slide-in', 'slide-out',
+    'slide-in-left', 'slide-out-left',
+    'slide-in-top',  'slide-out-top',
+  ];
 
-// Función para deslizar un elemento hacia afuera
-export function slideOut(element) {
-  element.classList.remove('slide-in');
-  element.classList.add('slide-out');
-  setTimeout(() => {
-    element.style.display = 'none';
-  }, 300); // Corresponde a la duración de la transición en CSS
-}
+  function ensureEl(el) {
+    if (!el) {
+      console.warn('ANIM: elemento no encontrado/undefined');
+      return false;
+    }
+    return true;
+  }
 
+  function show(el) {
+    el.style.display = 'block';
+  }
 
-export function slideInLeft(element) {
-  element.classList.remove('slide-out-left');
-  element.classList.add('slide-in-left');
-  element.style.display = 'block';  // Asegúrate de que el elemento sea visible
-}
+  function hide(el) {
+    el.style.display = 'none';
+  }
 
-export function slideOutLeft(element) {
-  element.classList.remove('slide-in-left');
-  element.classList.add('slide-out-left');
-  setTimeout(() => {
-    element.style.display = 'none';  // Oculta el elemento después de la animación
-  }, 1000);  // Duración de la animación
-}
+  function applyClass(el, clsToAdd) {
+    // Limpia cualquier clase de animación previa antes de aplicar la nueva
+    ALL_CLASSES.forEach(c => el.classList.remove(c));
+    el.classList.add(clsToAdd);
+  }
 
+  // -------------------------
+  // Efectos de desvanecido
+  // -------------------------
+  function fadeIn(element) {
+    if (!ensureEl(element)) return;
+    applyClass(element, 'fade-in');
+    show(element);
+  }
 
+  function fadeOut(element) {
+    if (!ensureEl(element)) return;
+    applyClass(element, 'fade-out');
+    setTimeout(() => hide(element), DURATIONS.fadeOut);
+  }
 
-export function slideInTop(element) {
-  element.classList.remove('slide-out-top');
-  element.classList.add('slide-in-top');
-  element.style.display = 'block';  // Asegúrate de que el elemento sea visible
-}
+  // -------------------------
+  // Efectos de slide genéricos
+  // -------------------------
+  function slideIn(element) {
+    if (!ensureEl(element)) return;
+    applyClass(element, 'slide-in');
+    show(element);
+  }
 
-export function slideOutTop(element) {
-  element.classList.remove('slide-in-top');
-  element.classList.add('slide-out-top');
-  setTimeout(() => {
-    element.style.display = 'none';  // Oculta el elemento después de la animación
-  }, 700);  // Duración de la animación
-}
+  function slideOut(element) {
+    if (!ensureEl(element)) return;
+    applyClass(element, 'slide-out');
+    setTimeout(() => hide(element), DURATIONS.slideOut);
+  }
+
+  // -------------------------
+  // Slide desde la izquierda
+  // -------------------------
+  function slideInLeft(element) {
+    if (!ensureEl(element)) return;
+    applyClass(element, 'slide-in-left');
+    show(element);
+  }
+
+  function slideOutLeft(element) {
+    if (!ensureEl(element)) return;
+    applyClass(element, 'slide-out-left');
+    setTimeout(() => hide(element), DURATIONS.slideOutLeft);
+  }
+
+  // -------------------------
+  // Slide desde arriba
+  // -------------------------
+  function slideInTop(element) {
+    if (!ensureEl(element)) return;
+    applyClass(element, 'slide-in-top');
+    show(element);
+  }
+
+  function slideOutTop(element) {
+    if (!ensureEl(element)) return;
+    applyClass(element, 'slide-out-top');
+    setTimeout(() => hide(element), DURATIONS.slideOutTop);
+  }
+
+  // 🔓 API pública disponible globalmente
+  window.ANIM = {
+    fadeIn,
+    fadeOut,
+    slideIn,
+    slideOut,
+    slideInLeft,
+    slideOutLeft,
+    slideInTop,
+    slideOutTop,
+  };
+})();
