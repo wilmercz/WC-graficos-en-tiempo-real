@@ -22,6 +22,14 @@ let configAvanzada = {
     coloresAvanzados: null
 };
 
+// 🔧 VARIABLE DE CONTROL GLOBAL
+let secuenciaAutomatica = {
+  activa: false,
+  fase: null, // 'invitado' | 'tema'
+  timers: {},
+  contenidos: {}
+};
+
 // 🆕 SISTEMA DE POSICIONES PREDEFINIDAS (como en Android)
 const POSICIONES_PREDEFINIDAS = {
     TOP_LEFT: { x: 50, y: 50 },
@@ -230,10 +238,77 @@ function initializeDataListeners() {
 }
 
 // 🆕 PROCESAR DATOS BÁSICOS (usando estructura que funciona)
+// 🔧 REEMPLAZA ESTA FUNCIÓN EN firebase-logic.js (línea ~169)
 function procesarDatosBasicos(data) {
     console.log("🔄 Procesando datos con estructura correcta...");
     
-    // ✅ LEER COLORES (estructura del primer código que funciona)
+    // 🆕 PASO 1: LEER DURACIONES DESDE FIREBASE (CRÍTICO)
+    console.log('🔍 VERIFICANDO DURACIONES DESDE FIREBASE:');
+    console.log(`   duracionNombreRol: ${data.duracionNombreRol} (Firebase) vs ${CONFIG_DEFECTO.automatizacion.duracionNombreRol} (defecto)`);
+    console.log(`   duracionTema: ${data.duracionTema} (Firebase) vs ${CONFIG_DEFECTO.automatizacion.duracionTema} (defecto)`);
+    console.log(`   duracionPublicidad: ${data.duracionPublicidad} (Firebase) vs ${CONFIG_DEFECTO.automatizacion.duracionPublicidad} (defecto)`);
+    console.log(`   duracionLogoPrincipal: ${data.duracionLogoPrincipal} (Firebase) vs ${CONFIG_DEFECTO.automatizacion.duracionLogoPrincipal} (defecto)`);
+    console.log(`   duracionLogosAliados: ${data.duracionLogosAliados} (Firebase) vs ${CONFIG_DEFECTO.automatizacion.duracionLogosAliados} (defecto)`);
+    
+    // ✅ LEER Y APLICAR DURACIONES DESDE FIREBASE
+    if (!currentConfig) {
+        currentConfig = { ...CONFIG_DEFECTO.automatizacion };
+    }
+    
+    // Leer cada duración con parseInt para asegurar que sean números
+    const duracionNombreRolFB = data.duracionNombreRol ? parseInt(data.duracionNombreRol) : null;
+    const duracionTemaFB = data.duracionTema ? parseInt(data.duracionTema) : null;
+    const duracionPublicidadFB = data.duracionPublicidad ? parseInt(data.duracionPublicidad) : null;
+    const duracionLogoPrincipalFB = data.duracionLogoPrincipal ? parseInt(data.duracionLogoPrincipal) : null;
+    const duracionLogosAliadosFB = data.duracionLogosAliados ? parseInt(data.duracionLogosAliados) : null;
+    
+    // Aplicar solo si vienen desde Firebase, sino mantener valores actuales
+    if (duracionNombreRolFB !== null) {
+        currentConfig.duracionNombreRol = duracionNombreRolFB;
+        console.log(`✅ duracionNombreRol actualizada: ${duracionNombreRolFB}s (desde Firebase)`);
+    } else {
+        console.log(`⚠️ duracionNombreRol: usando valor actual ${currentConfig.duracionNombreRol}s`);
+    }
+    
+    if (duracionTemaFB !== null) {
+        currentConfig.duracionTema = duracionTemaFB;
+        console.log(`✅ duracionTema actualizada: ${duracionTemaFB}s (desde Firebase)`);
+    } else {
+        console.log(`⚠️ duracionTema: usando valor actual ${currentConfig.duracionTema}s`);
+    }
+    
+    if (duracionPublicidadFB !== null) {
+        currentConfig.duracionPublicidad = duracionPublicidadFB;
+        console.log(`✅ duracionPublicidad actualizada: ${duracionPublicidadFB}s (desde Firebase)`);
+    } else {
+        console.log(`⚠️ duracionPublicidad: usando valor actual ${currentConfig.duracionPublicidad}s`);
+    }
+    
+    if (duracionLogoPrincipalFB !== null) {
+        currentConfig.duracionLogoPrincipal = duracionLogoPrincipalFB;
+        console.log(`✅ duracionLogoPrincipal actualizada: ${duracionLogoPrincipalFB}s (desde Firebase)`);
+    } else {
+        console.log(`⚠️ duracionLogoPrincipal: usando valor actual ${currentConfig.duracionLogoPrincipal}s`);
+    }
+    
+    if (duracionLogosAliadosFB !== null) {
+        currentConfig.duracionLogosAliados = duracionLogosAliadosFB;
+        console.log(`✅ duracionLogosAliados actualizada: ${duracionLogosAliadosFB}s (desde Firebase)`);
+    } else {
+        console.log(`⚠️ duracionLogosAliados: usando valor actual ${currentConfig.duracionLogosAliados}s`);
+    }
+    
+    // Actualizar variable global
+    window.currentConfig = currentConfig;
+    
+    console.log('🎯 DURACIONES FINALES APLICADAS:');
+    console.log(`   🧑 Nombre/Rol: ${currentConfig.duracionNombreRol}s`);
+    console.log(`   📋 Tema: ${currentConfig.duracionTema}s`);
+    console.log(`   📺 Publicidad: ${currentConfig.duracionPublicidad}s`);
+    console.log(`   🏛️ Logo Principal: ${currentConfig.duracionLogoPrincipal}s`);
+    console.log(`   🤝 Logos Aliados: ${currentConfig.duracionLogosAliados}s`);
+    
+    // ✅ RESTO DEL CÓDIGO ORIGINAL (sin cambios)
     const coloresBasicos = {
         colorFondo1: data.colorFondo1 || '#FFFFFF',
         colorLetra1: data.colorLetra1 || '#000000',
@@ -243,14 +318,12 @@ function procesarDatosBasicos(data) {
         colorLetra3: data.colorLetra3 || '#000000'
     };
 
-    // ✅ LEER CONTENIDO DE TEXTO (estructura que funciona)
     const contenidos = {
         invitado: (data.Invitado || 'Sin Invitado').replace(/^"|"$/g, ''),
         rol: (data.Rol || '-').replace(/^"|"$/g, ''),
         tema: (data.Tema || '-').replace(/^"|"$/g, '')
     };
 
-    // ✅ LEER VISIBILIDAD (estructura que funciona)
     const visibilidad = {
         temaAlAire: convertirBoolean(data.Mostrar_Tema),
         graficoAlAire: convertirBoolean(data.Mostrar_Invitado),
@@ -258,12 +331,10 @@ function procesarDatosBasicos(data) {
         publicidadAlAire: convertirBoolean(data.Mostrar_Publicidad)
     };
 
-    // ✅ LEER URLs (estructura que funciona)
     const urls = {
         logoUrl: (data.urlLogo || '').trim().replace(/^"|"$/g, ''),
         publicidadUrl: (data.urlImagenPublicidad || '').trim().replace(/^"|"$/g, '')
     };
-
 
     console.log('📄 Contenidos procesados:', contenidos);
     console.log('👁️ Visibilidad procesada:', visibilidad);
@@ -284,42 +355,24 @@ function procesarDatosBasicos(data) {
     // 🖼️ APLICAR IMÁGENES (mantener funcionamiento original)
     aplicarImagenes(urls);
 
-
-    // 🆕 CONFIGURAR LOGOS ALIADOS (sin interferir con el logo principal)
-    //configurarLogosAliados(data);
+    // 🆕 CONFIGURAR LOGOS ALIADOS
     leerParametrosLogosAliados(data);
 
-
-    console.log("🔄 Procesando datos con estructura correcta...");
-    
-    // 🔍 DEBUG CRÍTICO - AÑADIR ESTAS LÍNEAS
-    console.log('🚨 DEBUG CRÍTICO - DATOS FIREBASE RAW:');
-    console.log('animacion_invitadoRol_entrada:', data.animacion_invitadoRol_entrada);
-    console.log('animacion_invitadoRol_salida:', data.animacion_invitadoRol_salida);
-    console.log('Tipo entrada:', typeof data.animacion_invitadoRol_entrada);
-    console.log('Tipo salida:', typeof data.animacion_invitadoRol_salida);
-    
-    // ... resto del código existente hasta:
-    
-    // 🆕 LEER PARÁMETROS DE ANIMACIÓN DESDE FIREBASE
-    console.log('📊 Datos completos de Firebase para animaciones:', data);
-    
-    // 🔍 DEBUG ANTES DE LEER
+    // 🔍 DEBUG ANTES DE LEER ANIMACIONES
     console.log('🔍 ANTES de leerParametrosAnimacionFirebase:');
     console.log('Config actual:', window.animacionConfig?.invitadoRol);
     
     leerParametrosAnimacionFirebase(data);
     
-    // 🔍 DEBUG DESPUÉS DE LEER
+    // 🔍 DEBUG DESPUÉS DE LEER ANIMACIONES
     console.log('🔍 DESPUÉS de leerParametrosAnimacionFirebase:');
     console.log('Config actualizada:', window.animacionConfig?.invitadoRol);
-    
-
-    // 👁️ MANEJAR VISIBILIDAD CON AUTOMATIZACIÓN AVANZADA
-    //manejarVisibilidadElementos(visibilidad);
 
     // 👁️ MANEJAR VISIBILIDAD CON ANIMACIONES FIREBASE
     manejarVisibilidadElementosConFirebase(visibilidad);
+
+    // 🆕 AGREGAR ESTA LÍNEA FALTANTE:
+    procesarSecuenciaAutomatica(data);
 }
 
 // 🆕 CARGAR CONFIGURACIÓN AVANZADA (opcional, para futuro)
@@ -941,13 +994,32 @@ function ocultarConAnimacionYLuegoFirebase(tipo) {
 }
 
 
-function iniciarTemporizadorAutomatico(tipo) {
-  const ms = Number(window.currentConfig?.duracionOcultamiento?.[tipo]) || 45000; // 45s si no hay config
-  console.log(`⏱️ Iniciando temporizador automático para ${tipo}: ${Math.round(ms / 1000)}s`);
 
+function iniciarTemporizadorAutomatico(tipo) {
+  // 🔧 MAPEO CORRECTO - Las duraciones están directamente en currentConfig
+  const duracionesMap = {
+    'invitadoRol': window.currentConfig?.duracionNombreRol,  // 11s desde Firebase
+    'tema': window.currentConfig?.duracionTema,             // 30s desde Firebase
+    'publicidad': window.currentConfig?.duracionPublicidad, // 20s desde Firebase
+    'logo': window.currentConfig?.duracionLogoPrincipal     // 10s desde Firebase
+  };
+  
+  // 🔍 DEBUG: Verificar qué duración se va a usar
+  console.log('🔍 DEBUG TEMPORIZADOR CORREGIDO:');
+  console.log(`   Tipo solicitado: ${tipo}`);
+  console.log(`   Duración mapeada: ${duracionesMap[tipo]}s`);
+  console.log(`   currentConfig.duracionNombreRol: ${window.currentConfig?.duracionNombreRol}s`);
+  
+  // Obtener duración en segundos y convertir a milisegundos
+  const duracionSegundos = duracionesMap[tipo] || 45; // 45s por defecto si no encuentra
+  const ms = duracionSegundos * 1000;
+  
+  console.log(`⏱️ Iniciando temporizador automático para ${tipo}: ${duracionSegundos}s (${ms}ms) - DESDE FIREBASE ✅`);
+  
   cancelAutomaticTimer(tipo);
   window._autoTimers = window._autoTimers || {};
   window._autoTimers[tipo] = setTimeout(() => {
+    console.log(`⏰ TIMEOUT EJECUTADO: Ocultando ${tipo} después de ${duracionSegundos}s`);
     ocultarConAnimacionYLuegoFirebase(tipo);
   }, ms);
 }
@@ -1612,47 +1684,6 @@ window.mostrarElementoYSincronizar = mostrarElementoYSincronizar;
 manejarVisibilidadElementos(visibilidad);
 
 
-window.debugLogosBasico = function() {
-    console.log("🔍 DEBUG BÁSICO - LECTURA DE PARÁMETROS:");
-    console.log("=".repeat(50));
-    
-    const logo = document.getElementById('logo');
-    console.log("🏛️ LOGO PRINCIPAL:");
-    console.log(`   Elemento: ${logo ? 'Encontrado ✅' : 'No encontrado ❌'}`);
-    if (logo) {
-        console.log(`   URL actual: ${logo.src}`);
-        console.log(`   Visible: ${logo.style.display !== 'none' ? 'SÍ ✅' : 'NO ❌'}`);
-    }
-    console.log(`   URL almacenada: ${logoPrincipalUrl || 'No configurado'}`);
-    
-    console.log("\n📋 CONFIGURACIÓN LEÍDA:");
-    console.log(`   Sistema habilitado: ${logoConfig.habilitado ? 'SÍ ✅' : 'NO ❌'}`);
-    console.log(`   Duración principal: ${logoConfig.duraciones.principal}s`);
-    console.log(`   Duración aliados: ${logoConfig.duraciones.aliados}s`);
-    console.log(`   Ciclo continuo: ${logoConfig.cicloContinuo ? 'SÍ' : 'NO'}`);
-    
-    console.log("\n🤝 LOGOS ALIADOS:");
-    console.log(`   Cantidad: ${logosAliados.length}`);
-    if (logosAliados.length > 0) {
-        logosAliados.forEach((logo, index) => {
-            console.log(`   ${index + 1}. ${logo.nombre} (${logo.url.substring(0, 40)}...)`);
-        });
-    }
-    
-    console.log("\n🎬 ANIMACIONES:");
-    console.log(`   Principal: ${logoConfig.animaciones.entradaPrincipal} -> ${logoConfig.animaciones.salidaPrincipal}`);
-    console.log(`   Aliados: ${logoConfig.animaciones.entradaAliados}`);
-    
-    console.log("\n🔄 ROTACIÓN:");
-    console.log(`   Timer activo: ${logoRotationTimer ? 'SÍ ✅' : 'NO ❌'}`);
-    console.log(`   Índice actual: ${currentLogoIndex}`);
-    
-    console.log("\n💡 COMANDOS DISPONIBLES:");
-    console.log("   iniciarRotacionBasica() // Iniciar rotación");
-    console.log("   detenerRotacion()       // Detener rotación");
-};
-
-
 
 // 🌐 VARIABLES GLOBALES PARA DEBUG
 window.testAutomaticSystem = testAutomaticSystem;
@@ -1993,100 +2024,295 @@ function manejarVisibilidadElementosConFirebase(visibilidad) {
 }
 
 
-function debugWipeTiming() {
-    console.group('🔍 DEBUG WIPE TIMING');
-    
-    const elemento = document.getElementById('grafico-invitado-rol');
-    const config = window.animacionConfig?.invitadoRol;
-    
-    if (!elemento) {
-        console.error('❌ Elemento no encontrado');
-        console.groupEnd();
-        return;
-    }
-    
-    if (!config) {
-        console.error('❌ Configuración no encontrada');
-        console.groupEnd();
-        return;
-    }
-    
-    console.log('📊 Configuración actual:', config);
-    console.log('🎨 Estilos CSS actuales:', {
-        transition: elemento.style.transition,
-        clipPath: elemento.style.clipPath,
-        opacity: elemento.style.opacity,
-        display: elemento.style.display
-    });
-    
-    // Verificar valores computed
-    const computed = window.getComputedStyle(elemento);
-    console.log('🖥️ Valores computados:', {
-        transition: computed.transition,
-        clipPath: computed.clipPath,
-        transitionDuration: computed.transitionDuration,
-        transitionDelay: computed.transitionDelay
-    });
-    
-    console.groupEnd();
+// 🚀 INICIAR SECUENCIA COMPLETA
+function iniciarSecuenciaCompleta(contenidos) {
+  console.log('🎬 INICIANDO SECUENCIA COMPLETA:');
+  console.log('   Contenidos:', contenidos);
+  
+  // Guardar estado
+  secuenciaAutomatica.activa = true;
+  secuenciaAutomatica.contenidos = contenidos;
+  
+  // Obtener duraciones de la configuración actual
+  const duracionInvitado = window.currentConfig.duracionNombreRol || 11;
+  const duracionTema = window.currentConfig.duracionTema || 30;
+  
+  console.log('   Duraciones:', { invitado: duracionInvitado, tema: duracionTema });
+  
+  // FASE 1: Mostrar Invitado + Rol
+  mostrarFaseInvitadoRol(contenidos, duracionInvitado, duracionTema);
 }
 
-// 🔧 SOLUCIÓN 4: Test manual de WIPE con timing correcto
-
-function testWipeConTiming() {
-    console.clear();
-    console.log('🧪 TEST WIPE CON TIMING CORRECTO');
-    console.log('='.repeat(40));
-    
-    const elemento = document.getElementById('grafico-invitado-rol');
-    if (!elemento) {
-        console.error('❌ Elemento no encontrado');
-        return;
-    }
-    
-    // Configuración de test
-    const duracion = 600;
-    const delay = 100;
-    const easing = 'ease-in-out';
-    
-    console.log(`⚙️ Configuración: ${duracion}ms duración, ${delay}ms delay, ${easing}`);
-    
-    // Preparar elemento
-    elemento.style.display = 'flex';
-    elemento.style.opacity = '1';
-    elemento.style.transition = `clip-path ${duracion}ms ${easing} ${delay}ms`;
-    
-    // Estado inicial
-    elemento.style.clipPath = 'inset(0 100% 0 0)';
-    console.log('🔴 Estado inicial: Oculto');
-    
-    // Forzar reflow
-    elemento.offsetHeight;
-    
-    // Test entrada después de 1 segundo
-    setTimeout(() => {
-        console.log('🟢 Iniciando WIPE_IN_RIGHT...');
-        elemento.style.clipPath = 'inset(0 0% 0 0)';
-    }, 1000);
-    
-    // Test salida después de 3 segundos
-    setTimeout(() => {
-        console.log('🔴 Iniciando WIPE_OUT_LEFT...');
-        elemento.style.clipPath = 'inset(0 0 0 100%)';
-    }, 3000);
-    
-    // Estado final después de 5 segundos
-    setTimeout(() => {
-        console.log('✅ Test completado');
-        debugWipeTiming();
-    }, 5000);
+// 👤 FASE 1: MOSTRAR INVITADO + ROL
+function mostrarFaseInvitadoRol(contenidos, duracionInvitado, duracionTema) {
+  console.log(`👤 FASE 1: Invitado + Rol por ${duracionInvitado}s`);
+  
+  secuenciaAutomatica.fase = 'invitado';
+  
+  // Obtener elementos
+  const contenedor = document.getElementById('grafico-invitado-rol');
+  const h1 = contenedor?.querySelector('h1');
+  const h2 = contenedor?.querySelector('h2');
+  
+  if (!contenedor || !h1 || !h2) {
+    console.error('❌ Elementos no encontrados para la secuencia');
+    return;
+  }
+  
+  // 🆕 CONFIGURAR CONTENEDOR PARA FASE INVITADO
+  configurarContenedorParaSecuencia(contenedor, 'invitado');
+  
+  // Limpiar contenido previo
+  h1.textContent = '';
+  h2.textContent = '';
+  h2.style.display = ''; // Asegurar que h2 está visible
+  
+  // Configurar contenido para INVITADO
+  h1.textContent = contenidos.invitado;
+  h2.textContent = contenidos.rol;
+  
+  console.log('   Mostrando:', { invitado: contenidos.invitado, rol: contenidos.rol });
+  
+  // Mostrar con animación existente
+  LowerThirdsInvitadoFirebase(contenedor, h1, h2, true);
+  
+  // ⏰ Timer para cambiar a TEMA
+  secuenciaAutomatica.timers.invitado = setTimeout(() => {
+    transicionATemaDesdeFase1(contenidos, duracionTema);
+  }, duracionInvitado * 1000);
+  
+  // 🔒 Bloquear el alto del contenedor con su altura real en Fase 1
+    requestAnimationFrame(() => {
+    const hReal = contenedor.offsetHeight || parseInt(
+        getComputedStyle(document.documentElement).getPropertyValue('--lt-h')
+    ) || 90;
+    contenedor.style.minHeight = hReal + 'px';
+    contenedor.dataset.baseHeight = String(hReal); // guardamos para Fase 2
+    });
+  console.log(`⏱️ Timer configurado: ${duracionInvitado}s hasta cambio a tema`);
 }
 
-// 🌐 EXPONER FUNCIONES
-window.debugWipeTiming = debugWipeTiming;
-window.testWipeConTiming = testWipeConTiming;
+// 🔄 TRANSICIÓN: INVITADO → TEMA
+function transicionATemaDesdeFase1(contenidos, duracionTema) {
+  console.log('🔄 TRANSICIÓN: Invitado → Tema');
+  
+  // Obtener elementos
+  const contenedor = document.getElementById('grafico-invitado-rol');
+  const h1 = contenedor?.querySelector('h1');
+  const h2 = contenedor?.querySelector('h2');
+  
+  // Animación de salida
+  LowerThirdsInvitadoFirebase(contenedor, h1, h2, false);
+  
+  // Esperar que termine la animación de salida (WIPE_OUT_LEFT)
+  setTimeout(() => {
+    mostrarFaseTemaEnMismoContenedor(contenidos, duracionTema);
+  }, 700); // Duración típica de animación de salida
+}
 
-console.log('🔧 CORRECCIONES WIPE TIMING CARGADAS');
-console.log('📋 Comandos de test:');
-console.log('   - testWipeConTiming()    // Test manual con timing');
-console.log('   - debugWipeTiming()      // Ver configuración actual');
+// 📋 FASE 2: MOSTRAR TEMA (en el mismo contenedor)
+function mostrarFaseTemaEnMismoContenedor(contenidos, duracionTema) {
+  console.log(`📋 FASE 2: Tema por ${duracionTema}s`);
+
+  secuenciaAutomatica.fase = 'tema';
+
+  const contenedor = document.getElementById('grafico-invitado-rol');
+  const h1 = contenedor?.querySelector('h1');
+  const h2 = contenedor?.querySelector('h2');
+
+  // Reafirmar el alto base medido en Fase 1
+  const baseH = parseInt(contenedor?.dataset.baseHeight || '0', 10);
+  if (baseH) contenedor.style.minHeight = baseH + 'px';
+
+  // Configurar contenido para TEMA
+  h1.textContent = contenidos.tema;
+
+  // En vez de display:none, ocúltalo sin perder espacio
+  h2.textContent = '';
+  h2.style.visibility = 'hidden';
+  h2.style.display = ''; // por si quedó en 'none' por alguna razón
+
+  console.log('   Mostrando tema:', contenidos.tema);
+
+  // Animación existente (el contenedor ya tiene tamaño estable)
+  LowerThirdsInvitadoFirebase(contenedor, h1, h2, true);
+
+  secuenciaAutomatica.timers.tema = setTimeout(() => {
+    finalizarSecuenciaCompleta();
+  }, duracionTema * 1000);
+}
+
+
+// 🔗 INTEGRACIÓN CON SISTEMA EXISTENTE
+// Agregar esta línea en procesarDatosBasicos() después de las otras llamadas:
+function integrarSecuenciaEnProcesamiento(data) {
+  // Esta función se llamará desde procesarDatosBasicos()
+  console.log('🔗 Verificando secuencia automática en procesamiento...');
+  procesarSecuenciaAutomatica(data);
+}
+
+
+// 🔄 FUNCIONES ACTUALIZADAS PARA SINCRONIZAR CON FIREBASE
+
+// 📡 FUNCIÓN PARA ACTUALIZAR FIREBASE
+async function actualizarFirebaseSecuencia(estado, razon = '') {
+  try {
+    console.log(`📡 Actualizando Firebase: mostrar_secuencia_invitado_tema = ${estado}`);
+    if (razon) console.log(`   Razón: ${razon}`);
+    
+    const database = getDatabase();
+    const secuenciaRef = ref(database, 'CLAVE_STREAM_FB/STREAM_LIVE/GRAFICOS/mostrar_secuencia_invitado_tema');
+    
+    await set(secuenciaRef, estado);
+    
+    console.log(`✅ Firebase actualizado exitosamente: ${estado}`);
+    
+  } catch (error) {
+    console.error('❌ Error actualizando Firebase:', error);
+  }
+}
+
+async function finalizarSecuenciaCompleta() {
+  console.log('🏁 FINALIZANDO SECUENCIA COMPLETA');
+
+  const contenedor = document.getElementById('grafico-invitado-rol');
+  const h1 = contenedor?.querySelector('h1');
+  const h2 = contenedor?.querySelector('h2');
+
+  if (h2) {
+    h2.style.visibility = '';
+    h2.style.display = '';
+  }
+
+  LowerThirdsInvitadoFirebase(contenedor, h1, h2, false);
+
+  // ← limpiar alto fijado
+  contenedor.style.minHeight = '';
+  delete contenedor.dataset.baseHeight;
+
+  // …(resto igual)
+  secuenciaAutomatica.activa = false;
+  secuenciaAutomatica.fase = null;
+  secuenciaAutomatica.contenidos = {};
+  Object.values(secuenciaAutomatica.timers).forEach(t => clearTimeout(t));
+  secuenciaAutomatica.timers = {};
+
+  await actualizarFirebaseSecuencia(false, 'Secuencia completada normalmente');
+  console.log('🎯 Secuencia finalizada y sincronizada con Firebase');
+}
+
+// ❌ CANCELAR SECUENCIA
+async function cancelarSecuenciaCompleta() {
+  console.log('❌ CANCELANDO SECUENCIA EN PROGRESO');
+
+  Object.values(secuenciaAutomatica.timers).forEach(t => clearTimeout(t));
+  secuenciaAutomatica.timers = {};
+
+  const contenedor = document.getElementById('grafico-invitado-rol');
+  const h1 = contenedor?.querySelector('h1');
+  const h2 = contenedor?.querySelector('h2');
+
+  if (contenedor && contenedor.style.display !== 'none') {
+    LowerThirdsInvitadoFirebase(contenedor, h1, h2, false);
+  }
+
+  if (h2) {
+    h2.style.visibility = '';
+    h2.style.display = '';
+  }
+
+  // ← limpiar alto fijado
+  if (contenedor) {
+    contenedor.style.minHeight = '';
+    delete contenedor.dataset.baseHeight;
+  }
+
+  secuenciaAutomatica.activa = false;
+  secuenciaAutomatica.fase = null;
+  secuenciaAutomatica.contenidos = {};
+
+  await actualizarFirebaseSecuencia(false, 'Secuencia cancelada manualmente');
+  console.log('🎯 Secuencia cancelada y sincronizada con Firebase');
+}
+
+// 🆕 FUNCIÓN PARA CANCELAR DESDE LA APP (nueva funcionalidad)
+async function cancelarSecuenciaDesdeApp() {
+  if (secuenciaAutomatica.activa) {
+    console.log('📱 Cancelación solicitada desde la App');
+    await cancelarSecuenciaCompleta();
+  } else {
+    console.log('⚠️ No hay secuencia activa para cancelar');
+  }
+}
+
+// 🔄 PROCESAMIENTO MEJORADO CON MEJOR LOGGING
+function procesarSecuenciaAutomatica(data) {
+  const activarSecuencia = convertirBoolean(data.mostrar_secuencia_invitado_tema);
+  
+  console.log('🔍 PROCESANDO SECUENCIA AUTOMÁTICA:');
+  console.log(`   Campo Firebase: ${data.mostrar_secuencia_invitado_tema} (${typeof data.mostrar_secuencia_invitado_tema})`);
+  console.log(`   Convertido a boolean: ${activarSecuencia}`);
+  console.log(`   Secuencia activa actualmente: ${secuenciaAutomatica.activa}`);
+  
+  if (activarSecuencia && !secuenciaAutomatica.activa) {
+    // 🎬 INICIAR SECUENCIA
+    console.log('✅ INICIANDO SECUENCIA AUTOMÁTICA');
+    
+    // Leer contenidos existentes de Firebase
+    const contenidos = {
+      invitado: (data.Invitado || 'Sin Invitado').replace(/^"|"$/g, ''),
+      rol: (data.Rol || 'Sin Rol').replace(/^"|"$/g, ''),
+      tema: (data.Tema || 'Sin Tema').replace(/^"|"$/g, '')
+    };
+    
+    console.log('📋 Contenidos leídos:', contenidos);
+    iniciarSecuenciaCompleta(contenidos);
+    
+  } else if (!activarSecuencia && secuenciaAutomatica.activa) {
+    // 🛑 CANCELAR SECUENCIA (cuando la app pone false)
+    console.log('📱 CANCELACIÓN SOLICITADA DESDE APP (Firebase = false)');
+    cancelarSecuenciaCompleta();
+    
+  } else if (activarSecuencia && secuenciaAutomatica.activa) {
+    console.log('⚠️ Secuencia ya está activa - ignorando solicitud duplicada');
+    
+  } else {
+    console.log('⏸️ Sin cambios (Firebase = false, secuencia inactiva)');
+  }
+}
+
+// 🆕 FUNCIÓN PARA CONFIGURAR CONTENEDOR AL INICIAR SECUENCIA
+function configurarContenedorParaSecuencia(contenedor, fase) {
+  if (!contenedor) return;
+  
+  console.log(`🎭 Configurando contenedor para fase: ${fase}`);
+  
+  // Aplicar clase base de secuencia
+  contenedor.classList.add('secuencia-activa');
+  
+  // Configurar según la fase
+  if (fase === 'invitado') {
+    contenedor.classList.remove('solo-tema');
+    console.log('👤 Configurado para mostrar invitado + rol');
+  } else if (fase === 'tema') {
+    contenedor.classList.add('solo-tema');
+    console.log('📋 Configurado para mostrar solo tema');
+  }
+  
+  // Forzar reflow para asegurar que las dimensiones se apliquen
+  contenedor.offsetHeight;
+}
+
+// 🆕 FUNCIÓN PARA LIMPIAR CONTENEDOR AL FINALIZAR
+function limpiarContenedorSecuencia(contenedor) {
+  if (!contenedor) return;
+  
+  console.log('🧹 Limpiando clases del contenedor');
+  
+  // Remover todas las clases especiales
+  contenedor.classList.remove('secuencia-activa', 'solo-tema', 'debug-secuencia');
+  
+  // Forzar reflow
+  contenedor.offsetHeight;
+}
+
