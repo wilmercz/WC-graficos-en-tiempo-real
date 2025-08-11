@@ -68,6 +68,11 @@ html, body {
   --ads-img-w: auto;
   --ads-img-h: 70px;
   --ads-radius: 0px;
+
+  /* INVITADO + TEMA*/
+   --invtema-left: 0px;
+  --invtema-bottom: 0px;
+  --invtema-h: 17px
 }
 
 /* ====== LOGO ====== */
@@ -84,7 +89,17 @@ html, body {
 }
 
 
+/*SECUENCIA INVITADO Y TEMA*/
+/* Mantener el alto del contenedor mientras dura la secuencia */
+#grafico-invitado-rol.secuencia-activa {
+  /* Valor de respaldo si aún no se fijó por JS */
+  min-height: var(--invtema-h); /* 90px por defecto */
+}
 
+/* En modo solo-tema seguimos conservando el mismo alto */
+#grafico-invitado-rol.secuencia-activa.solo-tema {
+  min-height: var(--invtema-h);
+}
 
 
 /* ====== INVITADO / ROL UNIFICADO ====== */
