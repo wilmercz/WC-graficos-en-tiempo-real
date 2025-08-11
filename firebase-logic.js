@@ -2,7 +2,17 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/fireba
 import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js";
 import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js";
 import { firebaseConfig } from './firebase-config.js';
-import { slideIn, slideOut, fadeIn, fadeOut, slideInLeft, slideOutLeft, slideInTop, slideOutTop } from './animations.js';
+//import { slideIn, slideOut, fadeIn, fadeOut, slideInLeft, slideOutLeft, slideInTop, slideOutTop } from './animations.js';
+// 🔗 Bridge a las animaciones globales (animations.js modo script clásico)
+const ANIM = globalThis.ANIM || {};
+const fadeIn      = ANIM.fadeIn      ?? (el => { if (el) el.style.display = 'block'; });
+const fadeOut     = ANIM.fadeOut     ?? (el => { if (el) el.style.display = 'none';  });
+const slideIn     = ANIM.slideIn     ?? fadeIn;
+const slideOut    = ANIM.slideOut    ?? fadeOut;
+const slideInLeft = ANIM.slideInLeft ?? slideIn;
+const slideOutLeft= ANIM.slideOutLeft?? slideOut;
+const slideInTop  = ANIM.slideInTop  ?? slideIn;
+const slideOutTop = ANIM.slideOutTop ?? slideOut;
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -189,12 +199,6 @@ let animacionConfig = {
     }
 };
 
-// 🌐 EXPONER GLOBALMENTE DESDE EL PRINCIPIO
-window.animacionConfig = animacionConfig;
-window.TIPOS_ANIMACION = TIPOS_ANIMACION;
-window.TIPOS_EASING = TIPOS_EASING;
-
-
 
 // 🔥 AUTENTICACIÓN Y INICIALIZACIÓN
 signInAnonymously(auth)
@@ -368,11 +372,13 @@ function procesarDatosBasicos(data) {
     console.log('🔍 DESPUÉS de leerParametrosAnimacionFirebase:');
     console.log('Config actualizada:', window.animacionConfig?.invitadoRol);
 
+        // 🆕 AGREGAR ESTA LÍNEA FALTANTE:
+    procesarSecuenciaAutomatica(data);
+
     // 👁️ MANEJAR VISIBILIDAD CON ANIMACIONES FIREBASE
     manejarVisibilidadElementosConFirebase(visibilidad);
+ 
 
-    // 🆕 AGREGAR ESTA LÍNEA FALTANTE:
-    procesarSecuenciaAutomatica(data);
 }
 
 // 🆕 CARGAR CONFIGURACIÓN AVANZADA (opcional, para futuro)
@@ -708,6 +714,7 @@ function configurarAutomatizacion() {
     }
 }
 
+
 function configurarRotacionLogos() {
     const logosConfig = configAvanzada.logo?.logosAliados;
     if (!logosConfig || !logosConfig.habilitado) return;
@@ -789,7 +796,7 @@ function aplicarImagenes(urls) {
 
 // 👁️ MANEJAR VISIBILIDAD CON AUTOMATIZACIÓN AVANZADA
 function manejarVisibilidadElementos(visibilidad) {
-    console.log("👁️ Flags desde DB:", visibilidad);
+    console.log("👁️ manejarVisibilidadElementos, Flags desde DB:", visibilidad);
 
     const refs = {
         logo: {
@@ -1462,8 +1469,7 @@ function iniciarRotacionRobusta() {
     }, (logoConfig.duraciones.principal || 3) * 1000);
 }
 
-// Exponer función global
-window.iniciarRotacionRobusta = iniciarRotacionRobusta;
+
 
 // 🆕 PASO 2.1: Corrección para evitar interferencia del sistema automático
 function configurarRotacionEnVisibilidad(visibilidad) {
@@ -1680,11 +1686,6 @@ function mostrarElementoYSincronizar(elementType) {
 
 
 
-// 🔥 ====== SISTEMA DE ANIMACIONES DESDE FIREBASE ======
-
-    // 🆕 LEER PARÁMETROS DE ANIMACIÓN DESDE FIREBASE
-    console.log('📊 Datos completos de Firebase para animaciones:', data);
-    leerParametrosAnimacionFirebase(data);
 
 // Función para leer parámetros de animación desde Firebase
 function leerParametrosAnimacionFirebase(data) {
@@ -1995,6 +1996,9 @@ function manejarVisibilidadElementosConFirebase(visibilidad) {
       cancelAutomaticTimer(tipo);
     }
   });
+
+    // 🔄 ROTACIÓN DE LOGOS
+    configurarRotacionEnVisibilidad(visibilidad);
 }
 
 
