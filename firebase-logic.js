@@ -1678,32 +1678,6 @@ function mostrarElementoYSincronizar(elementType) {
     actualizarVisibilidadEnFirebase(elementType, true);
 }
 
-// 🆕 EXPONER FUNCIONES GLOBALMENTE PARA DEBUG
-window.actualizarVisibilidadEnFirebase = actualizarVisibilidadEnFirebase;
-window.mostrarElementoYSincronizar = mostrarElementoYSincronizar;
-manejarVisibilidadElementos(visibilidad);
-
-
-
-// 🌐 VARIABLES GLOBALES PARA DEBUG
-window.testAutomaticSystem = testAutomaticSystem;
-window.logAutomaticStatus = logAutomaticStatus;
-window.debugLogosAliados = debugLogosAliados;
-window.testRotacionLogos = testRotacionLogos;
-window.startLogoRotation = startLogoRotation;
-window.stopLogoRotation = stopLogoRotation;
-window.automaticTimers = automaticTimers;
-window.currentConfig = currentConfig;
-window.configAvanzada = configAvanzada;
-window.logoRotationTimer = logoRotationTimer;
-window.logosAliados = logosAliados;
-window.POSICIONES_PREDEFINIDAS = POSICIONES_PREDEFINIDAS;
-window.CONFIG_DEFECTO = CONFIG_DEFECTO;
-
-
-
-
-
 
 
 // 🔥 ====== SISTEMA DE ANIMACIONES DESDE FIREBASE ======
