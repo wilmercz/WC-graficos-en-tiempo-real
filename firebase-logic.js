@@ -372,12 +372,13 @@ function procesarDatosBasicos(data) {
     console.log('🔍 DESPUÉS de leerParametrosAnimacionFirebase:');
     console.log('Config actualizada:', window.animacionConfig?.invitadoRol);
 
-        // 🆕 AGREGAR ESTA LÍNEA FALTANTE:
-    procesarSecuenciaAutomatica(data);
+
 
     // 👁️ MANEJAR VISIBILIDAD CON ANIMACIONES FIREBASE
     manejarVisibilidadElementosConFirebase(visibilidad);
  
+            // 🆕 AGREGAR ESTA LÍNEA FALTANTE:
+    procesarSecuenciaAutomatica(data);
 
 }
 
