@@ -170,22 +170,22 @@ const TIPOS_EASING = {
 // 🔧 INICIALIZACIÓN GLOBAL - MOVER AL PRINCIPIO
 let animacionConfig = {
     invitadoRol: {
-        delay: 100,
+        delay: 200,
         duracion: 600,
         easing: 'EASE_IN_OUT',
         entrada: 'SLIDE_IN_RIGHT',
         salida: 'SLIDE_OUT_LEFT'
     },
     tema: {
-        delay: 100,
-        duracion: 500,
+        delay: 200,
+        duracion: 600,
         easing: 'EASE_IN_OUT',
         entrada: 'SLIDE_IN_LEFT',
         salida: 'SLIDE_OUT_TOP'
     },
     logo: {
         delay: 0,
-        duracion: 300,
+        duracion: 400,
         easing: 'EASE_IN_OUT',
         entrada: 'FADE_IN',
         salida: 'FADE_OUT'
@@ -775,7 +775,7 @@ function aplicarColoresElementos(colores) {
 }
 
 // 🖼️ APLICAR IMÁGENES
-function aplicarImagenes(urls) {
+function aplicarImagenes_vieja(urls) {
     console.log("🖼️ Aplicando URLs de imágenes:", urls);
     
     if (urls.logoUrl) {
@@ -860,6 +860,94 @@ function manejarVisibilidadElementos(visibilidad) {
     // 🔄 ROTACIÓN DE LOGOS
     configurarRotacionEnVisibilidad(visibilidad);
 }
+
+// Nueva función para manejar visibilidad con animaciones Firebase
+// ✅ Reemplaza toda tu función por esta versión
+function manejarVisibilidadElementosConFirebase(visibilidad) {
+  console.log("👁️ Flags desde DB (con animaciones Firebase):", visibilidad);
+
+  const refs = {
+    invitadoRol: {
+      el: document.getElementById('grafico-invitado-rol'),
+      visible: !!visibilidad.graficoAlAire
+    },
+    tema: {
+      el: document.getElementById('grafico-tema'),
+      visible: !!visibilidad.temaAlAire
+    },
+    publicidad: {
+      el: document.getElementById('grafico-publicidad'),
+      visible: !!visibilidad.publicidadAlAire
+    }
+  };
+
+   // 🆕 DETERMINAR SI DEBE MOSTRAR FONDO DEL LOGO
+  const mostrarFondoLogo = refs.invitadoRol.visible || refs.tema.visible;
+  console.log(`🎨 Fondo logo debe estar: ${mostrarFondoLogo ? 'VISIBLE' : 'OCULTO'}`);
+
+
+  Object.entries(refs).forEach(([tipo, cfg]) => {
+    const el = cfg.el;
+    if (!el) return;
+
+    const isVisible = el.style.display !== 'none';
+    if (cfg.visible === isVisible) {
+      console.log(`⏭️ ${tipo}: Sin cambios (${isVisible ? 'visible' : 'oculto'})`);
+      return;
+    }
+
+    console.log(`🔄 ${tipo}: ${isVisible ? 'visible' : 'oculto'} → ${cfg.visible ? 'visible' : 'oculto'}`);
+
+    if (cfg.visible) {
+      el.style.display = (tipo === 'invitadoRol') ? 'flex' : 'block';
+      aplicarAnimacionDinamica(el, tipo, true);
+
+      // 🆕 SINCRONIZAR FONDO DEL LOGO - MOSTRAR
+      if (tipo === 'invitadoRol' || tipo === 'tema') {
+        const animCfg = window.animacionConfig?.[tipo] || {};
+        const delay = Number(animCfg.delay) || 100;
+        animarFondoLogo(true, 400, delay);
+      }
+
+
+      if (window.currentConfig?.modoAutomatico && window.currentConfig?.habilitarOcultamientoAutomatico) {
+        cancelAutomaticTimer(tipo);
+        iniciarTemporizadorAutomatico(tipo);
+      }
+    } else {
+      // 🔸 Animar salida y ocultar SOLO al final
+      const animCfg = window.animacionConfig?.[tipo] || window.animacionConfig?.invitadoRol || {};
+      const total = (Number(animCfg.delay) || 0) + (Number(animCfg.duracion) || 600) + 50;
+
+      aplicarAnimacionDinamica(el, tipo, false);
+
+      // 🆕 SINCRONIZAR FONDO DEL LOGO - OCULTAR
+      if ((tipo === 'invitadoRol' || tipo === 'tema') && !mostrarFondoLogo) {
+        const delay = Number(animCfg.delay) || 0;
+        animarFondoLogo(false, 400, delay);
+      }
+
+
+      let fin = false;
+      const onEnd = () => {
+        if (fin) return;
+        fin = true;
+        el.style.display = 'none';
+        el.removeEventListener('transitionend', onEnd);
+        console.log(`✅ TRANSICIÓN FIN (${tipo})`);
+      };
+
+      el.addEventListener('transitionend', onEnd, { once: true });
+      setTimeout(onEnd, total); // Fallback
+      cancelAutomaticTimer(tipo);
+    }
+  });
+
+    // 🔄 ROTACIÓN DE LOGOS
+    configurarRotacionEnVisibilidad(visibilidad);
+}
+
+
 
 function procesarVisibilidadElemento(nombre, config) {
     if (!config.element) return;
@@ -982,6 +1070,21 @@ function ocultarConAnimacionYLuegoFirebase(tipo) {
   const animCfg = window.animacionConfig?.[tipo] || window.animacionConfig?.invitadoRol || {};
   const total = (Number(animCfg.delay) || 0) + (Number(animCfg.duracion) || 600) + 50;
 
+  // 🆕 OCULTAR FONDO DEL LOGO SI ES NECESARIO
+  if (tipo === 'invitadoRol' || tipo === 'tema') {
+    // Solo ocultar si no hay otros lower thirds visibles
+    const invitadoVisible = document.getElementById('grafico-invitado-rol')?.style.display !== 'none';
+    const temaVisible = document.getElementById('grafico-tema')?.style.display !== 'none';
+    
+    const debeOcultarFondo = (tipo === 'invitadoRol' && !temaVisible) || 
+                            (tipo === 'tema' && !invitadoVisible);
+    
+    if (debeOcultarFondo) {
+      const delay = Number(animCfg.delay) || 0;
+      animarFondoLogo(false, 400, delay);
+    }
+  }
+  
   aplicarAnimacionDinamica(el, tipo, false);
 
   let done = false;
@@ -1160,6 +1263,51 @@ function stopLogoRotation() {
     }
 }
 
+// 🎨 FUNCIÓN PARA ANIMAR FONDO DEL LOGO (NUEVA)
+function animarFondoLogo(mostrar, duracion = 400, delay = 0) {
+    const logo = document.getElementById('logo');
+    if (!logo) {
+        console.warn('⚠️ Elemento logo no encontrado para animar fondo');
+        return;
+    }
+
+    const colorFondo = logoConfig?.colores?.fondoLogos;
+    
+    // ✅ CONDICIÓN MEJORADA: Detecta 'transparent' como "sin fondo"
+    const esTransparenteOVacio = !colorFondo || 
+                                colorFondo === 'null' || 
+                                colorFondo.trim() === '' ||
+                                colorFondo.toLowerCase() === 'transparent' ||
+                                colorFondo === 'rgba(0,0,0,0)' ||
+                                colorFondo === 'rgba(0, 0, 0, 0)';
+    
+    if (esTransparenteOVacio) {
+        console.log('ℹ️ Sin color de fondo real configurado → No animar');
+        return;  // ← Sale de la función (como debería)
+    }
+
+    console.log(`🎭 Animando fondo logo: ${mostrar ? 'MOSTRAR' : 'OCULTAR'} (${colorFondo})`);
+    
+    // Configurar transición
+    logo.style.transition = `background-color ${duracion}ms ease-in-out ${delay}ms, padding ${duracion}ms ease-in-out ${delay}ms`;
+    
+    if (mostrar) {
+        // MOSTRAR fondo con animación
+        setTimeout(() => {
+            logo.style.backgroundColor = colorFondo;
+            logo.style.padding = '8px';
+            console.log(`✅ Fondo logo VISIBLE: ${colorFondo}`);
+        }, delay);
+    } else {
+        // OCULTAR fondo con animación
+        setTimeout(() => {
+            logo.style.backgroundColor = 'transparent';
+            logo.style.padding = '0px';
+            console.log('✅ Fondo logo OCULTO');
+        }, delay);
+    }
+}
+
 // 🎬 FUNCIONES DE ANIMACIÓN
 function updateVisibility(element, isVisible, animationFunctionIn = null, animationFunctionOut = null) {
     if (isVisible) {
@@ -1256,69 +1404,6 @@ function testAutomaticSystem() {
     console.log('✅ Test completado');
 }
 
-// 🆕 DEBUG ESPECÍFICO PARA LOGOS ALIADOS
-function debugLogosAliados() {
-    console.group('🔍 DEBUG LOGOS ALIADOS');
-    console.log('Logo principal URL:', logoPrincipalUrl || 'No configurado');
-    console.log('Logos aliados disponibles:', logosAliados.length);
-    
-    if (logosAliados.length > 0) {
-        console.log('Lista detallada de logos aliados:');
-        logosAliados.forEach((logo, index) => {
-            console.log(`  ${index + 1}. ${logo.nombre}`);
-            console.log(`     URL: ${logo.url}`);
-            console.log(`     Activo: ${logo.activo}`);
-            console.log(`     Orden: ${logo.orden}`);
-        });
-    }
-    
-    console.log('Rotación habilitada:', currentConfig?.habilitarRotacionLogos || false);
-    console.log('Duración logo principal:', currentConfig?.duracionLogoPrincipal || 'No configurado');
-    console.log('Duración logos aliados:', currentConfig?.duracionLogosAliados || 'No configurado');
-    console.log('Timer activo:', logoRotationTimer ? 'SÍ' : 'NO');
-    console.log('Índice actual:', currentLogoIndex);
-    
-    // Test rápido si hay logos
-    if (logosAliados.length > 0 && logoPrincipalUrl) {
-        console.log('✅ Todo listo para rotación automática');
-        console.log('💡 Para probar manualmente: startLogoRotation()');
-    } else {
-        console.log('❌ Faltan configuraciones para rotación');
-        if (!logoPrincipalUrl) console.log('   - Falta logo principal');
-        if (logosAliados.length === 0) console.log('   - Faltan logos aliados');
-    }
-    
-    console.groupEnd();
-}
-
-// 🆕 TEST MANUAL DE ROTACIÓN DE LOGOS
-function testRotacionLogos() {
-    console.log('🧪 Iniciando test manual de rotación de logos...');
-    
-    if (!logoPrincipalUrl && logosAliados.length === 0) {
-        console.error('❌ No hay logos configurados para probar');
-        return;
-    }
-    
-    // Habilitar rotación temporalmente para test
-    const originalConfig = currentConfig?.habilitarRotacionLogos;
-    if (currentConfig) {
-        currentConfig.habilitarRotacionLogos = true;
-        currentConfig.duracionLogoPrincipal = 3; // 3 segundos para test
-        currentConfig.duracionLogosAliados = 3;  // 3 segundos para test
-    }
-    
-    console.log('⚡ Iniciando rotación rápida para test (3 segundos por logo)');
-    startLogoRotation();
-    
-    // Restaurar configuración original después del test
-    setTimeout(() => {
-        if (currentConfig && originalConfig !== undefined) {
-            currentConfig.habilitarRotacionLogos = originalConfig;
-        }
-        console.log('✅ Test completado, configuración restaurada');
-    }, 15000); // 15 segundos de test
-}
 
 
 
@@ -1364,9 +1449,9 @@ function leerParametrosLogosAliados(data) {
         },
         cicloContinuo: cicloContinuo,
         animaciones: {
-            entradaPrincipal: data.animaciones_entradaLogo || 'FADE_IN',
-            salidaPrincipal: data.animacion_logo_salida || 'FADE_OUT',
-            entradaAliados: data.animacion_logo_entrada || 'FADE_IN',
+            entradaPrincipal: data.animaciones_entradaLogo || 'WIPE_IN_RIGHT',
+            salidaPrincipal: data.animacion_logo_salida || 'WIPE_OUT_LEFT',
+            entradaAliados: data.animacion_logo_entrada || 'WIPE_IN_RIGHT',
             duracionPrincipal: data.animaciones_duracionEntrada || 500,
             duracionAliados: data.animacion_logo_duracion || 500
         },
@@ -1382,6 +1467,9 @@ function leerParametrosLogosAliados(data) {
     const logoElement = document.getElementById('logo');
     logoPrincipalUrl = logoElement ? logoElement.src : '';
     
+    // 🆕 APLICAR FONDO DEL LOGO INMEDIATAMENTE
+    //aplicarFondoLogo(logoElement);
+
     // 🆕 ACTIVAR ROTACIÓN SI ESTÁ HABILITADA Y HAY LOGOS
     if (habilitado && (logosAliados.length > 0 || logoPrincipalUrl)) {
         console.log("✅ ROTACIÓN HABILITADA - Activando funcionalidad");
@@ -1414,7 +1502,13 @@ function leerParametrosLogosAliados(data) {
     console.log(`   🔄 Ciclo continuo: ${cicloContinuo}`);
     console.log(`   🏛️ Logo principal: ${logoPrincipalUrl ? 'SÍ' : 'NO'}`);
     console.log(`   🤝 Logos aliados: ${logosAliados.length}`);
+
+        console.log("📋 CONFIGURACIÓN FINAL:");
+    console.log(`   ✅ Habilitado: ${habilitado}`);
+    console.log(`   🎨 Color fondo: ${logoConfig.colores.fondoLogos || 'Transparente'}`); // ← AGREGAR ESTA LÍNEA
+    console.log(`   ⏱️ Duración principal: ${duracionPrincipal}s`);
 }
+
 
 // 🆕 PROCESAR lista de logos aliados
 function procesarListaLogosAliados(lista) {
@@ -1437,8 +1531,6 @@ function procesarListaLogosAliados(lista) {
     console.log(`📋 ${logosValidos.length} logos aliados válidos procesados`);
     return logosValidos;
 }
-
-
 
 
 // 🆕 PASO 2.2: Rotación más robusta que no se cancela
@@ -1469,7 +1561,6 @@ function iniciarRotacionRobusta() {
     rotarAlSiguienteLogo();
     }, (logoConfig.duraciones.principal || 3) * 1000);
 }
-
 
 
 // 🆕 PASO 2.1: Corrección para evitar interferencia del sistema automático
@@ -1507,6 +1598,8 @@ function configurarRotacionEnVisibilidad(visibilidad) {
 }
 
 
+
+// 🔧 MODIFICAR rotarAlSiguienteLogo() - APLICAR FONDO EN ROTACIÓN
 function rotarAlSiguienteLogo() {
     currentLogoIndex++;
     
@@ -1556,6 +1649,10 @@ function rotarAlSiguienteLogo() {
     setTimeout(() => {
         logo.src = nextUrl;
         logo.alt = logoName;
+        
+        // 🆕 APLICAR FONDO DESPUÉS DEL CAMBIO
+        //aplicarFondoLogo(logo);
+        
         updateVisibility(logo, true, fadeIn);
         console.log(`✅ Logo cambiado a: ${logoName}`);
         
@@ -1568,6 +1665,8 @@ function rotarAlSiguienteLogo() {
         
     }, 700); // Esperar a que termine fadeOut
 }
+
+
 
 function detenerRotacion() {
     if (logoRotationTimer) {
@@ -1812,7 +1911,25 @@ function aplicarAnimacionPorTipo(elemento, tipoAnimacion, mostrar, duracion) {
             elemento.style.transform = mostrar ? 'translateX(0)' : 'translateX(100%)';
             elemento.style.opacity = mostrar ? '1' : '0';
             break;
+        case 'SLIDE_IN_TOP':
+            elemento.style.transform = mostrar ? 'translateY(0)' : 'translateY(-100%)';
+            elemento.style.opacity = mostrar ? '1' : '0';
+            break;
             
+        case 'SLIDE_IN_BOTTOM':
+            elemento.style.transform = mostrar ? 'translateY(0)' : 'translateY(100%)';
+            elemento.style.opacity = mostrar ? '1' : '0';
+            break;
+            
+        case 'SLIDE_OUT_TOP':
+            elemento.style.transform = mostrar ? 'translateY(0)' : 'translateY(-100%)';
+            elemento.style.opacity = mostrar ? '1' : '0';
+            break;
+            
+        case 'SLIDE_OUT_BOTTOM':
+            elemento.style.transform = mostrar ? 'translateY(0)' : 'translateY(100%)';
+            elemento.style.opacity = mostrar ? '1' : '0';
+            break;    
         case 'FADE_IN':
         case 'FADE_OUT':
             elemento.style.opacity = mostrar ? '1' : '0';
@@ -1874,7 +1991,7 @@ function aplicarAnimacionPorTipo(elemento, tipoAnimacion, mostrar, duracion) {
                 }, 16);
             }
             break;
-            case 'WIPE_IN_TOP': {
+        case 'WIPE_IN_TOP': {
             console.log(`🎭 WIPE_IN_TOP - mostrar: ${mostrar}, duración: ${duracion}ms`);
             const easingTop = window.TIPOS_EASING?.[window.animacionConfig?.publicidad?.easing] || 'ease-in-out';
             const delayTop = window.animacionConfig?.publicidad?.delay ?? 0;
@@ -1897,7 +2014,7 @@ function aplicarAnimacionPorTipo(elemento, tipoAnimacion, mostrar, duracion) {
             break;
             }
 
-            case 'WIPE_OUT_BOTTOM': {
+        case 'WIPE_OUT_BOTTOM': {
             console.log(`🎭 WIPE_OUT_BOTTOM - mostrar: ${mostrar}, duración: ${duracion}ms`);
             const easingBot = window.TIPOS_EASING?.[window.animacionConfig?.publicidad?.easing] || 'ease-in-out';
             const delayBot = window.animacionConfig?.publicidad?.delay ?? 0;
@@ -1937,73 +2054,23 @@ function LowerThirdsInvitadoFirebase(graficoInvitadoRol, graficoInvitadoRolH1, g
     console.log(`🔥 LowerThirdsInvitadoFirebase: ${isVisible ? 'MOSTRAR' : 'OCULTAR'}`);
     console.log('📊 Usando configuración Firebase:', animacionConfig.invitadoRol);
 
-    aplicarAnimacionDinamica(graficoInvitadoRol, 'invitadoRol', isVisible);
-}
-
-// Nueva función para manejar visibilidad con animaciones Firebase
-// ✅ Reemplaza toda tu función por esta versión
-function manejarVisibilidadElementosConFirebase(visibilidad) {
-  console.log("👁️ Flags desde DB (con animaciones Firebase):", visibilidad);
-
-  const refs = {
-    invitadoRol: {
-      el: document.getElementById('grafico-invitado-rol'),
-      visible: !!visibilidad.graficoAlAire
-    },
-    tema: {
-      el: document.getElementById('grafico-tema'),
-      visible: !!visibilidad.temaAlAire
-    },
-    publicidad: {
-      el: document.getElementById('grafico-publicidad'),
-      visible: !!visibilidad.publicidadAlAire
-    }
-  };
-
-  Object.entries(refs).forEach(([tipo, cfg]) => {
-    const el = cfg.el;
-    if (!el) return;
-
-    const isVisible = el.style.display !== 'none';
-    if (cfg.visible === isVisible) {
-      console.log(`⏭️ ${tipo}: Sin cambios (${isVisible ? 'visible' : 'oculto'})`);
-      return;
-    }
-
-    console.log(`🔄 ${tipo}: ${isVisible ? 'visible' : 'oculto'} → ${cfg.visible ? 'visible' : 'oculto'}`);
-
-    if (cfg.visible) {
-      el.style.display = (tipo === 'invitadoRol') ? 'flex' : 'block';
-      aplicarAnimacionDinamica(el, tipo, true);
-
-      if (window.currentConfig?.modoAutomatico && window.currentConfig?.habilitarOcultamientoAutomatico) {
-        cancelAutomaticTimer(tipo);
-        iniciarTemporizadorAutomatico(tipo);
-      }
+    // 🆕 SINCRONIZAR FONDO DEL LOGO CON ANIMACIÓN DE INVITADO
+    const animCfg = animacionConfig.invitadoRol || {};
+    const delay = Number(animCfg.delay) || 100;
+    
+    if (isVisible) {
+        // MOSTRAR: Animar fondo del logo junto con el lower third
+        animarFondoLogo(true, 400, delay);
     } else {
-      // 🔸 Animar salida y ocultar SOLO al final
-      const animCfg = window.animacionConfig?.[tipo] || window.animacionConfig?.invitadoRol || {};
-      const total = (Number(animCfg.delay) || 0) + (Number(animCfg.duracion) || 600) + 50;
-
-      aplicarAnimacionDinamica(el, tipo, false);
-
-      let fin = false;
-      const onEnd = () => {
-        if (fin) return;
-        fin = true;
-        el.style.display = 'none';
-        el.removeEventListener('transitionend', onEnd);
-        console.log(`✅ TRANSICIÓN FIN (${tipo})`);
-      };
-
-      el.addEventListener('transitionend', onEnd, { once: true });
-      setTimeout(onEnd, total); // Fallback
-      cancelAutomaticTimer(tipo);
+        // OCULTAR: Solo ocultar fondo si no hay tema visible
+        const temaVisible = document.getElementById('grafico-tema')?.style.display !== 'none';
+        if (!temaVisible) {
+            animarFondoLogo(false, 400, delay);
+        }
     }
-  });
 
-    // 🔄 ROTACIÓN DE LOGOS
-    configurarRotacionEnVisibilidad(visibilidad);
+
+    aplicarAnimacionDinamica(graficoInvitadoRol, 'invitadoRol', isVisible);
 }
 
 
@@ -2055,6 +2122,12 @@ function mostrarFaseInvitadoRol(contenidos, duracionInvitado, duracionTema) {
   h2.textContent = contenidos.rol;
   
   console.log('   Mostrando:', { invitado: contenidos.invitado, rol: contenidos.rol });
+  
+  // 🆕 MOSTRAR FONDO DEL LOGO AL INICIAR SECUENCIA
+  const animCfg = animacionConfig.invitadoRol || {};
+  const delay = Number(animCfg.delay) || 100;
+  animarFondoLogo(true, 400, delay);
+
   
   // Mostrar con animación existente
   LowerThirdsInvitadoFirebase(contenedor, h1, h2, true);
@@ -2116,6 +2189,8 @@ function mostrarFaseTemaEnMismoContenedor(contenidos, duracionTema) {
   h2.style.display = ''; // por si quedó en 'none' por alguna razón
 
   console.log('   Mostrando tema:', contenidos.tema);
+  // 🆕 MANTENER FONDO DEL LOGO (ya está visible, no necesita re-animar)
+  console.log('🎨 Manteniendo fondo del logo visible para tema');
 
   // Animación existente (el contenedor ya tiene tamaño estable)
   LowerThirdsInvitadoFirebase(contenedor, h1, h2, true);
@@ -2135,7 +2210,6 @@ function integrarSecuenciaEnProcesamiento(data) {
 }
 
 
-// 🔄 FUNCIONES ACTUALIZADAS PARA SINCRONIZAR CON FIREBASE
 
 // 📡 FUNCIÓN PARA ACTUALIZAR FIREBASE
 async function actualizarFirebaseSecuencia(estado, razon = '') {
@@ -2167,6 +2241,11 @@ async function finalizarSecuenciaCompleta() {
     h2.style.display = '';
   }
 
+  // 🆕 OCULTAR FONDO DEL LOGO AL FINALIZAR
+  const animCfg = animacionConfig.invitadoRol || {};
+  const delay = Number(animCfg.delay) || 0;
+  animarFondoLogo(false, 400, delay);
+
   LowerThirdsInvitadoFirebase(contenedor, h1, h2, false);
 
   // ← limpiar alto fijado
@@ -2194,6 +2273,9 @@ async function cancelarSecuenciaCompleta() {
   const contenedor = document.getElementById('grafico-invitado-rol');
   const h1 = contenedor?.querySelector('h1');
   const h2 = contenedor?.querySelector('h2');
+
+  // 🆕 OCULTAR FONDO DEL LOGO AL CANCELAR
+  animarFondoLogo(false, 400, 0);
 
   if (contenedor && contenedor.style.display !== 'none') {
     LowerThirdsInvitadoFirebase(contenedor, h1, h2, false);
@@ -2324,7 +2406,8 @@ function getAnimCfg(tipo) {
     return merged;
 }
 
-// 🔧 MEJORAR: función swapLogo con mejor logging
+
+// 🔧 MODIFICAR swapLogo() - APLICAR FONDO EN CADA CAMBIO
 function swapLogo(nextUrl, nextAlt = '') {
     const logoEl = document.getElementById('logo-img') || document.getElementById('logo');
     if (!logoEl || !nextUrl) {
@@ -2351,9 +2434,309 @@ function swapLogo(nextUrl, nextAlt = '') {
         logoEl.src = nextUrl;
         if (nextAlt) logoEl.alt = nextAlt;
         
+        // 🆕 APLICAR FONDO DESPUÉS DEL CAMBIO
+        //aplicarFondoLogo(logoEl);
+        
         console.log(`✅ Logo cambiado a: ${nextAlt || 'Logo'}`);
 
         // ENTRADA (WIPE_IN_TOP por defecto)
         aplicarAnimacionDinamica(logoEl, 'logo', true);
     }, tSwap);
+}
+
+
+//
+
+
+
+// 🔧 MODIFICAR aplicarImagenes() - AGREGAR LLAMADA AL FONDO
+function aplicarImagenes(urls) {
+    console.log("🖼️ Aplicando URLs de imágenes:", urls);
+    
+    if (urls.logoUrl) {
+        const logo = document.getElementById('logo');
+        if (logo) {
+            logo.src = urls.logoUrl;
+            
+            // 🆕 APLICAR FONDO DESPUÉS DE CARGAR LA IMAGEN
+            //aplicarFondoLogo(logo);
+            
+            console.log('✅ Logo cargado:', urls.logoUrl);
+        }
+    }
+    
+    if (urls.publicidadUrl && esUrlPublicidadValida(urls.publicidadUrl)) {
+        const pubImg = document.getElementById('publicidad-img');
+        if (pubImg) {
+            pubImg.src = urls.publicidadUrl;
+            console.log('✅ Publicidad cargada:', urls.publicidadUrl);
+        }
+    } else if (urls.publicidadUrl) {
+        // URL existe pero es inválida
+        console.log(`⚠️ URL de publicidad inválida ignorada: "${urls.publicidadUrl}"`);
+    }
+}
+
+function esUrlPublicidadValida(url) {
+    // Verificaciones básicas
+    if (!url || typeof url !== 'string') return false;
+    
+    const urlLimpia = url.trim();
+    
+    // Rechazar casos problemáticos específicos
+    if (urlLimpia === '' || 
+        urlLimpia === 'null' || 
+        urlLimpia === 'undefined' || 
+        urlLimpia.length < 8) {
+        return false;
+    }
+    
+    // Verificar que tenga protocolo
+    if (!urlLimpia.startsWith('http://') && 
+        !urlLimpia.startsWith('https://') && 
+        !urlLimpia.startsWith('data:')) {
+        return false;
+    }
+    
+    return true;
+}
+
+
+
+
+// 🔧 AGREGAR AL FINAL DE firebase-logic.js
+// ====== HACER FUNCIONES DISPONIBLES GLOBALMENTE ======
+
+// 🌍 OBJETO GLOBAL DE DEBUG
+window.StreamDebug = {
+    
+    // ✅ Funciones principales de visibilidad
+    mostrarInvitado: function() {
+        console.log('🚀 FORZANDO MOSTRAR INVITADO...');
+        const datosTest = {
+            graficoAlAire: true,
+            temaAlAire: false, 
+            logoAlAire: false,
+            publicidadAlAire: false
+        };
+        manejarVisibilidadElementosConFirebase(datosTest);
+    },
+    
+    ocultarInvitado: function() {
+        console.log('🚀 FORZANDO OCULTAR INVITADO...');
+        const datosTest = {
+            graficoAlAire: false,
+            temaAlAire: false, 
+            logoAlAire: false,
+            publicidadAlAire: false
+        };
+        manejarVisibilidadElementosConFirebase(datosTest);
+    },
+    
+    // ✅ Debug y análisis
+    debug: function() {
+        console.group('🔍 DEBUG COMPLETO DEL LOWER THIRD');
+        
+        const el = document.getElementById('grafico-invitado-rol');
+        const h1 = el?.querySelector('h1');
+        const h2 = el?.querySelector('h2');
+        
+        console.log('📦 ELEMENTOS:');
+        console.log('   Contenedor:', el ? '✅ Encontrado' : '❌ No encontrado');
+        console.log('   H1:', h1 ? '✅ Encontrado' : '❌ No encontrado');
+        console.log('   H2:', h2 ? '✅ Encontrado' : '❌ No encontrado');
+        
+        if (el) {
+            const styles = window.getComputedStyle(el);
+            console.log('🎨 ESTILOS COMPUTADOS:');
+            console.log('   Display:', styles.display);
+            console.log('   Opacity:', styles.opacity);
+            console.log('   Transform:', styles.transform);
+            console.log('   Position:', styles.position);
+            console.log('   Left:', styles.left);
+            console.log('   Bottom:', styles.bottom);
+            console.log('   Z-index:', styles.zIndex);
+            
+            console.log('🎨 ESTILOS INLINE:');
+            console.log('   Display:', el.style.display);
+            console.log('   Opacity:', el.style.opacity);
+            console.log('   Transform:', el.style.transform);
+            
+            const rect = el.getBoundingClientRect();
+            console.log('📍 POSICIÓN:', rect);
+            console.log('¿Visible?:', rect.width > 0 && rect.height > 0);
+            
+            if (h1) {
+                console.log('📝 H1:', {
+                    texto: h1.textContent,
+                    color: h1.style.color,
+                    display: h1.style.display
+                });
+            }
+            
+            if (h2) {
+                console.log('📝 H2:', {
+                    texto: h2.textContent,
+                    color: h2.style.color,
+                    display: h2.style.display
+                });
+            }
+        }
+        
+        console.log('⚙️ CONFIGURACIÓN:');
+        console.log('   Animation Config:', window.animacionConfig?.invitadoRol);
+        console.log('   Current Config:', window.currentConfig);
+        
+        console.groupEnd();
+    },
+    
+    // ✅ Mostrar directamente sin animaciones
+    forzarMostrar: function() {
+        console.log('🚀 FORZANDO MOSTRAR DIRECTAMENTE...');
+        
+        const el = document.getElementById('grafico-invitado-rol');
+        const h1 = el?.querySelector('h1');
+        const h2 = el?.querySelector('h2');
+        
+        if (!el) {
+            console.error('❌ Elemento no encontrado');
+            return;
+        }
+        
+        // Aplicar estilos directos
+        el.style.display = 'flex';
+        el.style.position = 'absolute';
+        el.style.left = '100px';
+        el.style.bottom = '34px';
+        el.style.background = '#CCCCCC';
+        el.style.padding = '10px 20px';
+        el.style.opacity = '1';
+        el.style.transform = 'translateY(0)';
+        el.style.clipPath = 'none';
+        el.style.zIndex = '1000';
+        el.style.visibility = 'visible';
+        
+        if (h1) {
+            h1.style.color = '#043884';
+            h1.style.display = 'block';
+            h1.style.opacity = '1';
+            h1.textContent = 'INVITADO DE PRUEBA';
+        }
+        
+        if (h2) {
+            h2.style.color = '#000000';
+            h2.style.display = 'block';
+            h2.style.opacity = '1';
+            h2.textContent = 'ROL DE PRUEBA';
+        }
+        
+        console.log('✅ Elemento forzado a mostrar');
+        this.debug();
+    },
+    
+    // ✅ Limpiar estilos de debug
+    limpiar: function() {
+        const el = document.getElementById('grafico-invitado-rol');
+        if (el) {
+            el.style.display = 'none';
+            el.style.background = '';
+            el.style.padding = '';
+            el.style.opacity = '';
+            el.style.transform = '';
+            el.style.clipPath = '';
+            el.style.zIndex = '';
+            console.log('🧹 Estilos limpiados');
+        }
+    },
+    
+    // ✅ Probar solo animación
+    probarAnimacion: function() {
+        console.log('🎬 PROBANDO SOLO ANIMACIÓN...');
+        
+        const el = document.getElementById('grafico-invitado-rol');
+        if (!el) {
+            console.error('❌ Elemento no encontrado');
+            return;
+        }
+        
+        el.style.display = 'flex';
+        console.log('📊 Config de animación:', window.animacionConfig?.invitadoRol);
+        
+        if (typeof aplicarAnimacionDinamica === 'function') {
+            aplicarAnimacionDinamica(el, 'invitadoRol', true);
+        } else {
+            console.error('❌ Función aplicarAnimacionDinamica no disponible');
+        }
+    },
+    
+    // ✅ Ver estado de Firebase
+    estadoFirebase: function() {
+        console.log('🔥 ESTADO FIREBASE:');
+        console.log('   Animation Config:', window.animacionConfig);
+        console.log('   Current Config:', window.currentConfig);
+        console.log('   Logo Config:', window.logoConfig);
+    },
+    
+    // ✅ Ayuda
+    ayuda: function() {
+        console.log('🔧 COMANDOS DISPONIBLES:');
+        console.log('   StreamDebug.mostrarInvitado() - Mostrar invitado con animación');
+        console.log('   StreamDebug.forzarMostrar() - Mostrar directo sin animación');
+        console.log('   StreamDebug.debug() - Análisis completo del estado');
+        console.log('   StreamDebug.probarAnimacion() - Probar solo la animación');
+        console.log('   StreamDebug.limpiar() - Limpiar estilos de debug');
+        console.log('   StreamDebug.estadoFirebase() - Ver configuración de Firebase');
+        console.log('   StreamDebug.ayuda() - Esta ayuda');
+    }
+};
+
+// 🔧 FUNCIONES INDIVIDUALES TAMBIÉN (para compatibilidad)
+window.debugLowerThird = function() { StreamDebug.debug(); };
+window.forzarMostrarLowerThird = function() { StreamDebug.forzarMostrar(); };
+window.verificarEstadoInvitado = function() { StreamDebug.debug(); };
+
+// 🎯 MENSAJE DE BIENVENIDA
+console.log('🔧 DEBUG TOOLS CARGADOS');
+console.log('   Escribe: StreamDebug.ayuda()');
+console.log('   O directamente: StreamDebug.mostrarInvitado()');
+
+// 🔧 AUTO-DIAGNÓSTICO AL CARGAR
+setTimeout(() => {
+    console.log('🔍 Auto-diagnóstico después de cargar Firebase...');
+    StreamDebug.debug();
+}, 5000);
+
+
+// ===== TEST 1: DESHABILITAR TODOS LOS TEMPORIZADORES =====
+function testSinTemporizadores() {
+    console.log('🧪 TEST 1: Deshabilitando TODOS los temporizadores');
+    
+    // Deshabilitar completamente el modo automático
+    if (window.currentConfig) {
+        window.currentConfig.modoAutomatico = false;
+        window.currentConfig.habilitarOcultamientoAutomatico = false;
+    }
+    
+    // Limpiar todos los temporizadores existentes
+    if (window._autoTimers) {
+        Object.keys(window._autoTimers).forEach(key => {
+            clearTimeout(window._autoTimers[key]);
+            delete window._autoTimers[key];
+        });
+    }
+    
+    if (window.automaticTimers) {
+        Object.keys(window.automaticTimers).forEach(key => {
+            clearTimeout(window.automaticTimers[key]);
+            delete window.automaticTimers[key];
+        });
+    }
+    
+    console.log('✅ Todos los temporizadores deshabilitados');
+    
+    // Ahora probar mostrar invitado
+    setTimeout(() => {
+        console.log('📱 Probando mostrar invitado SIN temporizadores...');
+        StreamDebug.mostrarInvitado();
+    }, 1000);
 }
