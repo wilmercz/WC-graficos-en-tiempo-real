@@ -1,7 +1,7 @@
 /* ====== BASE (Fallbacks actuales) ====== */
 html, body {
   font-family: Arial, sans-serif;
-  background-color: transparent;
+  background-color: transparent; /* transparent;*/ /*este es un color para pruebas: #302B2B;*/
   margin: 0;
   padding: 0;
   position: relative;
@@ -24,13 +24,13 @@ html, body {
   /* INVITADO/ROL (container y etiquetas) */
   --lt-left: 0px;
   --lt-bottom: 0px;
-  --lt-h: 90px;
+  --lt-h: 93px;
 
   --lt-h1-bg: rgba(16, 102, 220, 1);
   --lt-h1-fg: rgba(255, 255, 255, 1);
   --lt-h1-font: 16px;
   --lt-h1-pad: 5px 40px 5px 20px;
-  --lt-h1-left: 95px;
+  --lt-h1-left: 100px;
   --lt-h1-bottom: 50px;
   --lt-h1-radius: 0px;
 
@@ -38,22 +38,22 @@ html, body {
   --lt-h2-fg: rgba(255, 255, 255, 1);
   --lt-h2-font: 13px;
   --lt-h2-pad: 3px 35px 3px 20px;
-  --lt-h2-left: 95px;
+  --lt-h2-left: 100px;
   --lt-h2-bottom: 34px;
   --lt-h2-radius: 0px;
 
   /* TEMA (container + h1 + círculo h2) */
   --tema-left: 0px;
   --tema-bottom: 0px;
-  --tema-h: 85px;
+  --tema-h: 87px;
 
   --tema-h1-bg: rgba(16, 50, 100, 1);
   --tema-h1-fg: rgba(225, 255, 255, 1);
   --tema-h1-font: 16px;
   --tema-h1-pad: 15px 15px;
-  --tema-h1-left: 95px;
-  --tema-h1-bottom: 30px;
-  --tema-h1-radius: 0px 5px 5px 0px;
+  --tema-h1-left: 100px;
+  --tema-h1-bottom: 34px;
+  --tema-h1-radius: 12px 12px 12px 12px;
 
   --tema-h2-bg: rgba(16, 102, 255, 1);
   --tema-h2-fg: #ffffff;
@@ -63,16 +63,16 @@ html, body {
   --tema-h2-size: 40px;  /* ancho/alto del círculo */
 
   /* PUBLICIDAD (container + img) */
-  --ads-left: 6px;
-  --ads-bottom: 0px;
+  --ads-left: 120px;
+  --ads-bottom: 20px;
   --ads-img-w: auto;
-  --ads-img-h: 70px;
+  --ads-img-h: 75px;
   --ads-radius: 0px;
 
   /* INVITADO + TEMA*/
    --invtema-left: 0px;
   --invtema-bottom: 0px;
-  --invtema-h: 17px
+  --invtema-h: 16px
 }
 
 /* ====== LOGO ====== */
@@ -90,20 +90,6 @@ html, body {
 
 #logo, #logo-img { will-change: clip-path, opacity; }
 #logo, #logo-container { overflow: hidden; }
-
-
-
-/*SECUENCIA INVITADO Y TEMA*/
-/* Mantener el alto del contenedor mientras dura la secuencia */
-#grafico-invitado-rol.secuencia-activa {
-  /* Valor de respaldo si aún no se fijó por JS */
-  min-height: var(--invtema-h); /* 90px por defecto */
-}
-
-/* En modo solo-tema seguimos conservando el mismo alto */
-#grafico-invitado-rol.secuencia-activa.solo-tema {
-  min-height: var(--invtema-h);
-}
 
 
 /* ====== INVITADO / ROL UNIFICADO ====== */
@@ -146,6 +132,21 @@ html, body {
   will-change: opacity, transform, clip-path;
   backface-visibility: hidden;
 }
+
+
+/*SECUENCIA INVITADO Y TEMA*/
+/* Mantener el alto del contenedor mientras dura la secuencia */
+#grafico-invitado-rol.secuencia-activa {
+  /* Valor de respaldo si aún no se fijó por JS */
+  min-height: var(--invtema-h); /* 90px por defecto */
+}
+
+/* En modo solo-tema seguimos conservando el mismo alto */
+#grafico-invitado-rol.secuencia-activa.solo-tema {
+  min-height: var(--invtema-h);
+}
+
+
 
 /* TÍTULO (INVITADO) - SIN FONDO PROPIO */
 #grafico-invitado-rol h1 {
@@ -221,7 +222,7 @@ html, body {
   border-radius: var(--tema-h1-radius);
   left: var(--tema-h1-left);
   bottom: var(--tema-h1-bottom);
-  transition: all 0.3s ease-in-out;
+  transition: all 0.6s ease-in-out;
 }
 
 /* h2 círculo (fondo del tema) – defaults actuales */
@@ -237,7 +238,7 @@ html, body {
   height: var(--tema-h2-size);
   border-radius: 50%;
   z-index: 4;
-  transition: all 0.3s ease-in-out;
+  transition: all 0.6s ease-in-out;
 }
 
 /* ====== PUBLICIDAD ====== */
@@ -250,7 +251,7 @@ html, body {
   display: flex;
   justify-content: center;
   background: transparent;
-  transition: all 0.3s ease-in-out;
+  transition: all 0.6s ease-in-out;
 }
 
 #grafico-publicidad img {
@@ -258,7 +259,7 @@ html, body {
   height: var(--ads-img-h);
   border-radius: var(--ads-radius);
   object-fit: contain;
-  transition: all 0.3s ease-in-out;
+  transition: all 0.6s ease-in-out;
 }
 
 /* ====== STATUS ====== */
@@ -293,24 +294,23 @@ html, body {
 .slide-in-top {
   opacity: 1;
   transform: translateY(0);
-  transition: opacity 0.30s ease-in-out, transform 0.30s ease-in-out;
+  transition: opacity 0.60s ease-in-out, transform 0.60s ease-in-out;  /* ⬅️ Cambiar 0.40s → 0.60s */
 }
 .slide-out-top {
   opacity: 0;
   transform: translateY(-20px);
-  transition: opacity 0.30s ease-in-out, transform 0.30s ease-in-out;
+  transition: opacity 0.60s ease-in-out, transform 0.60s ease-in-out;  /* ⬅️ Cambiar 0.40s → 0.60s */
 }
 
-/* Opcionales por si usas bottom */
 .slide-in-bottom {
   opacity: 1;
   transform: translateY(0);
-  transition: opacity 0.40s ease-in-out, transform 0.40s ease-in-out;
+  transition: opacity 0.60s ease-in-out, transform 0.60s ease-in-out;  /* ⬅️ Era 0.40s */
 }
 .slide-out-bottom {
   opacity: 0;
   transform: translateY(20px);
-  transition: opacity 0.40s ease-in-out, transform 0.40s ease-in-out;
+  transition: opacity 0.60s ease-in-out, transform 0.60s ease-in-out;  /* ⬅️ Era 0.40s */
 }
 
 
