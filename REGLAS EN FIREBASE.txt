@@ -1,0 +1,22 @@
+REGLA MODIFICADA EL 22 DE SEPTIEMBRE DEL 2024, PARA ACCEDERA LOS DATOS DE LA WEB GRAFICOS DINAMICOS
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "CLAVE_STREAM_FB": {
+      "GRAFICOS_TIEMPO_REAL": {
+        ".read": "auth != null"
+      }
+    }
+  }
+}
+
+
+REGLA ANTERIOR DEL 22 DE SEPTIEMBRE DEL 2024
+
+{
+  "rules": {
+    ".read": "now < 1632718800000",  // 2021-9-27
+    ".write": "now < 1632718800000",  // 2021-9-27
+  }
+}

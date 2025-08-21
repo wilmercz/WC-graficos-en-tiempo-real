@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gráficos en Tiempo Real</title>
+  <style>
+    #grafico {
+      background-color: rgba(0, 0, 0, 0.5);
+      color: white;
+      padding: 10px;
+      border-radius: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div id="grafico">
+    <h1 id="invitado">Cargando...</h1>
+    <h2 id="rol">Cargando...</h2>
+    <p id="tema">Cargando...</p>
+  </div>
+  <div id="status">Estado de la conexión: Desconectado</div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyD0lkEDKhia76E6ef3uU0B1lOH8CyklCnc",
+      authDomain: "arki-service-autoridades.firebaseapp.com",
+      databaseURL: "https://arki-service-autoridades.firebaseio.com",
+      projectId: "arki-service-autoridades",
+      storageBucket: "arki-service-autoridades.appspot.com",
+      messagingSenderId: "829954736380",
+      appId: "1:829954736380:web:c4badfee0e0db02dd69779"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+    
+    console.log('Firebase inicializado');
+
+    const graficoRef = ref(database, 'CLAVE_STREAM_FB/GRAFICOS_TIEMPO_REAL');
+
+    onValue(graficoRef, (snapshot) => {
+      const data = snapshot.val();
+      console.log('Datos recibidos:', data);
+
+      if (data) {
+        document.getElementById('invitado').innerText = data.INVITADO_ACTIVO || 'Sin invitado';
+        document.getElementById('rol').innerText = data.ROL_ACTIVO || 'Sin rol';
+        document.getElementById('tema').innerText = data.TEMA_ACTIVO || 'Sin tema';
+        
+        const grafico = document.getElementById('grafico');
+        grafico.style.display = data.GRAFICO_AL_AIRE ? 'block' : 'none';
+        
+        document.getElementById('status').innerText = 'Estado de la conexión: Conectado y actualizado';
+      } else {
+        console.log('No se recibieron datos');
+        document.getElementById('status').innerText = 'Estado de la conexión: Conectado, pero sin datos';
+      }
+    }, (error) => {
+      console.error('Error al leer datos:', error);
+      document.getElementById('status').innerText = 'Estado de la conexión: Error - ' + error.message;
+    });
+  </script>
+</body>
+</html>
