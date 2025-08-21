@@ -1116,4 +1116,264 @@ window.aplicarAnimacionDinamica = (element, type, show, config) => {
     return animationEngine.applyDynamicAnimation(element, type, show, config);
 };
 
+
 console.log('🎬 Animation Engine module loaded');
+
+// 🎨 Enhanced Logo Animations - Extensión para AnimationEngine
+// Agregar DESPUÉS de: console.log('🎬 Animation Engine module loaded');
+
+// Agregar nuevos tipos de animación al engine existente
+const ENHANCED_LOGO_ANIMATIONS = {
+    // 🔄 FLIP 3D - Recomendado #1
+    'LOGO_FLIP_3D_IN': {
+        prepare: (element) => {
+            element.style.transformStyle = 'preserve-3d';
+            element.style.backfaceVisibility = 'hidden';
+            element.style.transform = 'rotateY(-180deg)';
+            element.style.opacity = '1';
+        },
+        animate: (element) => {
+            element.style.transform = 'rotateY(0deg)';
+        },
+        cleanup: (element) => {
+            element.style.transformStyle = '';
+            element.style.backfaceVisibility = '';
+        }
+    },
+    
+    'LOGO_FLIP_3D_OUT': {
+        prepare: (element) => {
+            element.style.transformStyle = 'preserve-3d';
+            element.style.backfaceVisibility = 'hidden';
+        },
+        animate: (element) => {
+            element.style.transform = 'rotateY(180deg)';
+            element.style.opacity = '1';
+        }
+    },
+
+    // ⚡ ZOOM + ROTATE - Recomendado #2
+    'LOGO_ZOOM_ROTATE_IN': {
+        prepare: (element) => {
+            element.style.transform = 'scale(0) rotate(-360deg)';
+            element.style.opacity = '1';
+        },
+        animate: (element) => {
+            element.style.transform = 'scale(1) rotate(0deg)';
+        }
+    },
+    
+    'LOGO_ZOOM_ROTATE_OUT': {
+        animate: (element) => {
+            element.style.transform = 'scale(0) rotate(360deg)';
+            element.style.opacity = '1';
+        }
+    },
+
+    // 🎲 CUBE ROTATE - Recomendado #3
+    'LOGO_CUBE_IN': {
+        prepare: (element) => {
+            element.style.transformStyle = 'preserve-3d';
+            element.style.transform = 'rotateX(-90deg) rotateY(-90deg)';
+            element.style.opacity = '1';
+        },
+        animate: (element) => {
+            element.style.transform = 'rotateX(0deg) rotateY(0deg)';
+        },
+        cleanup: (element) => {
+            element.style.transformStyle = '';
+        }
+    },
+    
+    'LOGO_CUBE_OUT': {
+        prepare: (element) => {
+            element.style.transformStyle = 'preserve-3d';
+        },
+        animate: (element) => {
+            element.style.transform = 'rotateX(90deg) rotateY(90deg)';
+            element.style.opacity = '1';
+        }
+    },
+
+    // 🌪️ SLIDE + SPIN
+    'LOGO_SLIDE_SPIN_IN': {
+        prepare: (element) => {
+            element.style.transform = 'translateX(-200%) rotate(-720deg)';
+            element.style.opacity = '1';
+        },
+        animate: (element) => {
+            element.style.transform = 'translateX(0%) rotate(0deg)';
+        }
+    },
+    
+    'LOGO_SLIDE_SPIN_OUT': {
+        animate: (element) => {
+            element.style.transform = 'translateX(200%) rotate(720deg)';
+            element.style.opacity = '1';
+        }
+    },
+
+    // 🎾 BOUNCE ELASTIC
+    'LOGO_BOUNCE_IN': {
+        prepare: (element) => {
+            element.style.transform = 'scale(0)';
+            element.style.opacity = '1';
+        },
+        animate: (element) => {
+            element.style.animation = 'logoBouncyIn 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards';
+        },
+        cleanup: (element) => {
+            element.style.animation = '';
+            element.style.transform = 'scale(1)';
+        }
+    },
+    
+    'LOGO_BOUNCE_OUT': {
+        animate: (element) => {
+            element.style.animation = 'logoBouncyOut 0.6s cubic-bezier(0.55, 0.085, 0.68, 0.53) forwards';
+        },
+        cleanup: (element) => {
+            element.style.animation = '';
+        }
+    },
+
+    // 💧 LIQUID MORPH
+    'LOGO_LIQUID_IN': {
+        prepare: (element) => {
+            element.style.transform = 'scale(0.3)';
+            element.style.filter = 'blur(3px)';
+            element.style.borderRadius = '50%';
+            element.style.opacity = '1';
+        },
+        animate: (element) => {
+            element.style.animation = 'logoLiquidIn 1s cubic-bezier(0.23, 1, 0.32, 1) forwards';
+        },
+        cleanup: (element) => {
+            element.style.animation = '';
+            element.style.filter = '';
+            element.style.transform = 'scale(1)';
+        }
+    }
+};
+
+// 🔧 Extensión del AnimationEngine existente
+AnimationEngine.prototype.applyEnhancedLogoAnimation = function(element, animationType, show, config = {}) {
+    if (!element) return;
+    
+    console.log(`🎨 Aplicando animación mejorada: ${animationType} (${show ? 'IN' : 'OUT'})`);
+    
+    const animConfig = this.getAnimationConfig('logo', config);
+    const duration = animConfig.duracion || 600;
+    const delay = animConfig.delay || 0;
+    const easing = this.easingTypes[animConfig.easing] || 'ease-in-out';
+    
+    // Construir nombre completo de animación
+    const fullAnimationType = show ? 
+        `${animationType}_IN` : 
+        `${animationType}_OUT`;
+    
+    const animation = ENHANCED_LOGO_ANIMATIONS[fullAnimationType];
+    
+    if (!animation) {
+        console.warn(`❌ Animación no encontrada: ${fullAnimationType}`);
+        // Fallback a animación básica
+        return this.applyDynamicAnimationFromOldSystem(element, 'logo', show, config);
+    }
+    
+    // Configurar transición
+    element.style.transition = `all ${duration}ms ${easing} ${delay}ms`;
+    
+    // Preparar estado inicial
+    if (animation.prepare) {
+        animation.prepare(element);
+    }
+    
+    // Ejecutar animación después del delay
+    setTimeout(() => {
+        if (animation.animate) {
+            animation.animate(element);
+        }
+    }, delay + 16);
+    
+    // Cleanup después de completar
+    if (animation.cleanup) {
+        setTimeout(() => {
+            animation.cleanup(element);
+        }, duration + delay + 100);
+    }
+    
+    // Para animaciones de salida, ocultar elemento al final
+    if (!show) {
+        setTimeout(() => {
+            element.style.display = 'none';
+        }, duration + delay + 150);
+    } else {
+        element.style.display = 'block';
+    }
+};
+
+// 🚀 Configuraciones predefinidas recomendadas
+const RECOMMENDED_LOGO_CONFIGS = {
+    // Para logos de marca corporativa
+    corporate: {
+        entrada: 'LOGO_FLIP_3D',
+        salida: 'LOGO_FLIP_3D',
+        duracion: 600,
+        delay: 0,
+        easing: 'EASE_IN_OUT'
+    },
+    
+    // Para logos más dinámicos/deportivos
+    dynamic: {
+        entrada: 'LOGO_ZOOM_ROTATE',
+        salida: 'LOGO_ZOOM_ROTATE',
+        duracion: 500,
+        delay: 0,
+        easing: 'BOUNCE'
+    },
+    
+    // Para efectos dramáticos
+    dramatic: {
+        entrada: 'LOGO_CUBE',
+        salida: 'LOGO_CUBE',
+        duracion: 800,
+        delay: 100,
+        easing: 'EASE_IN_OUT'
+    },
+    
+    // Para logos más creativos/artísticos
+    creative: {
+        entrada: 'LOGO_LIQUID',
+        salida: 'LOGO_BOUNCE',
+        duracion: 1000,
+        delay: 0,
+        easing: 'ELASTIC'
+    }
+};
+
+// 📝 Función helper para aplicar configuración recomendada
+function applyRecommendedLogoConfig(type = 'corporate') {
+    const config = RECOMMENDED_LOGO_CONFIGS[type];
+    if (!config) {
+        console.warn(`❌ Configuración no encontrada: ${type}`);
+        return;
+    }
+    
+    // Actualizar configuración global
+    window.animacionConfig = window.animacionConfig || {};
+    window.animacionConfig.logo = {
+        ...window.animacionConfig.logo,
+        ...config
+    };
+    
+    console.log(`✅ Configuración de logo aplicada: ${type}`, config);
+}
+
+// 🔧 Hacer disponibles las funciones globalmente
+window.EnhancedLogoAnimations = {
+    apply: applyRecommendedLogoConfig,
+    configs: RECOMMENDED_LOGO_CONFIGS,
+    animations: ENHANCED_LOGO_ANIMATIONS
+};
+
+console.log('🎨 Enhanced Logo Animations loaded');

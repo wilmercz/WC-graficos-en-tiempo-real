@@ -1212,3 +1212,129 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 console.log('🎭 Main application module loaded');
+
+// ===== ACTIVACIÓN AUTOMÁTICA DE ANIMACIONES ENHANCED =====
+document.addEventListener('DOMContentLoaded', () => {
+    // Esperar a que todo esté cargado
+    setTimeout(() => {
+        console.log('🎨 Activando animaciones Enhanced automáticamente...');
+        
+        // 1. CONFIGURACIÓN FIJA DE ANIMACIONES ENHANCED
+        window.animacionConfig = window.animacionConfig || {};
+        window.animacionConfig.logo = {
+            entrada: 'LOGO_FLIP_3D',
+            salida: 'LOGO_FLIP_3D',
+            duracion: 600,
+            delay: 0,
+            easing: 'EASE_IN_OUT'
+        };
+
+        // 2. PROTEGER CONFIGURACIÓN CONTRA SOBRESCRITURA
+        Object.defineProperty(window.animacionConfig, 'logo', {
+            value: {
+                entrada: 'LOGO_FLIP_3D',
+                salida: 'LOGO_FLIP_3D', 
+                duracion: 600,
+                delay: 0,
+                easing: 'EASE_IN_OUT'
+            },
+            writable: false,
+            configurable: false
+        });
+
+        // 3. FORZAR MÉTODOS ENHANCED
+        if (window.StreamModules?.logoManager) {
+            const logoManager = window.StreamModules.logoManager;
+            
+            // Backup de métodos originales
+            logoManager._originalAnimateIn = logoManager.animateIn;
+            logoManager._originalAnimateOut = logoManager.animateOut;
+            logoManager._originalChangeLogo = logoManager.changeLogo;
+            
+            // Reemplazar con versiones Enhanced
+            logoManager.animateIn = function() {
+                if (this.animateInEnhanced) {
+                    this.animateInEnhanced();
+                } else {
+                    this._originalAnimateIn();
+                }
+            };
+            
+            logoManager.animateOut = function() {
+                if (this.animateOutEnhanced) {
+                    this.animateOutEnhanced();
+                } else {
+                    this._originalAnimateOut();
+                }
+            };
+            
+            logoManager.changeLogo = function(targetLogo, nextDuration = null) {
+                if (this.changeLogoEnhanced) {
+                    this.changeLogoEnhanced(targetLogo, nextDuration);
+                } else {
+                    this._originalChangeLogo(targetLogo, nextDuration);
+                }
+            };
+
+            // 4. TIMING MEJORADO PARA CHANGELOGO
+            logoManager.changeLogoEnhanced = function(targetLogo, nextDuration = null) {
+                if (!this.element) return;
+
+                const realDuration = 600;
+                const realDelay = 200;
+
+                // Aplicar animación de salida
+                this.animateOutEnhanced();
+
+                // Timing optimizado
+                setTimeout(() => {
+                    this.element.src = targetLogo.url;
+                    this.element.alt = targetLogo.alt;
+
+                    // Entrada después de cambiar
+                    setTimeout(() => {
+                        this.animateInEnhanced();
+                    }, 100);
+                }, realDuration + 200);
+
+                console.log(`🎨 Logo Enhanced: ${targetLogo.name}`);
+            };
+            
+            console.log('✅ Animaciones Enhanced activadas permanentemente');
+        }
+        
+    }, 3000); // Esperar 3 segundos para que todo esté cargado
+});
+
+// ===== FUNCIONES GLOBALES PARA CAMBIAR ANIMACIONES =====
+window.changeLogoAnimation = function(type) {
+    const configs = {
+        'flip': 'LOGO_FLIP_3D',      // Corporativo elegante
+        'zoom': 'LOGO_ZOOM_ROTATE',  // Dinámico deportivo  
+        'cube': 'LOGO_CUBE',         // Dramático impactante
+        'spin': 'LOGO_SLIDE_SPIN',   // Energético divertido
+        'bounce': 'LOGO_BOUNCE',     // Juguetón rebote
+        'liquid': 'LOGO_LIQUID'      // Artístico fluido
+    };
+    
+    const animationType = configs[type];
+    if (!animationType) {
+        console.warn('❌ Tipos disponibles: flip, zoom, cube, spin, bounce, liquid');
+        return;
+    }
+    
+    // Aplicar nueva configuración
+    window.animacionConfig.logo.entrada = animationType;
+    window.animacionConfig.logo.salida = animationType;
+    
+    console.log(`🎨 Animación cambiada a: ${type.toUpperCase()} (${animationType})`);
+    
+    // Probar inmediatamente
+    if (window.StreamModules?.logoManager) {
+        setTimeout(() => {
+            window.StreamModules.logoManager.rotateNext();
+        }, 500);
+    }
+};
+
+console.log('🎨 Sistema de animaciones Enhanced cargado permanentemente');

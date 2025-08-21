@@ -13,7 +13,8 @@ export class Clock {
         // ✅ MEJORADO: Configuración más robusta
         this.config = {
             position: {
-                left: 'var(--logo-left, 45px)',
+                //left: 'var(--logo-left, 45px)',
+                left: 'calc(var(--logo-left, 45px) - 5px)',
                 bottom: 'calc(var(--logo-bottom, 33px) - 25px)'
             },
             style: {
@@ -21,8 +22,9 @@ export class Clock {
                 color: 'white',
                 padding: '2px 8px',
                 borderRadius: '4px',
-                fontSize: '12px',
+                fontSize: '13px',
                 fontFamily: "'Courier New', monospace",
+                fontWeight: 'bold',
                 zIndex: '999',
                 transition: 'opacity 0.3s ease',
                 pointerEvents: 'none', // ✅ NUEVO: No interferir con clicks

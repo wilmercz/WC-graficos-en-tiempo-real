@@ -318,13 +318,21 @@ export class LogoManager {
     changeLogo(targetLogo, nextDuration = null) {
         if (!this.element) return;
 
+        /* dtos obtenidos de firebase
         // Obtener duración real de animación desde configuración
         const realDuration = window.animacionConfig?.logo?.duracion || 700;
         const realDelay = window.animacionConfig?.logo?.delay || 0;
+        */
+
+        // 🔧 TIMING CORREGIDO: Más rápido y fluido
+        const realDuration = 300;  // 🎯 FIJO: Era variable 700ms → 300ms fijo
+        const realDelay = 0;       // Sin delay
+        const changeBuffer = 50;   // 🎯 REDUCIDO: Era +100ms → +50ms
 
         // Aplicar animación de salida
         this.animateOut();
 
+        /* DESACTIVADO 2025-08-21
         // Cambiar logo después de la animación de salida COMPLETA
         setTimeout(() => {
             this.element.src = targetLogo.url;
@@ -335,6 +343,17 @@ export class LogoManager {
                 this.animateIn();
             });
         }, realDuration + realDelay + 100); // Tiempo suficiente
+        */
+
+        // 🚀 CAMBIO PRINCIPAL: Tiempo mucho más corto
+            setTimeout(() => {
+                this.element.src = targetLogo.url;
+                this.element.alt = targetLogo.alt;
+
+                // 🎯 ENTRADA INMEDIATA: Sin requestAnimationFrame innecesario
+                this.animateIn();
+                
+            }, realDuration + changeBuffer); // 🔥 350ms total (era 800ms)
 
         console.log(`🔄 Cambiando logo a: ${targetLogo.name}`);
         console.log(`🎬 URL: ${targetLogo.url}`);
@@ -354,7 +373,7 @@ export class LogoManager {
 
     /**
      * Aplicar animación de entrada
-     */
+     
     animateIn() {
         if (!this.element) return;
 
@@ -373,10 +392,44 @@ export class LogoManager {
             }, this.animations.delay + 16);
         }
     }
+    */
+
+    animateIn() {
+        if (!this.element) return;
+
+        this.element.style.display = 'block';
+
+        // 🎨 NUEVO: Intentar usar animación mejorada primero
+        const animationType = window.animacionConfig?.logo?.entrada;
+        const useEnhanced = animationType && animationType.startsWith('LOGO_') && 
+                        window.StreamGraphicsApp?.modules?.animations?.applyEnhancedLogoAnimation;
+
+        if (useEnhanced) {
+            console.log('🎨 Usando animación mejorada para logo IN');
+            window.StreamGraphicsApp.modules.animations.applyEnhancedLogoAnimation(
+                this.element, 
+                animationType, 
+                true
+            );
+        } else {
+            // Usar sistema de animación existente si está disponible
+            if (window.aplicarAnimacionDinamica) {
+                window.aplicarAnimacionDinamica(this.element, 'logo', true);
+            } else {
+                // Fallback simple
+                this.element.style.opacity = '0';
+                this.element.style.transition = `opacity ${this.animations.duration}ms ${this.animations.easing}`;
+                
+                setTimeout(() => {
+                    this.element.style.opacity = '1';
+                }, this.animations.delay + 16);
+            }
+        }
+    }
 
     /**
      * Aplicar animación de salida
-     */
+     
     animateOut() {
         if (!this.element) return;
 
@@ -387,6 +440,41 @@ export class LogoManager {
             // Fallback simple
             this.element.style.transition = `opacity ${this.animations.duration}ms ${this.animations.easing}`;
             this.element.style.opacity = '0';
+        }
+
+        // No ocultar completamente para rotación
+        if (!this.isVisible) {
+            setTimeout(() => {
+                this.element.style.display = 'none';
+            }, this.animations.duration + this.animations.delay + 50);
+        }
+    }
+    */
+
+    animateOut() {
+        if (!this.element) return;
+
+        // 🎨 NUEVO: Intentar usar animación mejorada primero
+        const animationType = window.animacionConfig?.logo?.salida;
+        const useEnhanced = animationType && animationType.startsWith('LOGO_') && 
+                        window.StreamGraphicsApp?.modules?.animations?.applyEnhancedLogoAnimation;
+
+        if (useEnhanced) {
+            console.log('🎨 Usando animación mejorada para logo OUT');
+            window.StreamGraphicsApp.modules.animations.applyEnhancedLogoAnimation(
+                this.element, 
+                animationType, 
+                false
+            );
+        } else {
+            // Usar sistema de animación existente si está disponible
+            if (window.aplicarAnimacionDinamica) {
+                window.aplicarAnimacionDinamica(this.element, 'logo', false);
+            } else {
+                // Fallback simple
+                this.element.style.transition = `opacity ${this.animations.duration}ms ${this.animations.easing}`;
+                this.element.style.opacity = '0';
+            }
         }
 
         // No ocultar completamente para rotación
@@ -620,3 +708,138 @@ export const LogoUtils = {
 console.log('🖼️ Logo Manager module loaded');
 
 
+// 🎨 EXTENSIONES MEJORADAS PARA LOGO MANAGER
+// Agregar DESPUÉS de: console.log('🖼️ Logo Manager module loaded');
+
+// 🔄 Extensión del LogoManager para usar animaciones mejoradas
+LogoManager.prototype.animateInEnhanced = function() {
+    if (!this.element) return;
+    
+    this.element.style.display = 'block';
+    
+    // Obtener tipo de animación desde configuración
+    const animationType = window.animacionConfig?.logo?.entrada || 'LOGO_FLIP_3D';
+    
+    // Usar animación mejorada si está disponible
+    if (window.StreamGraphicsApp?.modules?.animations?.applyEnhancedLogoAnimation) {
+        window.StreamGraphicsApp.modules.animations.applyEnhancedLogoAnimation(
+            this.element, 
+            animationType, 
+            true
+        );
+    } else {
+        // Fallback a animación original
+        this.animateIn();
+    }
+};
+
+LogoManager.prototype.animateOutEnhanced = function() {
+    if (!this.element) return;
+    
+    // Obtener tipo de animación desde configuración
+    const animationType = window.animacionConfig?.logo?.salida || 'LOGO_FLIP_3D';
+    
+    // Usar animación mejorada si está disponible
+    if (window.StreamGraphicsApp?.modules?.animations?.applyEnhancedLogoAnimation) {
+        window.StreamGraphicsApp.modules.animations.applyEnhancedLogoAnimation(
+            this.element, 
+            animationType, 
+            false
+        );
+    } else {
+        // Fallback a animación original
+        this.animateOut();
+    }
+};
+
+// 🎯 Modificar el método changeLogo para usar animaciones mejoradas
+LogoManager.prototype.changeLogoEnhanced = function(targetLogo, nextDuration = null) {
+    if (!this.element) return;
+
+    const realDuration = window.animacionConfig?.logo?.duracion || 700;
+    const realDelay = window.animacionConfig?.logo?.delay || 0;
+
+    // Aplicar animación de salida mejorada
+    this.animateOutEnhanced();
+
+    // Cambiar logo después de la animación COMPLETA
+    setTimeout(() => {
+        this.element.src = targetLogo.url;
+        this.element.alt = targetLogo.alt;
+
+        // Aplicar animación de entrada mejorada después de un frame
+        requestAnimationFrame(() => {
+            this.animateInEnhanced();
+        });
+    }, realDuration + realDelay + 100);
+
+    console.log(`🎨 Logo mejorado cambiando a: ${targetLogo.name}`);
+};
+
+console.log('🎨 Logo Manager Enhanced Extensions loaded');
+
+// 🎨 EXTENSIONES MEJORADAS PARA LOGO MANAGER
+LogoManager.prototype.animateInEnhanced = function() {
+    if (!this.element) return;
+    
+    this.element.style.display = 'block';
+    
+    // Obtener tipo de animación desde configuración
+    const animationType = window.animacionConfig?.logo?.entrada || 'LOGO_FLIP_3D';
+    
+    // Usar animación mejorada si está disponible
+    if (window.StreamGraphicsApp?.modules?.animations?.applyEnhancedLogoAnimation) {
+        window.StreamGraphicsApp.modules.animations.applyEnhancedLogoAnimation(
+            this.element, 
+            animationType, 
+            true
+        );
+    } else {
+        // Fallback a animación original
+        this.animateIn();
+    }
+};
+
+LogoManager.prototype.animateOutEnhanced = function() {
+    if (!this.element) return;
+    
+    // Obtener tipo de animación desde configuración
+    const animationType = window.animacionConfig?.logo?.salida || 'LOGO_FLIP_3D';
+    
+    // Usar animación mejorada si está disponible
+    if (window.StreamGraphicsApp?.modules?.animations?.applyEnhancedLogoAnimation) {
+        window.StreamGraphicsApp.modules.animations.applyEnhancedLogoAnimation(
+            this.element, 
+            animationType, 
+            false
+        );
+    } else {
+        // Fallback a animación original
+        this.animateOut();
+    }
+};
+
+LogoManager.prototype.changeLogoEnhanced = function(targetLogo, nextDuration = null) {
+    if (!this.element) return;
+
+    const realDuration = window.animacionConfig?.logo?.duracion || 700;
+    const realDelay = window.animacionConfig?.logo?.delay || 0;
+
+    // Aplicar animación de salida mejorada
+    this.animateOutEnhanced();
+
+    // Cambiar logo después de la animación COMPLETA
+    setTimeout(() => {
+        this.element.src = targetLogo.url;
+        this.element.alt = targetLogo.alt;
+
+        // Aplicar animación de entrada mejorada después de un frame
+        requestAnimationFrame(() => {
+            this.animateInEnhanced();
+        });
+    }, realDuration + realDelay + 100);
+
+    console.log(`🎨 Logo mejorado cambiando a: ${targetLogo.name}`);
+};
+
+console.log('🎨 Logo Manager Enhanced Extensions loaded');
