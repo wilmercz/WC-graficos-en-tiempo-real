@@ -1,0 +1,649 @@
+/* ⚽ shared/css/styles-sports.css */
+/* Estilos específicos para el tema de DEPORTES/FÚTBOL */
+
+/* ====== VARIABLES ESPECÍFICAS DE DEPORTES ====== */
+:root {
+  /* Colores base de deportes */
+  --sports-primary: #000000;
+  --sports-secondary: #1a1a1a;
+  --sports-accent: #00FF41;
+  --sports-danger: #FF0000;
+  --sports-warning: #FFD700;
+  --sports-success: #00FF41;
+  
+  /* Colores de equipos por defecto */
+  --team-local-default: #FF0000;
+  --team-visitante-default: #0000FF;
+  
+  /* Tipografía deportiva */
+  --sports-font-primary: 'Arial Black', 'Helvetica', sans-serif;
+  --sports-font-secondary: 'Arial', sans-serif;
+  --sports-font-mono: 'Courier New', monospace;
+  
+  /* Espaciado específico deportes */
+  --sports-padding: 10px 16px;
+  --sports-margin: 6px;
+  --sports-border-radius: 8px;
+  
+  /* Sombras deportivas */
+  --sports-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+  --sports-shadow-hover: 0 6px 20px rgba(0, 255, 65, 0.4);
+  --sports-shadow-glow: 0 0 20px rgba(0, 255, 65, 0.3);
+  
+  /* Transiciones deportivas */
+  --sports-transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --sports-bounce: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+/* ====== TEMA BASE DEPORTES ====== */
+.sports-theme {
+  font-family: var(--sports-font-secondary);
+  background: #1a1a1a; /* Fondo deportivo oscuro */
+  color: #FFFFFF;
+  overflow: hidden;
+}
+
+.sports-theme.football-theme {
+  /* Específico para fútbol */
+  background: linear-gradient(135deg, #0d1421 0%, #1a1a1a 50%, #0d2818 100%);
+}
+
+/* ====== MARCADOR DEL PARTIDO ====== */
+.sports-theme #grafico-marcador {
+  left: 50%;
+  top: 20px;
+  transform: translateX(-50%);
+  width: auto;
+  min-width: 400px;
+  background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+  border: 2px solid var(--sports-accent);
+  border-radius: var(--sports-border-radius);
+  box-shadow: var(--sports-shadow), var(--sports-shadow-glow);
+  padding: 15px 20px;
+  transition: var(--sports-bounce);
+}
+
+.sports-theme #grafico-marcador:hover {
+  transform: translateX(-50%) scale(1.02);
+  box-shadow: var(--sports-shadow-hover), var(--sports-shadow-glow);
+  border-color: #FFFFFF;
+}
+
+.sports-theme .marcador-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+/* Información de equipos en marcador */
+.sports-theme .equipo-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 140px;
+}
+
+.sports-theme .equipo-info.equipo-local {
+  justify-content: flex-start;
+}
+
+.sports-theme .equipo-info.equipo-visitante {
+  justify-content: flex-end;
+  flex-direction: row-reverse;
+}
+
+.sports-theme .escudo-equipo {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  transition: var(--sports-transition);
+}
+
+.sports-theme .escudo-equipo:hover {
+  border-color: var(--sports-accent);
+  transform: scale(1.1);
+}
+
+.sports-theme .nombre-equipo {
+  font-family: var(--sports-font-primary);
+  font-size: 14px;
+  font-weight: 900;
+  text-transform: uppercase;
+  color: #FFFFFF;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sports-theme .goles-equipo {
+  font-family: var(--sports-font-mono);
+  font-size: 28px;
+  font-weight: 900;
+  color: var(--sports-accent);
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+  min-width: 35px;
+  text-align: center;
+  background: rgba(0, 255, 65, 0.1);
+  border-radius: 6px;
+  padding: 5px 8px;
+  border: 1px solid rgba(0, 255, 65, 0.3);
+  transition: var(--sports-transition);
+}
+
+.sports-theme .goles-equipo:hover {
+  background: rgba(0, 255, 65, 0.2);
+  border-color: var(--sports-accent);
+  transform: scale(1.1);
+}
+
+/* Centro del marcador */
+.sports-theme .marcador-centro {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  min-width: 80px;
+}
+
+.sports-theme .tiempo-partido {
+  font-family: var(--sports-font-mono);
+  font-size: 16px;
+  font-weight: 700;
+  color: #FFFFFF;
+  background: linear-gradient(135deg, var(--sports-primary) 0%, var(--sports-secondary) 100%);
+  padding: 6px 12px;
+  border-radius: 4px;
+  border: 1px solid var(--sports-accent);
+  text-align: center;
+  min-width: 70px;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+}
+
+.sports-theme .estado-partido {
+  font-family: var(--sports-font-primary);
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+  color: var(--sports-accent);
+  background: rgba(0, 0, 0, 0.8);
+  padding: 2px 8px;
+  border-radius: 3px;
+  border: 1px solid rgba(0, 255, 65, 0.3);
+  letter-spacing: 1px;
+}
+
+/* Estados específicos del partido */
+.sports-theme .estado-partido.primer-tiempo {
+  color: #00FF41;
+  border-color: #00FF41;
+}
+
+.sports-theme .estado-partido.descanso {
+  color: #FFD700;
+  border-color: #FFD700;
+}
+
+.sports-theme .estado-partido.segundo-tiempo {
+  color: #00FF41;
+  border-color: #00FF41;
+}
+
+.sports-theme .estado-partido.finalizado {
+  color: #808080;
+  border-color: #808080;
+}
+
+/* ====== JUGADOR DESTACADO ====== */
+.sports-theme #grafico-jugador {
+  right: 20px;
+  bottom: 100px;
+  width: 320px;
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  border: 2px solid var(--sports-accent);
+  border-radius: var(--sports-border-radius);
+  box-shadow: var(--sports-shadow);
+  overflow: hidden;
+  transition: var(--sports-transition);
+}
+
+.sports-theme #grafico-jugador:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--sports-shadow-hover);
+  border-color: #FFFFFF;
+}
+
+.sports-theme .jugador-container {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 15px;
+}
+
+.sports-theme .foto-jugador {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 3px solid var(--sports-accent);
+  box-shadow: var(--sports-shadow);
+}
+
+.sports-theme .foto-jugador img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: var(--sports-transition);
+}
+
+.sports-theme .foto-jugador:hover img {
+  transform: scale(1.1);
+}
+
+.sports-theme .numero-jugador {
+  position: absolute;
+  bottom: -8px;
+  right: -8px;
+  background: var(--sports-accent);
+  color: #000000;
+  font-family: var(--sports-font-primary);
+  font-size: 14px;
+  font-weight: 900;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #000000;
+  box-shadow: var(--sports-shadow);
+}
+
+.sports-theme .info-jugador {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sports-theme .nombre-jugador {
+  font-family: var(--sports-font-primary);
+  font-size: 16px;
+  font-weight: 900;
+  color: #FFFFFF;
+  text-transform: uppercase;
+  margin: 0;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+  line-height: 1.2;
+}
+
+.sports-theme .detalles-jugador {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.sports-theme .posicion-jugador {
+  background: var(--sports-accent);
+  color: #000000;
+  font-family: var(--sports-font-primary);
+  font-size: 10px;
+  font-weight: 900;
+  padding: 2px 8px;
+  border-radius: 3px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.sports-theme .equipo-jugador {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.sports-theme .stats-jugador {
+  display: flex;
+  gap: 15px;
+}
+
+.sports-theme .stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.sports-theme .stat-label {
+  font-size: 9px;
+  color: rgba(255, 255, 255, 0.6);
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.sports-theme .stat-value {
+  font-family: var(--sports-font-mono);
+  font-size: 14px;
+  font-weight: 900;
+  color: var(--sports-accent);
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+}
+
+/* ====== ESTADÍSTICAS DEL PARTIDO ====== */
+.sports-theme #grafico-estadisticas {
+  left: 20px;
+  bottom: 100px;
+  width: 280px;
+  background: linear-gradient(135deg, #2d2d2d 0%, #1a1a1a 100%);
+  border: 2px solid var(--sports-accent);
+  border-radius: var(--sports-border-radius);
+  box-shadow: var(--sports-shadow);
+  transition: var(--sports-transition);
+}
+
+.sports-theme #grafico-estadisticas:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--sports-shadow-hover);
+}
+
+.sports-theme .estadisticas-container {
+  padding: 15px;
+}
+
+.sports-theme .titulo-stats {
+  font-family: var(--sports-font-primary);
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+  color: var(--sports-accent);
+  text-align: center;
+  margin: 0 0 15px 0;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(0, 255, 65, 0.3);
+  letter-spacing: 1px;
+}
+
+.sports-theme .stat-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sports-theme .stat-row:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.sports-theme .stat-local,
+.sports-theme .stat-visitante {
+  font-family: var(--sports-font-mono);
+  font-size: 14px;
+  font-weight: 900;
+  color: var(--sports-accent);
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+  min-width: 40px;
+  text-align: center;
+  background: rgba(0, 255, 65, 0.1);
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid rgba(0, 255, 65, 0.2);
+}
+
+.sports-theme .stat-label {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.8);
+  text-transform: uppercase;
+  font-weight: 600;
+  text-align: center;
+  flex: 1;
+}
+
+/* ====== INFORMACIÓN DE EQUIPOS ====== */
+.sports-theme #grafico-equipos {
+  left: 50%;
+  bottom: 50px;
+  transform: translateX(-50%);
+  width: 500px;
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  border: 2px solid var(--sports-accent);
+  border-radius: var(--sports-border-radius);
+  box-shadow: var(--sports-shadow);
+  padding: 20px;
+  transition: var(--sports-transition);
+}
+
+.sports-theme .equipos-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 30px;
+  margin-bottom: 15px;
+}
+
+.sports-theme .equipo-detalle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+}
+
+.sports-theme .escudo-grande {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 3px solid var(--sports-accent);
+  transition: var(--sports-transition);
+}
+
+.sports-theme .escudo-grande:hover {
+  transform: scale(1.1);
+  border-color: #FFFFFF;
+}
+
+.sports-theme .equipo-detalle h3 {
+  font-family: var(--sports-font-primary);
+  font-size: 14px;
+  font-weight: 900;
+  text-transform: uppercase;
+  color: #FFFFFF;
+  text-align: center;
+  margin: 0;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+  line-height: 1.2;
+}
+
+.sports-theme .vs-separator {
+  font-family: var(--sports-font-primary);
+  font-size: 20px;
+  font-weight: 900;
+  color: var(--sports-accent);
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+  background: rgba(0, 255, 65, 0.1);
+  padding: 8px 12px;
+  border-radius: 50%;
+  border: 2px solid rgba(0, 255, 65, 0.3);
+}
+
+.sports-theme .evento-info {
+  text-align: center;
+  padding-top: 15px;
+  border-top: 1px solid rgba(0, 255, 65, 0.3);
+}
+
+.sports-theme .torneo {
+  font-family: var(--sports-font-primary);
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+  color: var(--sports-accent);
+  margin-bottom: 5px;
+  letter-spacing: 1px;
+}
+
+.sports-theme .fecha-estadio {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 600;
+}
+
+.sports-theme .separador {
+  color: var(--sports-accent);
+  margin: 0 8px;
+}
+
+/* ====== LOGO - ESTILO DEPORTIVO ====== */
+.sports-theme #logo {
+  border-radius: var(--logo-radius, 50%);
+  box-shadow: var(--sports-shadow), var(--sports-shadow-glow);
+  transition: var(--sports-transition);
+  border: 2px solid rgba(0, 255, 65, 0.3);
+}
+
+.sports-theme #logo:hover {
+  transform: scale(1.08);
+  border-color: var(--sports-accent);
+  box-shadow: var(--sports-shadow-hover), var(--sports-shadow-glow);
+}
+
+/* ====== RELOJ - ESTILO DEPORTIVO ====== */
+.sports-theme #stream-clock {
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.9) 0%, rgba(26, 26, 26, 0.9) 100%);
+  color: var(--sports-accent);
+  border: 1px solid rgba(0, 255, 65, 0.5);
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-family: var(--sports-font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+  box-shadow: var(--sports-shadow);
+  transition: var(--sports-transition);
+}
+
+.sports-theme #stream-clock:hover {
+  background: linear-gradient(135deg, rgba(0, 255, 65, 0.2) 0%, rgba(0, 0, 0, 0.9) 100%);
+  border-color: #FFFFFF;
+  color: #FFFFFF;
+}
+
+/* ====== ANIMACIONES DEPORTIVAS ====== */
+
+/* Efecto de gol/celebración */
+@keyframes goalCelebration {
+  0% { transform: scale(1); }
+  25% { transform: scale(1.15) rotate(2deg); }
+  50% { transform: scale(1.1) rotate(-2deg); }
+  75% { transform: scale(1.15) rotate(1deg); }
+  100% { transform: scale(1); }
+}
+
+.sports-theme .goal-scored {
+  animation: goalCelebration 0.8s ease-in-out;
+  box-shadow: 0 0 30px var(--sports-accent) !important;
+}
+
+/* Entrada dinámica para elementos deportivos */
+@keyframes sportsSlideIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-30px) scale(0.9);
+  }
+  60% {
+    opacity: 0.8;
+    transform: translateY(10px) scale(1.05);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.sports-theme .sports-element.entering {
+  animation: sportsSlideIn 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+}
+
+/* ====== DEBUG Y ESTADO - ESTILO DEPORTIVO ====== */
+.sports-theme .debug-panel.sports-debug {
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.95) 0%, rgba(26, 26, 26, 0.95) 100%);
+  border: 2px solid var(--sports-accent);
+  border-radius: 8px;
+  box-shadow: var(--sports-shadow), var(--sports-shadow-glow);
+  backdrop-filter: blur(10px);
+}
+
+.sports-theme .debug-panel.sports-debug .debug-header {
+  background: linear-gradient(90deg, var(--sports-primary) 0%, var(--sports-secondary) 100%);
+  border-bottom: 1px solid var(--sports-accent);
+}
+
+.sports-theme .status-element.sports-status {
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.8) 0%, rgba(26, 26, 26, 0.8) 100%);
+  border: 1px solid rgba(0, 255, 65, 0.3);
+  border-radius: 6px;
+  color: var(--sports-accent);
+}
+
+/* ====== RESPONSIVE DEPORTIVO ====== */
+@media (max-width: 1366px) {
+  .sports-theme #grafico-marcador {
+    min-width: 350px;
+    transform: translateX(-50%) scale(0.9);
+  }
+  
+  .sports-theme #grafico-jugador {
+    width: 280px;
+    right: 15px;
+  }
+  
+  .sports-theme #grafico-estadisticas {
+    width: 250px;
+    left: 15px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .sports-theme #grafico-marcador {
+    min-width: 320px;
+    padding: 12px 16px;
+  }
+  
+  .sports-theme .nombre-equipo {
+    font-size: 12px;
+    max-width: 80px;
+  }
+  
+  .sports-theme .goles-equipo {
+    font-size: 24px;
+    min-width: 30px;
+  }
+  
+  .sports-theme #grafico-equipos {
+    width: 400px;
+  }
+}
+
+/* ====== TEMA ESPECÍFICO EQUIPOA ====== */
+.sports-theme.equipoA-theme {
+  --sports-accent: var(--equipoA-accent, #00FF41);
+  --sports-primary: var(--equipoA-primary, #000000);
+}
+
+.sports-theme.equipoA-theme #grafico-marcador {
+  border-color: var(--equipoA-accent);
+}
+
+.sports-theme.equipoA-theme .goles-equipo {
+  color: var(--equipoA-accent);
+  background: rgba(0, 255, 65, 0.1);
+  border-color: rgba(0, 255, 65, 0.3);
+}
+
+console.log('⚽ Sports Theme CSS loaded');
