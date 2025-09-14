@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gráficos en Tiempo Real - Sistema Modular v2.0</title>
+  <link rel="stylesheet" href="../../../styles.css"> <!-- Enlace al archivo CSS -->
+</head>
+<body>
+  <img id="logo" src="" alt="Logo">
+  
+  <!-- Elementos gráficos principales -->
+  <div id="grafico-invitado-rol" class="animated-element" style="display: none;">
+    <h1 id="invitado">INVITADO</h1>
+    <h2 id="rol">ROL</h2>
+  </div>
+  
+  <div id="grafico-tema" class="animated-element" style="display: none;">
+    <h1 id="tema">.</h1>
+  </div>
+
+  <div id="grafico-publicidad" class="animated-element" style="display: none;">
+    <img id="publicidad-img" src="" alt="Publicidad">
+  </div>
+
+  <div id="status" class="animated-element">
+    <!-- Estado de conexión y sistema -->
+  </div>
+
+  <!-- 🆕 PANEL DE DEBUG MEJORADO PARA SISTEMA MODULAR -->
+  <div id="debug-panel" class="debug-panel" style="display: none;">
+    <div class="debug-header">
+      <h4>🔧 Sistema Modular v2.0</h4>
+      <button id="toggle-debug" onclick="toggleDebugPanel()">❌</button>
+    </div>
+    <div class="debug-content">
+      <div class="debug-section">
+        <h5>📊 Estado de la App:</h5>
+        <div id="debug-app-status">Cargando...</div>
+      </div>
+      <div class="debug-section">
+        <h5>📦 Módulos Cargados:</h5>
+        <div id="debug-modules">Cargando...</div>
+      </div>
+      <div class="debug-section">
+        <h5>⏰ Scheduler Global:</h5>
+        <div id="debug-scheduler">Desactivado</div>
+      </div>
+      <div class="debug-section">
+        <h5>🔥 Firebase:</h5>
+        <div id="debug-firebase">Desconectado</div>
+      </div>
+      <div class="debug-section">
+        <h5>🖼️ Estado de Logos:</h5>
+        <div id="debug-logos">Cargando...</div>
+      </div>
+    </div>
+    <div class="debug-controls">
+      <button onclick="testModularSystem()">🧪 Test Módulos</button>
+      <button onclick="showAppStatus()">📊 Estado App</button>
+      <button onclick="forceElementsTest()">👁️ Test Elementos</button>
+      <button onclick="clearConsole()">🗑️ Limpiar Console</button>
+    </div>
+  </div>
+
+  <!-- 🚀 SISTEMA MODULAR v2.0 - PUNTO DE ENTRADA PRINCIPAL -->
+  <script type="module" src="main.js"></script>
+  
+  <!-- 🔧 FUNCIONES DE DEBUG PARA SISTEMA MODULAR -->
+  <script>
+    let debugVisible = false;
+    
+    // ===== FUNCIONES DE PANEL DEBUG =====
+    
+    function showDebugPanel() {
+      const panel = document.getElementById('debug-panel');
+      if (panel) {
+        panel.style.display = 'block';
+        debugVisible = true;
+        updateDebugInfo();
+      }
+    }
+    
+    function toggleDebugPanel() {
+      const panel = document.getElementById('debug-panel');
+      if (panel) {
+        if (panel.style.display === 'none') {
+          showDebugPanel();
+        } else {
+          panel.style.display = 'none';
+          debugVisible = false;
+        }
+      }
+    }
+    
+    // ===== FUNCIONES DE DEBUG PARA SISTEMA MODULAR =====
+    
+    function testModularSystem() {
+      console.log('🧪 TESTING SISTEMA MODULAR...');
+      
+      if (window.StreamGraphicsApp) {
+        console.log('✅ StreamGraphicsApp disponible');
+        console.log('Estado:', window.StreamGraphicsApp.getStatus());
+      } else {
+        console.error('❌ StreamGraphicsApp no disponible');
+      }
+      
+      if (window.StreamDebug) {
+        console.log('✅ StreamDebug disponible');
+        window.StreamDebug.app && console.log('App:', window.StreamDebug.app.isInitialized);
+      } else {
+        console.log('⚠️ StreamDebug no disponible (normal si no está en modo debug)');
+      }
+      
+      updateDebugInfo();
+    }
+    
+    function showAppStatus() {
+      console.log('📊 ESTADO COMPLETO DE LA APLICACIÓN:');
+      
+      if (window.StreamGraphicsApp) {
+        const status = window.StreamGraphicsApp.getStatus();
+        console.table(status.modules);
+        console.log('Scheduler:', status.scheduler);
+        console.log('Firebase:', status.firebase);
+      } else {
+        console.error('❌ Aplicación no inicializada');
+      }
+    }
+    
+    function forceElementsTest() {
+      console.log('👁️ TESTING ELEMENTOS VISUALES...');
+      
+      // Test usando StreamDebug si está disponible
+      if (window.StreamDebug && window.StreamDebug.utils) {
+        console.log('🚀 Usando StreamDebug para testing...');
+        
+        // Test invitado
+        setTimeout(() => {
+          console.log('📺 Mostrando invitado...');
+          if (window.StreamDebug.utils.lowerThirds) {
+            window.StreamDebug.utils.lowerThirds.show('invitado', {
+              invitado: 'TEST INVITADO',
+              rol: 'TEST ROL'
+            });
+          }
+        }, 1000);
+        
+        // Test tema
+        setTimeout(() => {
+          console.log('📋 Mostrando tema...');
+          if (window.StreamDebug.utils.lowerThirds) {
+            window.StreamDebug.utils.lowerThirds.show('tema', {
+              tema: 'TEST TEMA'
+            });
+          }
+        }, 3000);
+        
+        // Test logo
+        setTimeout(() => {
+          console.log('🖼️ Mostrando logo...');
+          if (window.StreamDebug.utils.logo) {
+            window.StreamDebug.utils.logo.show();
+          }
+        }, 5000);
+        
+      } else {
+        console.log('⚠️ StreamDebug no disponible - usando método básico...');
+        
+        // Fallback usando StreamGraphicsApp directamente
+        if (window.StreamGraphicsApp && window.StreamGraphicsApp.modules) {
+          const modules = window.StreamGraphicsApp.modules;
+          
+          if (modules.lowerThirds) {
+            modules.lowerThirds.showInvitado({
+              invitado: 'TEST BÁSICO INVITADO',
+              rol: 'TEST BÁSICO ROL'
+            });
+          }
+        }
+      }
+    }
+    
+    function clearConsole() {
+      console.clear();
+      console.log('🗑️ Console limpiada');
+      console.log('💡 Sistema Modular v2.0 ejecutándose...');
+    }
+    
+    // ===== ACTUALIZACIÓN AUTOMÁTICA DE DEBUG INFO =====
+    
+    function updateDebugInfo() {
+      if (!debugVisible) return;
+      
+      try {
+        // Estado de la aplicación
+        const appStatusDiv = document.getElementById('debug-app-status');
+        if (appStatusDiv) {
+          if (window.StreamGraphicsApp) {
+            const status = window.StreamGraphicsApp.getStatus();
+            appStatusDiv.innerHTML = `
+              <small>
+                Inicializada: ${status.isInitialized ? '✅' : '❌'}<br>
+                Uptime: ${Math.round(status.uptime / 1000)}s<br>
+                Módulos: ${Object.keys(status.modules).length}
+              </small>
+            `;
+          } else {
+            appStatusDiv.innerHTML = '<small style="color: orange;">Cargando...</small>';
+          }
+        }
+        
+        // Módulos cargados
+        const modulesDiv = document.getElementById('debug-modules');
+        if (modulesDiv && window.StreamGraphicsApp) {
+          const modules = window.StreamGraphicsApp.modules;
+          const moduleList = Object.keys(modules).map(key => {
+            const module = modules[key];
+            const loaded = !!module;
+            return `${key}: ${loaded ? '✅' : '❌'}`;
+          }).join('<br>');
+          modulesDiv.innerHTML = `<small>${moduleList}</small>`;
+        }
+        
+        // Scheduler
+        const schedulerDiv = document.getElementById('debug-scheduler');
+        if (schedulerDiv && window.StreamGraphicsApp?.modules?.scheduler) {
+          const scheduler = window.StreamGraphicsApp.modules.scheduler;
+          const state = scheduler.getState ? scheduler.getState() : {};
+          schedulerDiv.innerHTML = `
+            <small>
+              Activo: ${state.isActive ? '✅' : '❌'}<br>
+              Ciclos: ${state.stats?.cycles || 0}<br>
+              Tareas: ${state.tasksCount || 0}
+            </small>
+          `;
+        }
+        
+        // Firebase
+        const firebaseDiv = document.getElementById('debug-firebase');
+        if (firebaseDiv && window.StreamGraphicsApp?.modules?.firebase) {
+          const firebase = window.StreamGraphicsApp.modules.firebase;
+          const state = firebase.getConnectionState ? firebase.getConnectionState() : {};
+          firebaseDiv.innerHTML = `
+            <small>
+              Conectado: ${state.isConnected ? '✅' : '❌'}<br>
+              Listeners: ${state.activeListeners || 0}<br>
+              Auth: ${state.hasAuth ? '✅' : '❌'}
+            </small>
+          `;
+        }
+        
+        // Logos
+        const logosDiv = document.getElementById('debug-logos');
+        if (logosDiv && window.StreamGraphicsApp?.modules?.logoManager) {
+          const logoManager = window.StreamGraphicsApp.modules.logoManager;
+          const state = logoManager.getState ? logoManager.getState() : {};
+          logosDiv.innerHTML = `
+            <small>
+              Visible: ${state.isVisible ? '✅' : '❌'}<br>
+              Rotación: ${state.isRotating ? '🔄' : '⏸️'}<br>
+              Índice: ${state.currentIndex || 0}
+            </small>
+          `;
+        }
+        
+      } catch (error) {
+        console.warn('⚠️ Error actualizando debug info:', error);
+      }
+    }
+    
+    // ===== AUTO-ACTUALIZACIÓN =====
+    
+    // Actualizar info cada 3 segundos si el panel está visible
+    setInterval(() => {
+      if (debugVisible) {
+        updateDebugInfo();
+      }
+    }, 3000);
+    
+    // ===== MANEJO DE EVENTOS DE LA APLICACIÓN =====
+    
+    // Escuchar cuando la aplicación esté lista
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('🌟 DOM listo - Sistema Modular v2.0 inicializando...');
+      
+      
+      // Mostrar panel de debug automáticamente en desarrollo
+      const isDevelopment = window.location.hostname === 'localhost' || 
+                           window.location.hostname === '127.0.0.1';
+      /*
+      if (isDevelopment) {
+        setTimeout(() => {
+          showDebugPanel();
+          console.log('🔧 Panel de debug mostrado automáticamente (desarrollo)');
+        }, 3000);
+      }
+        */
+
+
+    });
+    
+    // Escuchar eventos de la aplicación (después de que se cargue)
+    setTimeout(() => {
+      if (window.EventBus) {
+        window.EventBus.on('app-initialized', () => {
+          console.log('🎉 Aplicación inicializada correctamente');
+          updateDebugInfo();
+        });
+        
+        window.EventBus.on('app-initialization-error', (error) => {
+          console.error('💥 Error de inicialización:', error);
+          const appStatusDiv = document.getElementById('debug-app-status');
+          if (appStatusDiv) {
+            appStatusDiv.innerHTML = '<small style="color: red;">Error de inicialización</small>';
+          }
+        });
+      }
+    }, 2000);
+    
+    // ===== COMPATIBILIDAD CON FUNCIONES ANTERIORES =====
+    
+    // Mantener algunas funciones del sistema anterior para transición
+    window.testAutomaticSystem = testModularSystem;
+    window.logAutomaticStatus = showAppStatus;
+    window.clearAllTimers = function() {
+      console.log('🔄 En sistema modular, los temporizadores son manejados por el Scheduler Global');
+      if (window.StreamGraphicsApp?.modules?.scheduler) {
+        console.log('Estado del scheduler:', window.StreamGraphicsApp.modules.scheduler.getState());
+      }
+    };
+    
+    console.log('🔧 Sistema de Debug Modular v2.0 cargado');
+  </script>
+</body>
+</html>

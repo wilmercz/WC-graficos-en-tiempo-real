@@ -43,6 +43,7 @@ const app = new StreamGraphicsApp({
 
 // 🌍 HACER DISPONIBLE GLOBALMENTE PARA DEBUG Y CONTROL
 window.Equipo1NoticiasApp = app;
+window.StreamGraphicsApp = app; // alias for shared debug tools
 window.instanceConfig = instanceConfig;
 window.equipo1Customizations = equipo1Customizations;
 
