@@ -5,6 +5,9 @@ import { createSportsInstanceConfig } from '../../../shared/templates/sports/con
 
 // 🎯 CONFIGURACIÓN PERSONALIZADA PARA EQUIPOA FÚTBOL
 const customConfig = {
+    // 🔗 Ruta personalizada de Firebase para datos de fútbol
+    firebasePath: 'CLAVE_STREAM_FB/STREAM_LIVE/GRAFICOS_FUTBOL',
+
     // 🎨 COLORES ESPECÍFICOS DEL EQUIPOA DEPORTES
     defaultColors: {
         // Colores deportivos del EquipoA

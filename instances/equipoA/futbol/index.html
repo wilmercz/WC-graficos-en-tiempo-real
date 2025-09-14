@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EquipoA Fútbol - Sistema Modular</title>
+
+  <!-- CSS Base del Sistema -->
+  <link rel="stylesheet" href="../../../shared/css/styles-base.css">
+  <link rel="stylesheet" href="../../../shared/css/styles-sports.css">
+  <link rel="stylesheet" href="../../../shared/css/styles-variables.css">
+</head>
+<body class="sports-theme football-theme">
+
+  <!-- 🖼️ LOGO PRINCIPAL -->
+  <img id="logo" src="" alt="Logo" style="display: none;">
+
+  <!-- ⚽ MARCADOR DEL PARTIDO -->
+  <div id="grafico-marcador" class="sports-element animated-element" style="display: none;">
+    <div class="marcador-container">
+      <div class="equipo-info equipo-local">
+        <img class="escudo-equipo" id="escudo-local" src="" alt="Escudo Local">
+        <span class="nombre-equipo" id="nombre-local">EQUIPO LOCAL</span>
+        <span class="goles-equipo" id="goles-local">0</span>
+      </div>
+
+      <div class="marcador-centro">
+        <div class="tiempo-partido" id="tiempo-partido">45:00</div>
+        <div class="estado-partido" id="estado-partido">1T</div>
+      </div>
+
+      <div class="equipo-info equipo-visitante">
+        <span class="goles-equipo" id="goles-visitante">0</span>
+        <span class="nombre-equipo" id="nombre-visitante">EQUIPO VISITANTE</span>
+        <img class="escudo-equipo" id="escudo-visitante" src="" alt="Escudo Visitante">
+      </div>
+    </div>
+  </div>
+
+  <!-- 👤 JUGADOR DESTACADO -->
+  <div id="grafico-jugador" class="sports-element animated-element" style="display: none;">
+    <div class="jugador-container">
+      <div class="foto-jugador">
+        <img id="foto-jugador" src="" alt="Foto Jugador">
+        <div class="numero-jugador" id="numero-jugador">10</div>
+      </div>
+      <div class="info-jugador">
+        <h2 class="nombre-jugador" id="nombre-jugador">NOMBRE JUGADOR</h2>
+        <div class="detalles-jugador">
+          <span class="posicion-jugador" id="posicion-jugador">MED</span>
+          <span class="equipo-jugador" id="equipo-jugador">EQUIPO</span>
+        </div>
+        <div class="stats-jugador">
+          <div class="stat-item">
+            <span class="stat-label">Goles</span>
+            <span class="stat-value" id="goles-jugador">0</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Tarjetas</span>
+            <span class="stat-value" id="tarjetas-jugador">0</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 📊 ESTADÍSTICAS DEL PARTIDO -->
+  <div id="grafico-estadisticas" class="sports-element animated-element" style="display: none;">
+    <div class="estadisticas-container">
+      <h3 class="titulo-stats">ESTADÍSTICAS</h3>
+
+      <div class="stat-row">
+        <span class="stat-local" id="posesion-local">45%</span>
+        <span class="stat-label">Posesión</span>
+        <span class="stat-visitante" id="posesion-visitante">55%</span>
+      </div>
+
+      <div class="stat-row">
+        <span class="stat-local" id="tiros-local">3</span>
+        <span class="stat-label">Tiros al arco</span>
+        <span class="stat-visitante" id="tiros-visitante">5</span>
+      </div>
+
+      <div class="stat-row">
+        <span class="stat-local" id="corners-local">2</span>
+        <span class="stat-label">Corners</span>
+        <span class="stat-visitante" id="corners-visitante">4</span>
+      </div>
+
+      <div class="stat-row">
+        <span class="stat-local" id="tarjetas-local">1</span>
+        <span class="stat-label">Tarjetas</span>
+        <span class="stat-visitante" id="tarjetas-visitante">2</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🏟️ INFORMACIÓN DE EQUIPOS (OPCIONAL) -->
+  <div id="grafico-equipos" class="sports-element animated-element" style="display: none;">
+    <div class="equipos-container">
+      <div class="equipo-detalle equipo-local-detail">
+        <img class="escudo-grande" id="escudo-local-grande" src="" alt="Escudo Local">
+        <h3 id="nombre-local-completo">NOMBRE COMPLETO EQUIPO LOCAL</h3>
+        <div class="info-adicional">
+          <span id="dt-local">Director Técnico</span>
+        </div>
+      </div>
+
+      <div class="vs-separator">VS</div>
+
+      <div class="equipo-detalle equipo-visitante-detail">
+        <img class="escudo-grande" id="escudo-visitante-grande" src="" alt="Escudo Visitante">
+        <h3 id="nombre-visitante-completo">NOMBRE COMPLETO EQUIPO VISITANTE</h3>
+        <div class="info-adicional">
+          <span id="dt-visitante">Director Técnico</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Información del evento -->
+    <div class="evento-info">
+      <div class="torneo" id="nombre-torneo">LIGA PRO</div>
+      <div class="fecha-estadio">
+        <span id="fecha-partido">15 DIC 2024</span>
+        <span class="separador">|</span>
+        <span id="estadio-partido">Estadio Monumental</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🕐 RELOJ DEL STREAM -->
+  <div id="stream-clock" class="clock-element" style="display: none;">
+    00:00
+  </div>
+
+  <!-- 📊 ESTADO DE CONEXIÓN -->
+  <div id="status" class="status-element sports-status">
+    <span id="connection-status">Conectando...</span>
+    <span id="instance-info">Fútbol</span>
+  </div>
+
+  <!-- 🔧 PANEL DE DEBUG (Solo si está habilitado) -->
+  <div id="debug-panel" class="debug-panel sports-debug" style="display: none;">
+    <div class="debug-header">
+      <h4>🔧 Debug - Fútbol</h4>
+      <button id="toggle-debug" onclick="toggleDebugPanel()">❌</button>
+    </div>
+    <div class="debug-content">
+      <div class="debug-section">
+        <h5>📊 Estado Instancia:</h5>
+        <div id="debug-instance-status">Cargando...</div>
+      </div>
+      <div class="debug-section">
+        <h5>🔥 Firebase:</h5>
+        <div id="debug-firebase-status">Desconectado</div>
+      </div>
+      <div class="debug-section">
+        <h5>⚽ Elementos:</h5>
+        <div id="debug-elements-status">
+          <div>Logo: <span id="logo-status">❌</span></div>
+          <div>Marcador: <span id="marcador-status">❌</span></div>
+          <div>Jugador: <span id="jugador-status">❌</span></div>
+          <div>Estadísticas: <span id="estadisticas-status">❌</span></div>
+        </div>
+      </div>
+      <div class="debug-section">
+        <h5>🏟️ Datos del Partido:</h5>
+        <div id="debug-match-data">Sin datos</div>
+      </div>
+    </div>
+    <div class="debug-controls">
+      <button onclick="testSportsElements()">🧪 Test Elementos</button>
+      <button onclick="showMatchStatus()">⚽ Estado Partido</button>
+      <button onclick="simulateMatchData()">🏟️ Simular Partido</button>
+      <button onclick="clearConsole()">🗑️ Limpiar</button>
+    </div>
+  </div>
+
+  <!-- 🚀 SISTEMA MODULAR - CARGA PRINCIPAL -->
+  <script type="module">
+    // Importar configuración específica de esta instancia
+    import { instanceConfig } from './config.js';
+
+    // Importar motor principal
+    import { StreamGraphicsApp } from '../../../shared/js/main-template.js';
+
+    // 🎯 INICIALIZACIÓN ESPECÍFICA DE FÚTBOL
+    console.log('⚽ Inicializando instancia de FÚTBOL...');
+    console.log('⚙️ Configuración:', instanceConfig);
+
+    // Crear y inicializar aplicación
+    const app = new StreamGraphicsApp(instanceConfig);
+
+    // Hacer disponible globalmente para debug
+    window.SportsApp = app;
+    window.instanceConfig = instanceConfig;
+
+    // Inicializar cuando el DOM esté listo
+    document.addEventListener('DOMContentLoaded', async () => {
+      try {
+        await app.init();
+
+        // Actualizar información de estado
+        updateConnectionStatus('✅ Conectado', 'success');
+        updateInstanceInfo(`⚽ ${instanceConfig.instanceName}`);
+
+        console.log('✅ Instancia de fútbol iniciada correctamente');
+
+      } catch (error) {
+        console.error('💥 Error inicializando instancia de fútbol:', error);
+        updateConnectionStatus('❌ Error', 'error');
+
+        // Mostrar error en pantalla
+        showErrorMessage(error.message);
+      }
+    });
+
+    // 🔧 FUNCIONES DE UTILIDAD PARA FÚTBOL
+    function updateConnectionStatus(status, type) {
+      const statusElement = document.getElementById('connection-status');
+      if (statusElement) {
+        statusElement.textContent = status;
+        statusElement.className = `status-${type}`;
+      }
+    }
+
+    function updateInstanceInfo(info) {
+      const infoElement = document.getElementById('instance-info');
+      if (infoElement) {
+        infoElement.textContent = info;
+      }
+    }
+
+    function showErrorMessage(message) {
+      const errorDiv = document.createElement('div');
+      errorDiv.className = 'error-message sports-error';
+      errorDiv.innerHTML = `
+        <h3>❌ Error de Inicialización</h3>
+        <p><strong>Instancia:</strong> Fútbol</p>
+        <p><strong>Error:</strong> ${message}</p>
+        <button onclick="location.reload()" class="retry-button">🔄 Reintentar</button>
+      `;
+      document.body.appendChild(errorDiv);
+    }
+  </script>
+
+  <!-- 🔧 FUNCIONES DE DEBUG PARA FÚTBOL -->
+  <script>
+    let debugVisible = false;
+
+    // ===== FUNCIONES DE DEBUG ESPECÍFICAS DE FÚTBOL =====
+
+    function toggleDebugPanel() {
+      const panel = document.getElementById('debug-panel');
+      if (panel) {
+        debugVisible = !debugVisible;
+        panel.style.display = debugVisible ? 'block' : 'none';
+        if (debugVisible) {
+          updateDebugInfo();
+        }
+      }
+    }
+
+    function testSportsElements() {
+      console.log('🧪 Testing elementos de fútbol...');
+
+      if (window.SportsApp && window.SportsApp.modules) {
+        const app = window.SportsApp;
+
+        // Test secuencial de elementos deportivos
+        setTimeout(() => {
+          console.log('⚽ Mostrando marcador...');
+          app.showElement('marcador', {
+            equipoLocal: 'Barcelona SC',
+            equipoVisitante: 'Emelec',
+            golesLocal: 2,
+            golesVisitante: 1,
+            tiempo: '67:30',
+            estado: '2T'
+          });
+        }, 1000);
+
+        setTimeout(() => {
+          console.log('👤 Mostrando jugador...');
+          app.showElement('jugador', {
+            nombre: 'Carlos Garcés',
+            posicion: 'DEL',
+            equipo: 'Barcelona SC',
+            numero: 9
+          });
+        }, 3000);
+
+        setTimeout(() => {
+          console.log('📊 Mostrando estadísticas...');
+          app.showElement('estadisticas');
+        }, 5000);
+
+        setTimeout(() => {
+          console.log('🖼️ Mostrando logo...');
+          if (app.modules.logoManager) {
+            app.modules.logoManager.show();
+          }
+        }, 7000);
+
+        setTimeout(() => {
+          console.log('🔄 Ocultando todo...');
+          app.hideElement('marcador');
+          app.hideElement('jugador');
+          app.hideElement('estadisticas');
+          if (app.modules.logoManager) {
+            app.modules.logoManager.hide();
+          }
+        }, 10000);
+
+      } else {
+        console.error('❌ App de fútbol no disponible');
+      }
+    }
+
+    function showMatchStatus() {
+      console.log('⚽ ESTADO DEL PARTIDO:');
+
+      if (window.SportsApp) {
+        const status = window.SportsApp.getStatus();
+        console.table(status);
+        console.log('Firebase Path:', status.firebasePath);
+        console.log('Deporte:', status.sport || 'futbol');
+      }
+
+      if (window.lastFirebaseData) {
+        console.log('Datos del partido:', {
+          equipoLocal: window.lastFirebaseData.Equipo_Local,
+          equipoVisitante: window.lastFirebaseData.Equipo_Visitante,
+          golesLocal: window.lastFirebaseData.Goles_Local,
+          golesVisitante: window.lastFirebaseData.Goles_Visitante,
+          tiempo: window.lastFirebaseData.Tiempo_Partido,
+          estado: window.lastFirebaseData.Estado_Partido
+        });
+      }
+    }
+
+    function simulateMatchData() {
+      console.log('⚽ Simulando datos de partido...');
+
+      const sampleMatchData = {
+        // Visibilidad
+        logoAlAire: true,
+        marcadorAlAire: true,
+        jugadorAlAire: false,
+        estadisticasAlAire: false,
+
+        // Datos del partido
+        Equipo_Local: "Barcelona SC",
+        Equipo_Visitante: "Emelec",
+        Goles_Local: 2,
+        Goles_Visitante: 1,
+        Tiempo_Partido: "67:30",
+        Minuto_Partido: 67,
+        Estado_Partido: "SEGUNDO_TIEMPO",
+
+        // Jugador destacado
+        Jugador_Destacado: "Carlos Garcés",
+        Posicion_Jugador: "DEL",
+        Equipo_Jugador: "Barcelona SC",
+        Numero_Jugador: 9,
+
+        // URLs de prueba
+        urlLogo_Local: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAiIGhlaWdodD0iNTAiPjxyZWN0IHdpZHRoPSI1MCIgaGVpZ2h0PSI1MCIgZmlsbD0iI0ZGRDcwMCIvPjx0ZXh0IHg9IjI1IiB5PSIzMCIgZmlsbD0iYmxhY2siIHRleHQtYW5jaG9yPSJtaWRkbGUiPkJTQzwvdGV4dD48L3N2Zz4=",
+        urlLogo_Visitante: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAiIGhlaWdodD0iNTAiPjxyZWN0IHdpZHRoPSI1MCIgaGVpZ2h0PSI1MCIgZmlsbD0iIzAwNjZDQyIvPjx0ZXh0IHg9IjI1IiB5PSIzMCIgZmlsbD0id2hpdGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkVNRTwvdGV4dD48L3N2Zz4=",
+
+        // Colores
+        colorEquipo_Local: "#FFD700",
+        colorEquipo_Visitante: "#0066CC",
+        colorFondo_Marcador: "#000000",
+        colorTexto_Marcador: "#FFFFFF",
+
+        // Estadísticas
+        Posesion_Local: 65,
+        Posesion_Visitante: 35,
+        Tiros_Local: 8,
+        Tiros_Visitante: 4,
+        Corners_Local: 5,
+        Corners_Visitante: 2,
+
+        // Configuración
+        modoAutomatico: false,
+        category: 'futbol'
+      };
+
+      if (window.SportsApp) {
+        window.SportsApp.applyDataChanges(sampleMatchData);
+        console.log('✅ Datos de partido de prueba aplicados');
+
+        // Actualizar elementos DOM manualmente para demo
+        updateMatchElements(sampleMatchData);
+      }
+    }
+
+    function updateMatchElements(data) {
+      // Función auxiliar para demos locales
+      document.getElementById('nombre-local').textContent = data.Equipo_Local;
+      document.getElementById('nombre-visitante').textContent = data.Equipo_Visitante;
+      document.getElementById('goles-local').textContent = data.Goles_Local;
+      document.getElementById('goles-visitante').textContent = data.Goles_Visitante;
+      document.getElementById('tiempo-partido').textContent = data.Tiempo_Partido;
+      document.getElementById('estado-partido').textContent = data.Estado_Partido;
+    }
+
+    function updateDebugInfo() {
+      if (!debugVisible) return;
+
+      const instanceStatusDiv = document.getElementById('debug-instance-status');
+      if (instanceStatusDiv && window.SportsApp) {
+        const status = window.SportsApp.getStatus();
+        instanceStatusDiv.innerHTML = `
+          <small>
+            ID: ${status.instanceId}<br>
+            Deporte: ${status.sport}<br>
+            Inicializada: ${status.isInitialized ? '✅' : '❌'}<br>
+            Tiempo Init: ${status.initTime?.toFixed(0) || 0}ms
+          </small>
+        `;
+      }
+
+      const firebaseStatusDiv = document.getElementById('debug-firebase-status');
+      if (firebaseStatusDiv && window.SportsApp?.modules?.firebaseClient) {
+        const fbState = window.SportsApp.modules.firebaseClient.getConnectionState();
+        firebaseStatusDiv.innerHTML = `
+          <small>
+            Conectado: ${fbState.isConnected ? '✅' : '❌'}<br>
+            Path: ${window.instanceConfig?.firebasePath}<br>
+            Listeners: ${fbState.activeListeners || 0}
+          </small>
+        `;
+      }
+
+      updateElementStatus('logo', 'logo-status');
+      updateElementStatus('grafico-marcador', 'marcador-status');
+      updateElementStatus('grafico-jugador', 'jugador-status');
+      updateElementStatus('grafico-estadisticas', 'estadisticas-status');
+    }
+
+    function updateElementStatus(elementId, statusId) {
+      const element = document.getElementById(elementId);
+      const statusSpan = document.getElementById(statusId);
+
+      if (element && statusSpan) {
+        const isVisible = element.style.display !== 'none';
+        statusSpan.textContent = isVisible ? '✅' : '❌';
+        statusSpan.className = isVisible ? 'status-visible' : 'status-hidden';
+      }
+    }
+
+    function clearConsole() {
+      console.clear();
+      console.log('🗑️ Console limpiada - Instancia de Fútbol');
+      console.log('💡 Comandos disponibles:');
+      console.log('  - testSportsElements(): Probar elementos');
+      console.log('  - showMatchStatus(): Ver estado partido');
+      console.log('  - simulateMatchData(): Simular datos');
+    }
+
+    // ===== AUTO-ACTUALIZACIÓN DEBUG =====
+    setInterval(() => {
+      if (debugVisible) {
+        updateDebugInfo();
+      }
+    }, 2000);
+
+    // ===== ATAJOS DE TECLADO PARA DEBUG =====
+    document.addEventListener('keydown', (e) => {
+      if (e.ctrlKey && e.key === 'd') {
+        e.preventDefault();
+        toggleDebugPanel();
+      }
+
+      if (e.ctrlKey && e.key === 't') {
+        e.preventDefault();
+        testSportsElements();
+      }
+    });
+
+    console.log('⚽ Sports Template HTML loaded');
+    console.log('💡 Debug: Ctrl+D | Test: Ctrl+T');
+  </script>
+</body>
+</html>
