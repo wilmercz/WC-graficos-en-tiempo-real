@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Equipo1 Noticias - Sistema Modular</title>
+
+  <!-- CSS Base del Sistema -->
+  <link rel="stylesheet" href="../../../shared/css/styles-base.css">
+  <link rel="stylesheet" href="../../../shared/css/styles-news.css">
+  <link rel="stylesheet" href="../../../shared/css/styles-variables.css">
+</head>
+<body class="news-theme">
+
+  <!-- 🖼️ LOGO PRINCIPAL -->
+  <img id="logo" src="" alt="Logo" style="display: none;">
+
+  <!-- 📺 GRÁFICO INVITADO/ROL -->
+  <div id="grafico-invitado-rol" class="news-element animated-element" style="display: none;">
+    <h1 id="invitado">INVITADO</h1>
+    <h2 id="rol">ROL</h2>
+  </div>
+
+  <!-- 📋 GRÁFICO TEMA -->
+  <div id="grafico-tema" class="news-element animated-element" style="display: none;">
+    <h1 id="tema">TEMA</h1>
+    <!-- Círculo decorativo para tema -->
+    <h2 class="tema-circle"></h2>
+  </div>
+
+  <!-- 📺 GRÁFICO PUBLICIDAD -->
+  <div id="grafico-publicidad" class="news-element animated-element" style="display: none;">
+    <img id="publicidad-img" src="" alt="Publicidad">
+  </div>
+
+  <!-- 🕐 RELOJ DEL STREAM -->
+  <div id="stream-clock" class="clock-element" style="display: none;">
+    00:00
+  </div>
+
+  <!-- 📊 ESTADO DE CONEXIÓN -->
+  <div id="status" class="status-element">
+    <span id="connection-status">Conectando...</span>
+    <span id="instance-info">Noticias</span>
+  </div>
+
+  <!-- 🔧 PANEL DE DEBUG (Solo si está habilitado) -->
+  <div id="debug-panel" class="debug-panel news-debug" style="display: none;">
+    <div class="debug-header">
+      <h4>🔧 Debug - Noticias</h4>
+      <button id="toggle-debug" onclick="toggleDebugPanel()">❌</button>
+    </div>
+    <div class="debug-content">
+      <div class="debug-section">
+        <h5>📊 Estado Instancia:</h5>
+        <div id="debug-instance-status">Cargando...</div>
+      </div>
+      <div class="debug-section">
+        <h5>🔥 Firebase:</h5>
+        <div id="debug-firebase-status">Desconectado</div>
+      </div>
+      <div class="debug-section">
+        <h5>📺 Elementos:</h5>
+        <div id="debug-elements-status">
+          <div>Logo: <span id="logo-status">❌</span></div>
+          <div>Invitado: <span id="invitado-status">❌</span></div>
+          <div>Tema: <span id="tema-status">❌</span></div>
+          <div>Publicidad: <span id="publicidad-status">❌</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="debug-controls">
+      <button onclick="testNewsElements()">🧪 Test Elementos</button>
+      <button onclick="showInstanceStatus()">📊 Estado</button>
+      <button onclick="simulateNewsData()">📺 Simular Datos</button>
+      <button onclick="clearConsole()">🗑️ Limpiar</button>
+    </div>
+  </div>
+
+  <!-- 🚀 ENTRADA PRINCIPAL PARA EQUIPO1 NOTICIAS -->
+  <script type="module" src="./main.js"></script>
+
+  <!-- 🔧 FUNCIONES DE DEBUG PARA NOTICIAS -->
+  <script>
+    let debugVisible = false;
+
+    // ===== FUNCIONES DE DEBUG ESPECÍFICAS DE NOTICIAS =====
+
+    function toggleDebugPanel() {
+      const panel = document.getElementById('debug-panel');
+      if (panel) {
+        debugVisible = !debugVisible;
+        panel.style.display = debugVisible ? 'block' : 'none';
+        if (debugVisible) {
+          updateDebugInfo();
+        }
+      }
+    }
+
+    function testNewsElements() {
+      console.log('🧪 Testing elementos de noticias...');
+
+      if (window.Equipo1NoticiasApp && window.Equipo1NoticiasApp.modules) {
+        const app = window.Equipo1NoticiasApp;
+
+        // Test secuencial de elementos
+        setTimeout(() => {
+          console.log('📺 Mostrando invitado...');
+          app.showElement('invitado', {
+            invitado: 'TEST INVITADO',
+            rol: 'TEST ROL'
+          });
+        }, 1000);
+
+        setTimeout(() => {
+          console.log('📋 Mostrando tema...');
+          app.showElement('tema', {
+            tema: 'TEST TEMA DE NOTICIAS'
+          });
+        }, 3000);
+
+        setTimeout(() => {
+          console.log('🖼️ Mostrando logo...');
+          if (app.modules.logoManager) {
+            app.modules.logoManager.show();
+          }
+        }, 5000);
+
+        setTimeout(() => {
+          console.log('🔄 Ocultando todo...');
+          app.hideElement('invitado');
+          app.hideElement('tema');
+          if (app.modules.logoManager) {
+            app.modules.logoManager.hide();
+          }
+        }, 8000);
+
+      } else {
+        console.error('❌ App de noticias no disponible');
+      }
+    }
+
+    function showInstanceStatus() {
+      console.log('📊 ESTADO DE INSTANCIA DE NOTICIAS:');
+
+      if (window.Equipo1NoticiasApp) {
+        const status = window.Equipo1NoticiasApp.getStatus();
+        console.table(status);
+        console.log('Firebase Path:', status.firebasePath);
+        console.log('Categoría:', status.category);
+      }
+
+      if (window.instanceConfig) {
+        console.log('Configuración:', window.instanceConfig);
+      }
+    }
+
+    function simulateNewsData() {
+      console.log('📺 Simulando datos de noticias...');
+
+      const sampleData = {
+        logoAlAire: true,
+        graficoAlAire: true,
+        temaAlAire: false,
+        publicidadAlAire: false,
+
+        Invitado: "Dr. María González",
+        Rol: "Ministra de Salud",
+        Tema: "Nuevas medidas sanitarias",
+
+        urlLogo: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAiIGhlaWdodD0iNTAiPjxyZWN0IHdpZHRoPSI1MCIgaGVpZ2h0PSI1MCIgZmlsbD0iIzAwNjZjYyIvPjx0ZXh0IHg9IjI1IiB5PSIzMCIgZmlsbD0id2hpdGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkxPR088L3RleHQ+PC9zdmc+",
+
+        colorFondo1: "#1066DC",
+        colorLetra1: "#FFFFFF",
+        colorFondo2: "#1066FF",
+        colorLetra2: "#FFFFFF",
+
+        modoAutomatico: false
+      };
+
+      if (window.Equipo1NoticiasApp) {
+        window.Equipo1NoticiasApp.applyDataChanges(sampleData);
+        console.log('✅ Datos de prueba aplicados');
+      }
+    }
+
+    function updateDebugInfo() {
+      if (!debugVisible) return;
+
+      // Actualizar estado de la instancia
+      const instanceStatusDiv = document.getElementById('debug-instance-status');
+      if (instanceStatusDiv && window.Equipo1NoticiasApp) {
+        const status = window.Equipo1NoticiasApp.getStatus();
+        instanceStatusDiv.innerHTML = `
+          <small>
+            ID: ${status.instanceId}<br>
+            Categoría: ${status.category}<br>
+            Inicializada: ${status.isInitialized ? '✅' : '❌'}<br>
+            Tiempo Init: ${status.initTime?.toFixed(0) || 0}ms
+          </small>
+        `;
+      }
+
+      // Actualizar estado Firebase
+      const firebaseStatusDiv = document.getElementById('debug-firebase-status');
+      if (firebaseStatusDiv && window.Equipo1NoticiasApp?.modules?.firebaseClient) {
+        const fbState = window.Equipo1NoticiasApp.modules.firebaseClient.getConnectionState();
+        firebaseStatusDiv.innerHTML = `
+          <small>
+            Conectado: ${fbState.isConnected ? '✅' : '❌'}<br>
+            Path: ${window.instanceConfig?.firebasePath}<br>
+            Listeners: ${fbState.activeListeners || 0}
+          </small>
+        `;
+      }
+
+      // Actualizar estado de elementos
+      updateElementStatus('logo', 'logo-status');
+      updateElementStatus('grafico-invitado-rol', 'invitado-status');
+      updateElementStatus('grafico-tema', 'tema-status');
+      updateElementStatus('grafico-publicidad', 'publicidad-status');
+    }
+
+    function updateElementStatus(elementId, statusId) {
+      const element = document.getElementById(elementId);
+      const statusSpan = document.getElementById(statusId);
+
+      if (element && statusSpan) {
+        const isVisible = element.style.display !== 'none';
+        statusSpan.textContent = isVisible ? '✅' : '❌';
+        statusSpan.className = isVisible ? 'status-visible' : 'status-hidden';
+      }
+    }
+
+    function clearConsole() {
+      console.clear();
+      console.log('🗑️ Console limpiada - Instancia de Noticias');
+      console.log('💡 Comandos disponibles:');
+      console.log('  - testNewsElements(): Probar elementos');
+      console.log('  - showInstanceStatus(): Ver estado');
+      console.log('  - simulateNewsData(): Simular datos');
+    }
+
+    // ===== AUTO-ACTUALIZACIÓN DEBUG =====
+    setInterval(() => {
+      if (debugVisible) {
+        updateDebugInfo();
+      }
+    }, 2000);
+
+    // ===== ATAJOS DE TECLADO PARA DEBUG =====
+    document.addEventListener('keydown', (e) => {
+      // Ctrl + D = Toggle Debug
+      if (e.ctrlKey && e.key === 'd') {
+        e.preventDefault();
+        toggleDebugPanel();
+      }
+
+      // Ctrl + T = Test Elements
+      if (e.ctrlKey && e.key === 't') {
+        e.preventDefault();
+        testNewsElements();
+      }
+    });
+
+    console.log('📺 News Template HTML loaded');
+    console.log('💡 Debug: Ctrl+D | Test: Ctrl+T');
+  </script>
+</body>
+</html>
