@@ -14,7 +14,7 @@ html, body {
    Firebase puede sobrescribir vía JS con: el.style.setProperty('--var', valor) */
 :root {
   /* LOGO (tamaños/posiciones por defecto) */
-  --logo-left: 45px;
+  --logo-left: 42px;
   --logo-bottom: 33px;
   --logo-w: 60px;
   --logo-h: auto;
