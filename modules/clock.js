@@ -18,12 +18,13 @@ export class Clock {
                 bottom: 'calc(var(--logo-bottom, 33px) - 25px)'
             },
             style: {
-                background: 'rgba(0, 0, 0, 0.7)',
+                //background: 'rgba(0, 0, 0, 0.7)',
+                background: 'transparent',
                 color: 'white',
                 padding: '2px 8px',
                 borderRadius: '4px',
-                fontSize: '13px',
-                fontFamily: "'Courier New', monospace",
+                fontSize: '16px',
+                fontFamily: "'Verdana', monospace",
                 fontWeight: 'bold',
                 zIndex: '999',
                 transition: 'opacity 0.3s ease',
