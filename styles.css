@@ -1,7 +1,7 @@
 /* ====== BASE (Fallbacks actuales) ====== */
 html, body {
   font-family: Arial, sans-serif;
-  background-color: transparent; /* transparent;*/ /*este es un color para pruebas: #302B2B;*/
+  background-color: #302B2B; /* transparent;*/ /*este es un color para pruebas: #302B2B;*/
   margin: 0;
   padding: 0;
   position: relative;
