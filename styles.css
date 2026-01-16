@@ -16,7 +16,7 @@ html, body {
   /* LOGO (tamaños/posiciones por defecto) */
   --logo-left: 45px;
   --logo-bottom: 33px;
-  --logo-w: 46px;
+  --logo-w: 60px;
   --logo-h: auto;
   --logo-radius: 15%;
   --logo-bg: transparent;
@@ -24,34 +24,34 @@ html, body {
   /* INVITADO/ROL (container y etiquetas) */
   --lt-left: 0px;
   --lt-bottom: 0px;
-  --lt-h: 93px;
+  --lt-h: 96px;
 
   --lt-h1-bg: rgba(16, 102, 220, 1);
   --lt-h1-fg: rgba(255, 255, 255, 1);
-  --lt-h1-font: 16px;
+  --lt-h1-font: 21px;
   --lt-h1-pad: 5px 40px 5px 20px;
-  --lt-h1-left: 100px;
+  --lt-h1-left: 122px;
   --lt-h1-bottom: 50px;
   --lt-h1-radius: 0px;
 
   --lt-h2-bg: rgba(16, 102, 255, 1);
   --lt-h2-fg: rgba(255, 255, 255, 1);
-  --lt-h2-font: 13px;
+  --lt-h2-font: 14px;
   --lt-h2-pad: 3px 35px 3px 20px;
   --lt-h2-left: 100px;
-  --lt-h2-bottom: 34px;
+  --lt-h2-bottom: 42px;
   --lt-h2-radius: 0px;
 
   /* TEMA (container + h1 + círculo h2) */
   --tema-left: 0px;
   --tema-bottom: 0px;
-  --tema-h: 87px;
+  --tema-h: 100px;
 
   --tema-h1-bg: rgba(16, 50, 100, 1);
   --tema-h1-fg: rgba(225, 255, 255, 1);
-  --tema-h1-font: 16px;
+  --tema-h1-font: 24px;
   --tema-h1-pad: 15px 15px;
-  --tema-h1-left: 100px;
+  --tema-h1-left: 122px;
   --tema-h1-bottom: 34px;
   --tema-h1-radius: 12px 12px 12px 12px;
 
