@@ -1,7 +1,7 @@
 /* ====== BASE (Fallbacks actuales) ====== */
 html, body {
   font-family: Arial, sans-serif;
-  background-color: transparent; /* transparent;*/ /*este es un color para pruebas: #302B2B;*/
+  background-color: #302B2B; /* transparent;*/ /*este es un color para pruebas: #302B2B;*/
   margin: 0;
   padding: 0;
   position: relative;
@@ -15,7 +15,7 @@ html, body {
 :root {
   /* LOGO (tamaños/posiciones por defecto) */
   --logo-left: 42px;
-  --logo-bottom: 33px;
+  --logo-bottom: 35px;
   --logo-w: 60px;
   --logo-h: auto;
   --logo-radius: 15%;
@@ -30,29 +30,30 @@ html, body {
   --lt-h1-fg: rgba(255, 255, 255, 1);
   --lt-h1-font: 21px;
   --lt-h1-pad: 5px 40px 5px 20px;
-  --lt-h1-left: 122px;
+  --lt-h1-left: 30px; /* 122 valor funcional*/
   --lt-h1-bottom: 50px;
   --lt-h1-radius: 0px;
 
   --lt-h2-bg: rgba(16, 102, 255, 1);
   --lt-h2-fg: rgba(255, 255, 255, 1);
-  --lt-h2-font: 14px;
+  --lt-h2-font: 16px;
   --lt-h2-pad: 3px 35px 3px 20px;
   --lt-h2-left: 100px;
-  --lt-h2-bottom: 42px;
+  --lt-h2-bottom: 27px;
   --lt-h2-radius: 0px;
 
-  /* TEMA (container + h1 + círculo h2) */
-  --tema-left: 0px;
-  --tema-bottom: 0px;
-  --tema-h: 100px;
 
-  --tema-h1-bg: rgba(16, 50, 100, 1);
+  /* TEMA (container + h1 + círculo h2) */
+  --tema-left: 30px;
+  --tema-bottom: 28px;
+  --tema-h: auto;  /* ✅ En lugar de 150px anteriormente*/
+
+  --tema-h1-bg: transparent; /*rgba(16, 50, 100, 1);*/
   --tema-h1-fg: rgba(225, 255, 255, 1);
   --tema-h1-font: 22px;
   --tema-h1-pad: 15px 15px;
-  --tema-h1-left: 122px;
-  --tema-h1-bottom: 34px;
+  --tema-h1-left: 30px; /* 122 el left del recuadro amterior ,emte*/
+  --tema-h1-bottom: 5px;
   --tema-h1-radius: 12px 12px 12px 12px;
 
   --tema-h2-bg: rgba(16, 102, 255, 1);
@@ -99,12 +100,12 @@ html, body {
   bottom: var(--lt-h2-bottom);
   width: auto;
   min-width: 300px;
-  height: auto;
+  height: 64px; /*ANTES  auto */
   
   /* 🔧 FONDO TRANSPARENTE - Se aplicará desde JavaScript */
   background: transparent;
   border-radius: 5px;
-  padding: 3px 12px;
+  padding: 3px 100px; /*3px 12px; la letra empieza en 100 y el recuadro en 35 */
   
   /* LAYOUT */
   display: flex;
@@ -203,31 +204,30 @@ html, body {
   position: absolute;
   left: var(--tema-left);
   bottom: var(--tema-bottom);
-  width: 100%;
-  height: var(--tema-h);
+  
+  /* ✅ COPIAR DE INVITADO/ROL */
+  width: auto;           /* En lugar de 100% */
+  min-width: 300px;
+  height: 48px;          /* En lugar de var(--tema-h) */
+  
   display: flex;
-  align-items: center;
-  text-align: left;
-  background: transparent;
-  transition: all 0.3s ease-in-out;
-
-    /* 🆕 CRÍTICO: Configuración para WIPE effects */
-  clip-path: inset(0 100% 0 0);  /* Estado inicial oculto */
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
   
-  /* 🆕 TRANSICIÓN que respeta timing de Firebase */
+  /* ✅ PADDING para separar contenido */
+  padding: 10px 100px 10px 50px;
+  
+  background: transparent;  /* Fondo desde JS */
+  border-radius: 5px;
+  
+  /* Mantener animaciones */
   transition-property: opacity, transform, background-color, clip-path;
-  transition-duration: 0.6s;  /* Se sobrescribe desde JavaScript */
-  transition-timing-function: ease-in-out;  /* Se sobrescribe desde JavaScript */
-  transition-delay: 0.1s;  /* Se sobrescribe desde JavaScript */
-  
-  /* Optimización para animaciones */
-  will-change: opacity, transform, clip-path;
-  backface-visibility: hidden;
-
+  z-index: 1;
 }
 
 #grafico-tema h1 {
-  position: absolute;
+  position: relative;  /* En lugar de absolute */
   margin: 0;
   background: var(--tema-h1-bg);
   color: var(--tema-h1-fg);
