@@ -11,6 +11,35 @@ import { animationEngine } from './modules/animations.js';
 import { clockInstance } from './modules/clock.js';
 import { debugTools } from './utils/debug-tools.js';
 
+
+    function darkenColor(color, amount = 0.08) {
+    const clamp = (v) => Math.max(0, Math.min(255, v));
+
+    // rgb / rgba
+    const rgb = color.replace(/\s+/g, '').match(/^rgba?\((\d+),(\d+),(\d+)(?:,([0-9.]+))?\)$/i);
+    if (rgb) {
+        let r = clamp(Math.round(rgb[1] * (1 - amount)));
+        let g = clamp(Math.round(rgb[2] * (1 - amount)));
+        let b = clamp(Math.round(rgb[3] * (1 - amount)));
+        return rgb[4]
+            ? `rgba(${r},${g},${b},${rgb[4]})`
+            : `rgb(${r},${g},${b})`;
+    }
+
+    // hex
+    let hex = color.replace('#', '');
+    if (hex.length === 3) hex = hex.split('').map(x => x + x).join('');
+    if (hex.length !== 6) return color;
+
+    const r = clamp(Math.round(parseInt(hex.substr(0, 2), 16) * (1 - amount)));
+    const g = clamp(Math.round(parseInt(hex.substr(2, 2), 16) * (1 - amount)));
+    const b = clamp(Math.round(parseInt(hex.substr(4, 2), 16) * (1 - amount)));
+
+    return `rgb(${r}, ${g}, ${b})`;
+}
+
+
+
 class StreamGraphicsApp {
     constructor() {
         this.isInitialized = false;
@@ -306,11 +335,12 @@ class StreamGraphicsApp {
                 this.modules.animations.applyDynamicAnimationFromOldSystem(el, tipo, true);
                 
                 // Sincronizar fondo del logo para lower thirds
+                /*
                 if (tipo === 'invitadoRol' || tipo === 'tema') {
                     const animCfg = window.animacionConfig?.[tipo] || {};
                     const delay = Number(animCfg.delay) || 100;
                     this.animarFondoLogo(true, 400, delay);
-                }
+                }*/
                 
                 // ⏰ Iniciar timer automático si está habilitado
                 if (window.currentConfig?.modoAutomatico) {
@@ -527,10 +557,21 @@ class StreamGraphicsApp {
         const contenedorInvitadoRol = document.getElementById('grafico-invitado-rol');
         if (contenedorInvitadoRol) {
             // Fondo del contenedor
-            if (colors.fondo1) {
+            /*if (colors.fondo1) {
                 contenedorInvitadoRol.style.setProperty('background-color', colors.fondo1, 'important');
+            }*/
+            if (colors.fondo1) {
+                const base = colors.fondo1;
+                const dark = darkenColor(base, 0.08); // 8% más oscuro
+
+                contenedorInvitadoRol.style.setProperty(
+                    'background',
+                    `linear-gradient(90deg, ${base} 0%, ${dark} 100%)`,
+                    'important'
+                );
             }
-            
+
+
             // Color del título (H1)
             const titulo = contenedorInvitadoRol.querySelector('h1');
             if (titulo && colors.letra1) {
@@ -545,11 +586,39 @@ class StreamGraphicsApp {
         }
         
         // Aplicar colores al tema
-        const temaElement = document.getElementById('tema');
+        const temaContainer = document.getElementById('grafico-tema');  // ← CONTAINER, no H1
+        const temaH1 = temaContainer?.querySelector('h1');
+
+        /*if (temaContainer && colors.fondo3) {
+            // Aplicar fondo al CONTAINER
+            temaContainer.style.setProperty('background-color', colors.fondo3, 'important');
+            temaContainer.style.setProperty('border-radius', '5px');
+        }*/
+
+        if (temaContainer && colors.fondo3) {
+            const base = colors.fondo3;
+            const dark = darkenColor(base, 0.08);
+
+            temaContainer.style.setProperty(
+                'background',
+                `linear-gradient(90deg, ${base} 0%, ${dark} 100%)`,
+                'important'
+            );
+            temaContainer.style.setProperty('border-radius', '5px');
+        }
+
+
+        if (temaH1 && colors.letra1) {
+            // Solo COLOR al texto (sin fondo)
+            temaH1.style.setProperty('color', colors.letra1, 'important');
+        }
+
+/* CODIGO ANTERIOR
+        const temaElement = document.getElementById('grafico-tema');
         if (temaElement && colors.fondo3 && colors.letra3) {
             temaElement.style.setProperty('background-color', colors.fondo3, 'important');
             temaElement.style.setProperty('color', colors.letra3, 'important');
-        }
+        }*/
         
         // Configurar color de fondo para logos
         if (colors.fondoLogos) {
@@ -559,6 +628,10 @@ class StreamGraphicsApp {
         }
     }
 
+
+
+
+    
     /**
      * Actualizar configuración de animaciones
      */
