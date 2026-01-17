@@ -105,7 +105,7 @@ html, body {
   /* 🔧 FONDO TRANSPARENTE - Se aplicará desde JavaScript */
   background: transparent;
   border-radius: 5px;
-  padding: 3px 100px; /*3px 12px; la letra empieza en 100 y el recuadro en 35 */
+ padding: 3px 3px 3px 100px; /*3px 12px; la letra empieza en 100 y el recuadro en 35 */
   
   /* LAYOUT */
   display: flex;
@@ -216,7 +216,7 @@ html, body {
   gap: 2px;
   
   /* ✅ PADDING para separar contenido */
-  padding: 10px 100px 10px 50px;
+  padding: 10px 30px 10px 50px;
   
   background: transparent;  /* Fondo desde JS */
   border-radius: 5px;
