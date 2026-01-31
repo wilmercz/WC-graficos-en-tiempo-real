@@ -175,6 +175,7 @@
   box-shadow: var(--news-shadow);
   transition: var(--news-transition);
 }
+
 .news-theme #stream-clock:hover {
   background: linear-gradient(135deg, rgba(16, 102, 220, 1) 0%, rgba(16, 50, 100, 1) 100%);
   border-color: var(--news-accent);
