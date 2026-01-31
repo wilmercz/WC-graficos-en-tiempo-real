@@ -14,11 +14,9 @@ html, body {
    Firebase puede sobrescribir vía JS con: el.style.setProperty('--var', valor) */
 :root {
   /* LOGO (tamaños/posiciones por defecto) */
-  /* --logo-left: 42px; DESACTIVADO POSICION */
   --logo-left: 45px;
-  /* --logo-bottom: 35px; DESACTIVADO POSICION */
-  --logo-bottom: 39px;
-  --logo-w: 60px;
+  --logo-bottom: 33px;
+  --logo-w: 46px;
   --logo-h: auto;
   --logo-radius: 15%;
   --logo-bg: transparent;
@@ -30,40 +28,32 @@ html, body {
 
   --lt-h1-bg: rgba(16, 102, 220, 1);
   --lt-h1-fg: rgba(255, 255, 255, 1);
-  --lt-h1-font: 24px;
+  --lt-h1-font: 16px;
   --lt-h1-pad: 5px 40px 5px 20px;
-  /* --lt-h1-left: 30px; DESACTIVADO POSICION */
-  --lt-h1-left: 33px;
-  /* --lt-h1-bottom: 50px; DESACTIVADO POSICION */
-  --lt-h1-bottom: 54px;
+  --lt-h1-left: 100px;
+  --lt-h1-bottom: 50px;
   --lt-h1-radius: 0px;
 
   --lt-h2-bg: rgba(16, 102, 255, 1);
   --lt-h2-fg: rgba(255, 255, 255, 1);
-  --lt-h2-font: 19px;
+  --lt-h2-font: 13px;
   --lt-h2-pad: 3px 35px 3px 20px;
-  /* --lt-h2-left: 100px; DESACTIVADO POSICION */
-  --lt-h2-left: 103px;
-  /* --lt-h2-bottom: 27px; DESACTIVADO POSICION */
-  --lt-h2-bottom: 31px;
+  --lt-h2-left: 100px;
+  --lt-h2-bottom: 34px;
   --lt-h2-radius: 0px;
 
 
   /* TEMA (container + h1 + círculo h2) */
-  /* --tema-left: 30px; DESACTIVADO POSICION */
-  --tema-left: 33px;
-  /* --tema-bottom: 28px; DESACTIVADO POSICION */
-  --tema-bottom: 36px;
-  --tema-h: auto;  /* ✅ En lugar de 150px anteriormente*/
+  --tema-left: 0px;
+  --tema-bottom: 0px;
+  --tema-h: 87px;
 
   --tema-h1-bg: transparent; /*rgba(16, 50, 100, 1);*/
   --tema-h1-fg: rgba(225, 255, 255, 1);
   --tema-h1-font: 22px;
   --tema-h1-pad: 15px 15px;
-  /* --tema-h1-left: 30px; DESACTIVADO POSICION */
-  --tema-h1-left: 33px;
-  /* --tema-h1-bottom: 5px; DESACTIVADO POSICION */
-  --tema-h1-bottom: 9px;
+  --tema-h1-left: 100px;
+  --tema-h1-bottom: 34px;
   --tema-h1-radius: 12px 12px 12px 12px;
 
   --tema-h2-bg: rgba(16, 102, 255, 1);
@@ -243,17 +233,15 @@ html, body {
   height: 48px;          /* En lugar de var(--tema-h) */
   
   display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 2px;
+  align-items: center;
+  text-align: left;
+  background: transparent;
+  transition: all 0.3s ease-in-out;
+
+    /* 🆕 CRÍTICO: Configuración para WIPE effects */
+  clip-path: inset(0 100% 0 0);  /* Estado inicial oculto */
   
-  /* ✅ PADDING para separar contenido */
-  padding: 17px 60px 5px 50px;
-  
-  background: transparent;  /* Fondo desde JS */
-  border-radius: 5px;
-  
-  /* Mantener animaciones */
+  /* 🆕 TRANSICIÓN que respeta timing de Firebase */
   transition-property: opacity, transform, background-color, clip-path;
   z-index: 1;
 }
