@@ -1,7 +1,7 @@
 /* ====== BASE (Fallbacks actuales) ====== */
 html, body {
   font-family: Arial, sans-serif;
-  background-color: transparent; /* transparent;*/ /*este es un color para pruebas: #302B2B;*/
+  background-color: #302B2B; /* transparent;*/ /*este es un color para pruebas: #302B2B;*/
   margin: 0;
   padding: 0;
   position: relative;
@@ -14,9 +14,11 @@ html, body {
    Firebase puede sobrescribir vía JS con: el.style.setProperty('--var', valor) */
 :root {
   /* LOGO (tamaños/posiciones por defecto) */
+  /* --logo-left: 42px; DESACTIVADO POSICION */
   --logo-left: 45px;
-  --logo-bottom: 33px;
-  --logo-w: 46px;
+  /* --logo-bottom: 35px; DESACTIVADO POSICION */
+  --logo-bottom: 39px;
+  --logo-w: 60px;
   --logo-h: auto;
   --logo-radius: 15%;
   --logo-bg: transparent;
@@ -24,47 +26,61 @@ html, body {
   /* INVITADO/ROL (container y etiquetas) */
   --lt-left: 0px;
   --lt-bottom: 0px;
-  --lt-h: 93px;
+  --lt-h: 96px;
 
   --lt-h1-bg: rgba(16, 102, 220, 1);
   --lt-h1-fg: rgba(255, 255, 255, 1);
-  --lt-h1-font: 16px;
+  --lt-h1-font: 24px;
   --lt-h1-pad: 5px 40px 5px 20px;
-  --lt-h1-left: 100px;
-  --lt-h1-bottom: 50px;
+  /* --lt-h1-left: 30px; DESACTIVADO POSICION */
+  --lt-h1-left: 33px;
+  /* --lt-h1-bottom: 50px; DESACTIVADO POSICION */
+  --lt-h1-bottom: 54px;
   --lt-h1-radius: 0px;
 
   --lt-h2-bg: rgba(16, 102, 255, 1);
   --lt-h2-fg: rgba(255, 255, 255, 1);
-  --lt-h2-font: 13px;
+  --lt-h2-font: 19px;
   --lt-h2-pad: 3px 35px 3px 20px;
-  --lt-h2-left: 100px;
-  --lt-h2-bottom: 34px;
+  /* --lt-h2-left: 100px; DESACTIVADO POSICION */
+  --lt-h2-left: 103px;
+  /* --lt-h2-bottom: 27px; DESACTIVADO POSICION */
+  --lt-h2-bottom: 31px;
   --lt-h2-radius: 0px;
 
-  /* TEMA (container + h1 + círculo h2) */
-  --tema-left: 0px;
-  --tema-bottom: 0px;
-  --tema-h: 87px;
 
-  --tema-h1-bg: rgba(16, 50, 100, 1);
+  /* TEMA (container + h1 + círculo h2) */
+  /* --tema-left: 30px; DESACTIVADO POSICION */
+  --tema-left: 33px;
+  /* --tema-bottom: 28px; DESACTIVADO POSICION */
+  --tema-bottom: 36px;
+  --tema-h: auto;  /* ✅ En lugar de 150px anteriormente*/
+
+  --tema-h1-bg: transparent; /*rgba(16, 50, 100, 1);*/
   --tema-h1-fg: rgba(225, 255, 255, 1);
-  --tema-h1-font: 16px;
+  --tema-h1-font: 22px;
   --tema-h1-pad: 15px 15px;
-  --tema-h1-left: 100px;
-  --tema-h1-bottom: 34px;
+  /* --tema-h1-left: 30px; DESACTIVADO POSICION */
+  --tema-h1-left: 33px;
+  /* --tema-h1-bottom: 5px; DESACTIVADO POSICION */
+  --tema-h1-bottom: 9px;
   --tema-h1-radius: 12px 12px 12px 12px;
 
   --tema-h2-bg: rgba(16, 102, 255, 1);
   --tema-h2-fg: #ffffff;
   --tema-h2-font: 13px;
-  --tema-h2-left: 37px;
-  --tema-h2-bottom: 31px;
+  /* --tema-h2-left: 37px; DESACTIVADO POSICION */
+  --tema-h2-left: 40px;
+  /* --tema-h2-bottom: 31px; DESACTIVADO POSICION */
+  --tema-h2-bottom: 35px;
   --tema-h2-size: 40px;  /* ancho/alto del círculo */
 
   /* PUBLICIDAD (container + img) */
-  --ads-left: 120px;
-  --ads-bottom: 20px;
+  /* --ads-left: 120px; DESACTIVADO POSICION */
+  --ads-left: 123px;
+  /* --ads-bottom: 20px; DESACTIVADO POSICION */
+  /* --ads-bottom: 24px; DESACTIVADO POSICION */
+  --ads-bottom: 32px;
   --ads-img-w: auto;
   --ads-img-h: 75px;
   --ads-radius: 0px;
@@ -99,12 +115,12 @@ html, body {
   bottom: var(--lt-h2-bottom);
   width: auto;
   min-width: 300px;
-  height: auto;
+  height: 64px; /*ANTES  auto */
   
   /* 🔧 FONDO TRANSPARENTE - Se aplicará desde JavaScript */
   background: transparent;
   border-radius: 5px;
-  padding: 3px 12px;
+ padding: 3px 3px 3px 100px; /*3px 12px; la letra empieza en 100 y el recuadro en 35 */
   
   /* LAYOUT */
   display: flex;
@@ -181,6 +197,23 @@ html, body {
   z-index: 3;
 }
 
+#grafico-invitado-rol h2::before {
+    content: "";
+    display: inline-block;
+    width: 14px; /* Icono más pequeño y minimalista */
+    height: 14px;
+    margin-right: 6px;
+    vertical-align: -2px; /* Ajuste vertical para alinear con el texto */
+    background-color: currentColor; /* Hereda el color del texto */
+    opacity: 0.6; /* Opacidad al 60% */
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M17.63 5.84C17.27 5.33 16.67 5 16 5L5 5.01C3.9 5.01 3 5.9 3 7v10c0 1.1.9 1.99 2 1.99L16 19c.67 0 1.27-.33 1.63-.84L22 12l-4.37-6.16z'/%3E%3C/svg%3E");
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M17.63 5.84C17.27 5.33 16.67 5 16 5L5 5.01C3.9 5.01 3 5.9 3 7v10c0 1.1.9 1.99 2 1.99L16 19c.67 0 1.27-.33 1.63-.84L22 12l-4.37-6.16z'/%3E%3C/svg%3E");
+    -webkit-mask-size: contain;
+    mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+}
+
 /* Estado inicial específico para WIPE */
 #grafico-invitado-rol.wipe-ready {
   clip-path: inset(0 100% 0 0);
@@ -203,31 +236,30 @@ html, body {
   position: absolute;
   left: var(--tema-left);
   bottom: var(--tema-bottom);
-  width: 100%;
-  height: var(--tema-h);
+  
+  /* ✅ COPIAR DE INVITADO/ROL */
+  width: auto;           /* En lugar de 100% */
+  min-width: 300px;
+  height: 48px;          /* En lugar de var(--tema-h) */
+  
   display: flex;
-  align-items: center;
-  text-align: left;
-  background: transparent;
-  transition: all 0.3s ease-in-out;
-
-    /* 🆕 CRÍTICO: Configuración para WIPE effects */
-  clip-path: inset(0 100% 0 0);  /* Estado inicial oculto */
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
   
-  /* 🆕 TRANSICIÓN que respeta timing de Firebase */
+  /* ✅ PADDING para separar contenido */
+  padding: 17px 60px 5px 50px;
+  
+  background: transparent;  /* Fondo desde JS */
+  border-radius: 5px;
+  
+  /* Mantener animaciones */
   transition-property: opacity, transform, background-color, clip-path;
-  transition-duration: 0.6s;  /* Se sobrescribe desde JavaScript */
-  transition-timing-function: ease-in-out;  /* Se sobrescribe desde JavaScript */
-  transition-delay: 0.1s;  /* Se sobrescribe desde JavaScript */
-  
-  /* Optimización para animaciones */
-  will-change: opacity, transform, clip-path;
-  backface-visibility: hidden;
-
+  z-index: 1;
 }
 
 #grafico-tema h1 {
-  position: absolute;
+  position: relative;  /* En lugar de absolute */
   margin: 0;
   background: var(--tema-h1-bg);
   color: var(--tema-h1-fg);
@@ -237,6 +269,22 @@ html, body {
   left: var(--tema-h1-left);
   bottom: var(--tema-h1-bottom);
   transition: all 0.6s ease-in-out;
+}
+
+#grafico-tema h1::before {
+    content: "";
+    display: inline-block;
+    width: 20px; /* Tamaño del icono */
+    height: 20px;
+    margin-right: 8px; /* Espacio entre icono y texto */
+    vertical-align: -4px; /* Ajuste vertical para alinear con el texto */
+    background-color: currentColor; /* Hereda el color del texto */
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z'/%3E%3C/svg%3E");
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z'/%3E%3C/svg%3E");
+    -webkit-mask-size: contain;
+    mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
 }
 
 /* h2 círculo (fondo del tema) – defaults actuales */
@@ -254,6 +302,104 @@ html, body {
   z-index: 4;
   transition: all 0.6s ease-in-out;
 }
+
+
+/* ===== 📍 LUGAR (NUEVO) ===== */
+
+#grafico-lugar {
+    position: absolute;
+    
+    /* POSICIÓN TEMPORAL - Cambiar con CSS después */
+    left: var(--tema-left);
+    /* bottom: 2px; DESACTIVADO POSICION */
+    bottom: 6px;  /* Debajo de logo, encima de invitado */
+    
+    width: auto;
+    min-width: 200px;
+    height: auto;
+    
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0;
+    
+    padding: 0px 0px 0px 0px;
+    background: transparent;
+    border-radius: 5px;
+    
+    /* Animaciones */
+    transition-property: opacity, transform, background-color, clip-path;
+    transition-duration: 0.6s;
+    transition-timing-function: ease-in-out;
+    
+    z-index: 100;  /* Encima de invitado (z-index: 1) pero debajo de logo (z-index: 1000) */
+    will-change: opacity, transform;
+    backface-visibility: hidden;
+}
+
+#grafico-lugar h1 {
+    position: relative;
+    margin: 0;
+    padding: 6px 23px 6px 90px;
+    
+    /* Colores desde Firebase (fondo3 y letra3) */
+    background-color: #FFFFFF;  /* Será overwritten por JavaScript desde Firebase */
+    color: #000000;             /* Será overwritten por JavaScript desde Firebase */
+    
+    font-size: 14px;
+    font-weight: normal;
+    border-radius: 5px;
+    line-height: 1.2;
+    white-space: nowrap;
+    
+    transition: all 0.3s ease-in-out;
+    z-index: 2;
+}
+
+#grafico-lugar h1::before {
+    content: "";
+    display: inline-block;
+    width: 15px;
+    height: 15px;
+    margin-right: 5px;
+    vertical-align: -2px;
+    background-color: currentColor; /* Hereda el color exacto del texto */
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z'/%3E%3C/svg%3E");
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z'/%3E%3C/svg%3E");
+    -webkit-mask-size: contain;
+    mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+}
+
+/* Animaciones de entrada/salida (igual que tema) */
+#grafico-lugar.wipe-ready {
+    clip-path: inset(0 100% 0 0);
+    opacity: 0;
+}
+
+#grafico-lugar.wipe-revealed {
+    clip-path: inset(0 0% 0 0);
+    opacity: 1;
+}
+
+#grafico-lugar.wipe-hidden {
+    clip-path: inset(0 0 0 100%);
+    opacity: 0;
+}
+
+/* Fade animations */
+#grafico-lugar.fade-in {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+#grafico-lugar.fade-out {
+    opacity: 0;
+    transform: translateX(-20px);
+}
+
+
 
 /* ====== PUBLICIDAD ====== */
 #grafico-publicidad {

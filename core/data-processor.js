@@ -86,6 +86,7 @@ export class DataProcessor {
             logoAlAire: this.convertBoolean(data.Mostrar_Logo),
             graficoAlAire: this.convertBoolean(data.Mostrar_Invitado),
             temaAlAire: this.convertBoolean(data.Mostrar_Tema),
+            lugarAlAire: this.convertBoolean(data.Mostrar_Lugar),
             publicidadAlAire: this.convertBoolean(data.Mostrar_Publicidad),
             
             // Secuencia automática
@@ -102,7 +103,8 @@ export class DataProcessor {
         return {
             invitado: this.cleanText(data.Invitado, 'Sin Invitado'),
             rol: this.cleanText(data.Rol, 'Sin Rol'),
-            tema: this.cleanText(data.Tema, 'Sin Tema')
+            tema: this.cleanText(data.Tema, 'Sin Tema'),
+            lugar: this.cleanText(data.Lugar, 'Sin Lugar')
         };
     }
 
@@ -197,6 +199,13 @@ export class DataProcessor {
             easing: data.animacion_publicidad_easing || 'EASE_IN_OUT',
             entrada: data.animacion_publicidad_entrada || 'WIPE_IN_TOP',
             salida: data.animacion_publicidad_salida || 'WIPE_OUT_BOTTOM'
+        },
+        lugar: {
+            delay: this.parseInteger(data.animacion_lugar_delay, 200),
+            duracion: this.parseInteger(data.animacion_lugar_duracion, 600),
+            easing: data.animacion_lugar_easing || 'EASE_IN_OUT',
+            entrada: data.animacion_lugar_entrada || 'WIPE_IN_RIGHT',
+            salida: data.animacion_lugar_salida || 'WIPE_OUT_LEFT'
         }
     };
     
