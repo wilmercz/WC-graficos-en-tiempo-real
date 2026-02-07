@@ -255,7 +255,7 @@ html, body {
   
   /* Mantener animaciones */
   transition-property: opacity, transform, background-color, clip-path;
-  z-index: 1;
+  z-index: 100;
 }
 
 #grafico-tema h1 {
