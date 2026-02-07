@@ -58,7 +58,7 @@ html, body {
 
   --tema-h1-bg: transparent; /*rgba(16, 50, 100, 1);*/
   --tema-h1-fg: rgba(225, 255, 255, 1);
-  --tema-h1-font: 22px;
+  --tema-h1-font: 18px;
   --tema-h1-pad: 15px 15px;
   /* --tema-h1-left: 30px; DESACTIVADO POSICION */
   --tema-h1-left: 33px;
