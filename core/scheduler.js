@@ -291,6 +291,10 @@ export class GlobalScheduler {
             shouldShow = true;
             type = 'tema';
             duration = (config?.duracionTema || 25) * 1000;
+        } else if (data.lugarAlAire) {             // ✅ AGREGAR ESTE BLOQUE
+            shouldShow = true;
+            type = 'lugar';
+            duration = (config?.duracionTema || 25) * 1000;
         } else {
             shouldShow = false;
         }

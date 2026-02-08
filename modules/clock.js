@@ -14,16 +14,17 @@ export class Clock {
         this.config = {
             position: {
                 //left: 'var(--logo-left, 45px)',
-                left: 'calc(var(--logo-left, 45px) - 5px)',
-                bottom: 'calc(var(--logo-bottom, 33px) - 25px)'
+                left: 'calc(var(--logo-left, 42px) - 3px)',
+                bottom: 'calc(var(--logo-bottom, 33px) - 30px)'
             },
             style: {
-                background: 'rgba(0, 0, 0, 0.7)',
+                //background: 'rgba(0, 0, 0, 0.7)',
+                background: 'transparent',
                 color: 'white',
                 padding: '2px 8px',
                 borderRadius: '4px',
-                fontSize: '13px',
-                fontFamily: "'Courier New', monospace",
+                fontSize: '15px',
+                fontFamily: "'Verdana', monospace",
                 fontWeight: 'bold',
                 zIndex: '999',
                 transition: 'opacity 0.3s ease',

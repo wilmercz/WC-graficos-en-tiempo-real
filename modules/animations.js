@@ -418,7 +418,9 @@ applyDynamicAnimationFromOldSystem(elemento, tipoElemento, mostrar, config = {})
     
     // 1. PREPARAR ELEMENTO
     if (mostrar) {
-        elemento.style.display = (tipoElemento === 'invitadoRol') ? 'flex' : 'block';
+        elemento.style.display = (tipoElemento === 'invitadoRol' || tipoElemento === 'lugar') ? 'flex' : 'block';
+        elemento.style.visibility = 'visible'; // ✅ FIX: Asegurar visibilidad contra conflictos del sistema nuevo
+        elemento.style.opacity = '0'; // ✅ FIX: Forzar opacidad para evitar que se quede invisible
         // 🔧 CRÍTICO: Limpiar transiciones previas antes de aplicar nuevas
         elemento.style.transition = 'none';
         elemento.offsetHeight; // Forzar reflow para limpiar transiciones
@@ -438,7 +440,7 @@ applyDynamicAnimationFromOldSystem(elemento, tipoElemento, mostrar, config = {})
     // 3. APLICAR ANIMACIÓN ESPECÍFICA (16ms después para asegurar que se aplique la transición)
     setTimeout(() => {
         this.aplicarAnimacionPorTipoCorregido(elemento, animacion, mostrar, duracion, delay, easing);
-    }, 16);
+    }, 50); // ✅ FIX: Aumentar delay (16->50ms) para asegurar que el navegador registre el estado inicial
     
     // 4. CLEANUP después de la animación
     if (!mostrar) {
@@ -450,6 +452,7 @@ applyDynamicAnimationFromOldSystem(elemento, tipoElemento, mostrar, config = {})
             if (done) return;
             done = true;
             elemento.style.display = 'none';
+            elemento.style.visibility = 'hidden'; // ✅ FIX: Forzar ocultamiento visual
             elemento.removeEventListener('transitionend', finish);
             // 🔧 CRÍTICO: Limpiar todas las propiedades de transición al finalizar
             elemento.style.transition = '';
@@ -484,6 +487,7 @@ aplicarAnimacionPorTipoCorregido(elemento, tipoAnimacion, mostrar, duracion, del
         elemento.style.clipPath = '';
         elemento.style.transform = '';
         elemento.style.opacity = '';
+        elemento.style.visibility = 'visible'; // ✅ FIX: Asegurar visibilidad
     }
     
     // ✅ CORRECCIÓN: Forzar reflow de manera más explícita
@@ -586,7 +590,7 @@ aplicarAnimacionPorTipoCorregido(elemento, tipoAnimacion, mostrar, duracion, del
             
             // 🔧 CONFIGURAR TRANSICIÓN ESPECÍFICA PARA WIPE (copiado exactamente del sistema viejo)
             elemento.style.transition = `clip-path ${duracion}ms ${easing} ${delay}ms, opacity ${duracion}ms ${easing} ${delay}ms`;
-            elemento.style.opacity = '1';
+            elemento.style.opacity = '1'; // ✅ FIX: Asegurar opacidad
             elemento.style.transform = 'none'; // ✅ NO usar transform con WIPE
             
             if (mostrar) {
@@ -600,7 +604,7 @@ aplicarAnimacionPorTipoCorregido(elemento, tipoAnimacion, mostrar, duracion, del
                 setTimeout(() => {
                     elemento.style.clipPath = 'inset(0 0% 0 0)';
                     console.log('🟢 WIPE_IN_RIGHT CORREGIDA: Revelando...');
-                }, 16);
+                }, 50); // ✅ FIX: Delay aumentado
             } else {
                 // Ocultar inmediatamente
                 elemento.style.clipPath = 'inset(0 100% 0 0)';

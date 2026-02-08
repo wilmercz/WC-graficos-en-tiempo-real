@@ -17,6 +17,11 @@ export class LowerThirds {
                 h1: null,
                 isVisible: false
             },
+            lugar: {                        // ✅ AGREGAR BLOQUE LUGAR
+                container: null,
+                h1: null,
+                isVisible: false
+            },
             publicidad: {
                 container: null,
                 img: null,
@@ -57,6 +62,11 @@ export class LowerThirds {
             this.elements.tema.h1 = this.elements.tema.container.querySelector('h1');
         }
 
+        this.elements.lugar.container = document.getElementById('grafico-lugar');
+        if (this.elements.lugar.container) {
+            this.elements.lugar.h1 = this.elements.lugar.container.querySelector('h1');
+        }
+
         // Elementos de publicidad
         this.elements.publicidad.container = document.getElementById('grafico-publicidad');
         if (this.elements.publicidad.container) {
@@ -66,6 +76,7 @@ export class LowerThirds {
         console.log('📺 Lower thirds elements found:', {
             invitado: !!this.elements.invitado.container,
             tema: !!this.elements.tema.container,
+            lugar: !!this.elements.lugar.container,
             publicidad: !!this.elements.publicidad.container
         });
     }
@@ -182,6 +193,73 @@ export class LowerThirds {
         EventBus.emit('lower-third-hidden', { type: 'tema' });
     }
 
+
+        /**
+     * ✅ NUEVO MÉTODO: Mostrar lugar
+     */
+    showLugar(data = null) {
+        console.log('📍 Mostrando LUGAR:', data?.lugar);
+        
+        if (!this.elements.lugar.container || !this.elements.lugar.h1) {
+            console.error('❌ Elemento lugar no encontrado en DOM');
+            return;
+        }
+        
+        // Asignar texto desde Firebase
+        if (data && data.lugar) {
+            this.elements.lugar.h1.textContent = data.lugar;
+        }
+        
+        // Aplicar estilos de color desde Firebase
+        if (data?.colors) {
+            this.elements.lugar.h1.style.backgroundColor = data.colors.fondo3;
+            this.elements.lugar.h1.style.color = data.colors.letra3;
+        }
+        
+        // Mostrar contenedor
+        this.elements.lugar.container.style.display = 'flex';
+        this.elements.lugar.isVisible = true;
+        
+        // Aplicar animación de entrada
+        const animConfig = this.animations.entrada || 'WIPE_IN_RIGHT';
+        this.applyAnimation(this.elements.lugar.container, animConfig);
+        
+        // Emitir evento
+        EventBus.emit('lugar-shown', {
+            texto: data?.lugar,
+            timestamp: Date.now()
+        });
+        
+        console.log('✅ Lugar mostrado correctamente');
+    }
+
+    /**
+     * ✅ NUEVO MÉTODO: Ocultar lugar
+     */
+    hideLugar() {
+        console.log('📍 Ocultando LUGAR');
+        
+        if (!this.elements.lugar.container) {
+            return;
+        }
+        
+        // Aplicar animación de salida
+        const animConfig = this.animations.salida || 'WIPE_OUT_LEFT';
+        this.applyAnimation(this.elements.lugar.container, animConfig);
+        
+        // Esperar a que termine la animación
+        setTimeout(() => {
+            this.elements.lugar.container.style.display = 'none';
+            this.elements.lugar.isVisible = false;
+            
+            EventBus.emit('lugar-hidden', {
+                timestamp: Date.now()
+            });
+            
+            console.log('✅ Lugar ocultado');
+        }, this.animations.duration || 600);
+    }
+
     /**
      * Mostrar publicidad
      */
@@ -262,6 +340,19 @@ export class LowerThirds {
         
         if (element.h1 && data.tema) {
             element.h1.textContent = data.tema;
+        }
+        
+        console.log('📋 Contenido de tema actualizado:', data);
+    }
+
+    /**
+     * Actualizar contenido de tema
+     */
+    updateLugarContent(data) {
+        const element = this.elements.lugar;
+        
+        if (element.h1 && data.lugar) {
+            element.h1.textContent = data.lugar;
         }
         
         console.log('📋 Contenido de tema actualizado:', data);
@@ -351,7 +442,8 @@ export class LowerThirds {
         const configs = {
             invitado: window.animacionConfig?.invitadoRol || this.animations,
             tema: window.animacionConfig?.tema || this.animations,
-            publicidad: window.animacionConfig?.publicidad || this.animations
+            publicidad: window.animacionConfig?.publicidad || this.animations,
+            lugar: window.animacionConfig?.lugar || this.animations
         };
         
         return configs[type] || this.animations;
@@ -368,12 +460,16 @@ export class LowerThirds {
                 this.showInvitado();
             } else if (data.type === 'tema') {
                 this.showTema();
+            } else if (data.type === 'lugar') {
+                this.showLugar();
             }
         } else {
             if (data.type === 'invitado') {
                 this.hideInvitado();
             } else if (data.type === 'tema') {
                 this.hideTema();
+            } else if (data.type === 'lugar') {
+                this.hideLugar();
             }
         }
     }
@@ -522,6 +618,9 @@ export const LowerThirdsUtils = {
             case 'tema':
                 lowerThirds.showTema(data);
                 break;
+            case 'lugar':              // ✅ AGREGAR ESTE CASO
+                lowerThirds.showLugar(data);
+                break;
             case 'publicidad':
                 lowerThirds.showPublicidad(data);
                 break;
@@ -535,6 +634,9 @@ export const LowerThirdsUtils = {
                 break;
             case 'tema':
                 lowerThirds.hideTema();
+                break;
+            case 'lugar':              
+                lowerThirds.hideLugar();
                 break;
             case 'publicidad':
                 lowerThirds.hidePublicidad();
@@ -554,6 +656,9 @@ export const LowerThirdsUtils = {
                 break;
             case 'tema':
                 lowerThirds.updateTemaContent(data);
+                break;
+            case 'lugar':              
+                lowerThirds.updateLugarContent(data);
                 break;
             case 'publicidad':
                 lowerThirds.updatePublicidadContent(data);

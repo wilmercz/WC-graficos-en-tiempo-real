@@ -10,6 +10,68 @@ import { logoManager } from './modules/logo-manager.js';
 import { animationEngine } from './modules/animations.js';
 import { clockInstance } from './modules/clock.js';
 import { debugTools } from './utils/debug-tools.js';
+import { SequenceManager } from './modules/sequence-manager.js';
+
+function lightenColor(color, amount = 0.10) {
+    const clamp = (v) => Math.max(0, Math.min(255, v));
+
+    // rgb / rgba
+    const rgb = color.replace(/\s+/g, '').match(/^rgba?\((\d+),(\d+),(\d+)(?:,([0-9.]+))?\)$/i);
+    if (rgb) {
+        const r = clamp(Math.round(Number(rgb[1]) + (255 - rgb[1]) * amount));
+        const g = clamp(Math.round(Number(rgb[2]) + (255 - rgb[2]) * amount));
+        const b = clamp(Math.round(Number(rgb[3]) + (255 - rgb[3]) * amount));
+        return rgb[4]
+            ? `rgba(${r},${g},${b},${rgb[4]})`
+            : `rgb(${r},${g},${b})`;
+    }
+
+    // hex
+    let hex = color.replace('#', '').trim();
+    if (hex.length === 3) hex = hex.split('').map(x => x + x).join('');
+    if (hex.length !== 6) return color;
+
+    const r = clamp(Math.round(parseInt(hex.slice(0,2), 16) + (255 - parseInt(hex.slice(0,2),16)) * amount));
+    const g = clamp(Math.round(parseInt(hex.slice(2,4), 16) + (255 - parseInt(hex.slice(2,4),16)) * amount));
+    const b = clamp(Math.round(parseInt(hex.slice(4,6), 16) + (255 - parseInt(hex.slice(4,6),16)) * amount));
+
+    return `rgb(${r}, ${g}, ${b})`;
+}
+
+
+
+// ===== Helpers de color (para degradados) =====
+function darkenColor(color, amount = 0.08) {
+    const clamp = (v) => Math.max(0, Math.min(255, v));
+
+    // rgb / rgba
+    const rgb = String(color).replace(/\s+/g, '').match(/^rgba?\((\d+),(\d+),(\d+)(?:,([0-9.]+))?\)$/i);
+    if (rgb) {
+        const r = clamp(Math.round(parseInt(rgb[1], 10) * (1 - amount)));
+        const g = clamp(Math.round(parseInt(rgb[2], 10) * (1 - amount)));
+        const b = clamp(Math.round(parseInt(rgb[3], 10) * (1 - amount)));
+        const a = rgb[4] !== undefined ? parseFloat(rgb[4]) : null;
+        return a === null ? `rgb(${r},${g},${b})` : `rgba(${r},${g},${b},${a})`;
+    }
+
+    // hex #RGB o #RRGGBB
+    let hex = String(color).trim();
+    if (hex.startsWith('#')) hex = hex.slice(1);
+    if (hex.length === 3) hex = hex.split('').map(ch => ch + ch).join('');
+    if (hex.length !== 6) return color;
+
+    const r0 = parseInt(hex.slice(0, 2), 16);
+    const g0 = parseInt(hex.slice(2, 4), 16);
+    const b0 = parseInt(hex.slice(4, 6), 16);
+
+    const r = clamp(Math.round(r0 * (1 - amount)));
+    const g = clamp(Math.round(g0 * (1 - amount)));
+    const b = clamp(Math.round(b0 * (1 - amount)));
+
+    return `rgb(${r},${g},${b})`;
+}
+
+
 
 class StreamGraphicsApp {
     constructor() {
@@ -23,7 +85,8 @@ class StreamGraphicsApp {
             logoManager: null,
             animations: null,
             clock: null,
-            debug: null
+            debug: null,
+            sequenceManager: null // ✅ NUEVO: Gestor de secuencias
         };
         this.performance = {
             initTime: 0,
@@ -170,6 +233,21 @@ class StreamGraphicsApp {
     procesarDatosFirebase(rawData) {
         console.log('📊 Datos RAW recibidos de Firebase:', rawData);
         
+        // ✅ DETECTAR ACTIVACIÓN DE SECUENCIA DESDE FIREBASE
+        // Si el campo 'mostrar_secuencia_invitado_tema' está en TRUE y no estamos corriendo, iniciamos.
+        if (rawData.mostrar_secuencia_invitado_tema === true) {
+            if (this.modules.sequenceManager && !this.modules.sequenceManager.isActive) {
+                console.log('🎬 Trigger de secuencia detectado desde Firebase: INICIANDO');
+                this.modules.sequenceManager.startGuestAdSequence();
+            }
+        } else {
+            // Si el usuario apaga el interruptor manualmente (o viene false), detenemos si está activa
+            if (this.modules.sequenceManager && this.modules.sequenceManager.isActive) {
+                console.log('🛑 Trigger de secuencia apagado en Firebase: DETENIENDO');
+                this.modules.sequenceManager.stopSequence();
+            }
+        }
+
         // 📝 LOG DETALLADO DE URLs
         if (rawData.urlLogo) {
             console.log('🖼️ URL Logo encontrada en Firebase:', rawData.urlLogo);
@@ -210,6 +288,7 @@ class StreamGraphicsApp {
             Invitado: processedData.content.invitado,
             Rol: processedData.content.rol,
             Tema: processedData.content.tema,
+            Lugar: processedData.content.lugar || rawData.Lugar || 'Sin Lugar',
             
             // ✅ Mapear URLs
             urlLogo: processedData.images.logoUrl,
@@ -281,7 +360,8 @@ class StreamGraphicsApp {
     
         // 🔻 RESTO DE ELEMENTOS (invitadoRol, tema, publicidad) - LÓGICA CORREGIDA
         const elementosLowerThird = [
-            { tipo: 'invitadoRol', visible: visibility.graficoAlAire, id: 'grafico-invitado-rol' },
+            { tipo: 'lugar', visible: visibility.lugarAlAire, id: 'grafico-lugar' }, // ✅ PRIMERO: Lugar (fondo)
+            { tipo: 'invitadoRol', visible: visibility.graficoAlAire, id: 'grafico-invitado-rol' }, // ✅ SEGUNDO: Invitado (encima)
             { tipo: 'tema', visible: visibility.temaAlAire, id: 'grafico-tema' },
             { tipo: 'publicidad', visible: visibility.publicidadAlAire, id: 'grafico-publicidad' }
         ];
@@ -300,21 +380,29 @@ class StreamGraphicsApp {
             
             if (visible) {
                 // ======= MOSTRAR ELEMENTO =======
-                el.style.display = (tipo === 'invitadoRol') ? 'flex' : 'block';
+                el.style.display = (tipo === 'invitadoRol' || tipo === 'lugar') ? 'flex' : 'block';
                 
                 // ✅ Aplicar animación de entrada con configuración Firebase
                 this.modules.animations.applyDynamicAnimationFromOldSystem(el, tipo, true);
                 
                 // Sincronizar fondo del logo para lower thirds
+                /*
                 if (tipo === 'invitadoRol' || tipo === 'tema') {
                     const animCfg = window.animacionConfig?.[tipo] || {};
                     const delay = Number(animCfg.delay) || 100;
                     this.animarFondoLogo(true, 400, delay);
-                }
+                }*/
                 
                 // ⏰ Iniciar timer automático si está habilitado
                 if (window.currentConfig?.modoAutomatico) {
-                    this.startAutoHideTimer(tipo, window.currentConfig[`duracion${tipo === 'invitado' ? 'NombreRol' : tipo.charAt(0).toUpperCase() + tipo.slice(1)}`]);
+                    // CORRECCIÓN: Mapeo correcto de la propiedad de duración para incluir invitadoRol
+                    let durationKey;
+                    if (tipo === 'invitado' || tipo === 'invitadoRol') {
+                        durationKey = 'duracionNombreRol';
+                    } else {
+                        durationKey = `duracion${tipo.charAt(0).toUpperCase() + tipo.slice(1)}`;
+                    }
+                    this.startAutoHideTimer(tipo, window.currentConfig[durationKey]);
                 }
                 
             } else {
@@ -441,6 +529,7 @@ class StreamGraphicsApp {
         console.log('📝 Actualizando contenido:', data.content);
         this.modules.lowerThirds.updateInvitadoContent(data.content);
         this.modules.lowerThirds.updateTemaContent(data.content);
+        this.modules.lowerThirds.updateLugarContent(data.content);
         
         // 🖼️ APLICAR IMÁGENES SIN ELIMINAR LAS EXISTENTES
         console.log('🖼️ Aplicando imágenes:', data.images);
@@ -527,10 +616,39 @@ class StreamGraphicsApp {
         const contenedorInvitadoRol = document.getElementById('grafico-invitado-rol');
         if (contenedorInvitadoRol) {
             // Fondo del contenedor
+
             if (colors.fondo1) {
-                contenedorInvitadoRol.style.setProperty('background-color', colors.fondo1, 'important');
+                const base = colors.fondo1;
+                const dark = darkenColor(base, 0.14);   // oscurecido arriba/abajo
+                const light = lightenColor(base, 0.10); // brillo superior sutil
+
+                // Limpia shorthand por si algo pisa el fondo
+                contenedorInvitadoRol.style.removeProperty('background');
+
+                // Capa base
+                contenedorInvitadoRol.style.setProperty('background-color', base, 'important');
+
+                // Capa PRO: brillo arriba + centro limpio + sombra abajo
+                contenedorInvitadoRol.style.setProperty(
+                    'background-image',
+                    `
+                    linear-gradient(180deg,
+                        rgba(255,255,255,0.18) 0%,
+                        ${light} 12%,
+                        ${base} 45%,
+                        ${base} 55%,
+                        ${dark} 100%
+                    )
+                    `,
+                    'important'
+                );
+
+                contenedorInvitadoRol.style.setProperty('background-repeat', 'no-repeat', 'important');
+                contenedorInvitadoRol.style.setProperty('background-size', '100% 100%', 'important');
             }
-            
+
+
+
             // Color del título (H1)
             const titulo = contenedorInvitadoRol.querySelector('h1');
             if (titulo && colors.letra1) {
@@ -545,11 +663,63 @@ class StreamGraphicsApp {
         }
         
         // Aplicar colores al tema
-        const temaElement = document.getElementById('tema');
+        const temaContainer = document.getElementById('grafico-tema');  // ← CONTAINER, no H1
+        const temaH1 = temaContainer?.querySelector('h1');
+
+        /*if (temaContainer && colors.fondo3) {
+            // Aplicar fondo al CONTAINER
+            temaContainer.style.setProperty('background-color', colors.fondo3, 'important');
+            temaContainer.style.setProperty('border-radius', '5px');
+        }*/
+
+        if (temaContainer && colors.fondo2) {
+    const base = colors.fondo2;
+    const dark = darkenColor(base, 0.14);
+    const light = lightenColor(base, 0.10);
+
+    temaContainer.style.removeProperty('background');
+
+    temaContainer.style.setProperty('background-color', base, 'important');
+    temaContainer.style.setProperty(
+        'background-image',
+        `
+        linear-gradient(180deg,
+            rgba(255,255,255,0.18) 0%,
+            ${light} 12%,
+            ${base} 45%,
+            ${base} 55%,
+            ${dark} 100%
+        )
+        `,
+        'important'
+    );
+
+    temaContainer.style.setProperty('background-repeat', 'no-repeat', 'important');
+    temaContainer.style.setProperty('background-size', '100% 100%', 'important');
+    temaContainer.style.setProperty('border-radius', '5px');
+}
+
+
+
+        if (temaH1 && colors.letra1) {
+            // Solo COLOR al texto (sin fondo)
+            temaH1.style.setProperty('color', colors.letra1, 'important');
+        }
+
+        // ✅ Aplicar colores al LUGAR (Nuevo)
+        const lugarContainer = document.getElementById('grafico-lugar');
+        const lugarH1 = lugarContainer?.querySelector('h1');
+        if (lugarH1 && colors.fondo1 && colors.letra3) {
+            lugarH1.style.setProperty('background-color', colors.fondo3, 'important');
+            lugarH1.style.setProperty('color', colors.letra3, 'important');
+        }
+
+/* CODIGO ANTERIOR
+        const temaElement = document.getElementById('grafico-tema');
         if (temaElement && colors.fondo3 && colors.letra3) {
             temaElement.style.setProperty('background-color', colors.fondo3, 'important');
             temaElement.style.setProperty('color', colors.letra3, 'important');
-        }
+        }*/
         
         // Configurar color de fondo para logos
         if (colors.fondoLogos) {
@@ -559,6 +729,10 @@ class StreamGraphicsApp {
         }
     }
 
+
+
+
+    
     /**
      * Actualizar configuración de animaciones
      */
@@ -672,6 +846,9 @@ class StreamGraphicsApp {
         // Debug Tools
         this.modules.debug = debugTools;
         
+        // ✅ Sequence Manager (Instanciado aquí mismo para simplificar)
+        this.modules.sequenceManager = new SequenceManager(this);
+
         console.log('✅ Módulos inicializados');
     }
 
@@ -845,6 +1022,13 @@ class StreamGraphicsApp {
                 easing: 'EASE_IN_OUT',
                 entrada: 'SLIDE_IN_BOTTOM',
                 salida: 'SLIDE_OUT_BOTTOM'
+            },
+            lugar: {
+                delay: 200,
+                duracion: 600,
+                easing: 'EASE_IN_OUT',
+                entrada: 'WIPE_IN_RIGHT',
+                salida: 'WIPE_OUT_LEFT'
             }
         };
         
@@ -924,11 +1108,25 @@ class StreamGraphicsApp {
                 console.log('   StreamDebug.test.ocultarTodo() - Ocultar todo');
                 console.log('   StreamDebug.status() - Ver estado completo');
                 console.log('   StreamDebug.debug() - Análisis completo');
+                console.log('   --- SECUENCIAS ---');
+                console.log('   StreamDebug.secuencia.iniciar() - Iniciar secuencia Invitado+Publicidad');
+                console.log('   StreamDebug.secuencia.agregarAd(url) - Agregar publicidad a la playlist');
             }
         };
         
         console.log('✅ Debug tools configurado');
         console.log('   💡 Usa: window.StreamDebug.help() para ver comandos');
+    }
+
+    // ✅ EXTENSIÓN DEBUG PARA SECUENCIAS
+    setupSequenceDebug() {
+        if (!window.StreamDebug) return;
+        window.StreamDebug.secuencia = {
+            iniciar: () => this.modules.sequenceManager.startGuestAdSequence(),
+            detener: () => this.modules.sequenceManager.stopSequence(),
+            agregarAd: (url) => this.modules.sequenceManager.addAdToPlaylist(url),
+            verPlaylist: () => console.log(this.modules.sequenceManager.adPlaylist)
+        };
     }
 
     /**
@@ -938,6 +1136,9 @@ class StreamGraphicsApp {
         this.isInitialized = true;
         this.performance.initTime = performance.now() - this.initStartTime;
         
+        // Configurar debug de secuencias
+        this.setupSequenceDebug();
+
         // Emitir evento de inicialización completa
         EventBus.emit('app-initialized');
         
@@ -985,8 +1186,10 @@ class StreamGraphicsApp {
             // ✅ USAR LA MISMA LÓGICA QUE EL SISTEMA VIEJO
             const elementMap = {
                 'invitadoRol': 'grafico-invitado-rol',
+                'invitado': 'grafico-invitado-rol', // ✅ AGREGADO: Compatibilidad por seguridad
                 'tema': 'grafico-tema', 
-                'publicidad': 'grafico-publicidad'
+                'publicidad': 'grafico-publicidad',
+                'lugar': 'grafico-lugar'
             };
             
             const el = document.getElementById(elementMap[elementType]);
@@ -1021,17 +1224,39 @@ class StreamGraphicsApp {
     /**
      * 🔄 ACTUALIZAR FIREBASE (cuando se oculta automáticamente)
      */
-    async updateFirebaseVisibility(fieldName, value) {
-        try {
-            if (this.modules.firebaseClient) {
-                const path = `CLAVE_STREAM_FB/STREAM_LIVE/GRAFICOS/${fieldName}`;
-                await this.modules.firebaseClient.writeData(path, value);
-                console.log(`✅ Firebase actualizado: ${fieldName} = ${value}`);
+        async updateFirebaseVisibility(fieldName, value) {
+            try {
+                if (this.modules.firebaseClient) {
+                    // 🔧 MAPEO DE NOMBRES DE CAMPOS
+                    // La web usa: invitadoRol, tema, publicidad
+                    // Firebase espera: Mostrar_Invitado, Mostrar_Tema, Mostrar_Publicidad
+                    const fieldMap = {
+                        'invitadoRol': 'Mostrar_Invitado',
+                        'invitado': 'Mostrar_Invitado', // ✅ AGREGADO: Compatibilidad por seguridad
+                        'tema': 'Mostrar_Tema',
+                        'publicidad': 'Mostrar_Publicidad',
+                        'lugar': 'Mostrar_Lugar'
+                    };
+                    
+                    // Usar el nombre correcto del campo
+                    const firebaseFieldName = fieldMap[fieldName] || fieldName;
+                    
+                    const path = `CLAVE_STREAM_FB/STREAM_LIVE/GRAFICOS/${firebaseFieldName}`;
+                    
+                    await this.modules.firebaseClient.writeData(path, value);
+                    
+                    console.log(`✅ Firebase actualizado correctamente:`);
+                    console.log(`   - Campo local: ${fieldName}`);
+                    console.log(`   - Campo Firebase: ${firebaseFieldName}`);
+                    console.log(`   - Valor: ${value}`);
+                    console.log(`   - Ruta completa: ${path}`);
+                }
+            } catch (error) {
+                console.error('❌ Error actualizando Firebase:', error);
+                console.error(`   - Campo intentado: ${fieldName}`);
+                console.error(`   - Valor: ${value}`);
             }
-        } catch (error) {
-            console.error('❌ Error actualizando Firebase:', error);
         }
-    }
 
     /**
      * ⚙️ ACTUALIZAR CONFIGURACIÓN GLOBAL
