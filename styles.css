@@ -310,6 +310,104 @@ html, body {
   transition: all 0.6s ease-in-out;
 }
 
+
+/* ===== 📍 LUGAR (NUEVO) ===== */
+
+#grafico-lugar {
+    position: absolute;
+    
+    /* POSICIÓN TEMPORAL - Cambiar con CSS después */
+    left: var(--tema-left);
+    /* bottom: 2px; DESACTIVADO POSICION */
+    bottom: 6px;  /* Debajo de logo, encima de invitado */
+    
+    width: auto;
+    min-width: 200px;
+    height: auto;
+    
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0;
+    
+    padding: 0px 0px 0px 0px;
+    background: transparent;
+    border-radius: 5px;
+    
+    /* Animaciones */
+    transition-property: opacity, transform, background-color, clip-path;
+    transition-duration: 0.6s;
+    transition-timing-function: ease-in-out;
+    
+    z-index: 100;  /* Encima de invitado (z-index: 1) pero debajo de logo (z-index: 1000) */
+    will-change: opacity, transform;
+    backface-visibility: hidden;
+}
+
+#grafico-lugar h1 {
+    position: relative;
+    margin: 0;
+    padding: 6px 23px 6px 90px;
+    
+    /* Colores desde Firebase (fondo3 y letra3) */
+    background-color: #FFFFFF;  /* Será overwritten por JavaScript desde Firebase */
+    color: #000000;             /* Será overwritten por JavaScript desde Firebase */
+    
+    font-size: 14px;
+    font-weight: normal;
+    border-radius: 5px;
+    line-height: 1.2;
+    white-space: nowrap;
+    
+    transition: all 0.3s ease-in-out;
+    z-index: 2;
+}
+
+#grafico-lugar h1::before {
+    content: "";
+    display: inline-block;
+    width: 15px;
+    height: 15px;
+    margin-right: 5px;
+    vertical-align: -2px;
+    background-color: currentColor; /* Hereda el color exacto del texto */
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z'/%3E%3C/svg%3E");
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z'/%3E%3C/svg%3E");
+    -webkit-mask-size: contain;
+    mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+}
+
+/* Animaciones de entrada/salida (igual que tema) */
+#grafico-lugar.wipe-ready {
+    clip-path: inset(0 100% 0 0);
+    opacity: 0;
+}
+
+#grafico-lugar.wipe-revealed {
+    clip-path: inset(0 0% 0 0);
+    opacity: 1;
+}
+
+#grafico-lugar.wipe-hidden {
+    clip-path: inset(0 0 0 100%);
+    opacity: 0;
+}
+
+/* Fade animations */
+#grafico-lugar.fade-in {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+#grafico-lugar.fade-out {
+    opacity: 0;
+    transform: translateX(-20px);
+}
+
+
+
 /* ====== PUBLICIDAD ====== */
 #grafico-publicidad {
   position: absolute;
