@@ -10,68 +10,6 @@ import { logoManager } from './modules/logo-manager.js';
 import { animationEngine } from './modules/animations.js';
 import { clockInstance } from './modules/clock.js';
 import { debugTools } from './utils/debug-tools.js';
-import { SequenceManager } from './modules/sequence-manager.js';
-
-function lightenColor(color, amount = 0.10) {
-    const clamp = (v) => Math.max(0, Math.min(255, v));
-
-    // rgb / rgba
-    const rgb = color.replace(/\s+/g, '').match(/^rgba?\((\d+),(\d+),(\d+)(?:,([0-9.]+))?\)$/i);
-    if (rgb) {
-        const r = clamp(Math.round(Number(rgb[1]) + (255 - rgb[1]) * amount));
-        const g = clamp(Math.round(Number(rgb[2]) + (255 - rgb[2]) * amount));
-        const b = clamp(Math.round(Number(rgb[3]) + (255 - rgb[3]) * amount));
-        return rgb[4]
-            ? `rgba(${r},${g},${b},${rgb[4]})`
-            : `rgb(${r},${g},${b})`;
-    }
-
-    // hex
-    let hex = color.replace('#', '').trim();
-    if (hex.length === 3) hex = hex.split('').map(x => x + x).join('');
-    if (hex.length !== 6) return color;
-
-    const r = clamp(Math.round(parseInt(hex.slice(0,2), 16) + (255 - parseInt(hex.slice(0,2),16)) * amount));
-    const g = clamp(Math.round(parseInt(hex.slice(2,4), 16) + (255 - parseInt(hex.slice(2,4),16)) * amount));
-    const b = clamp(Math.round(parseInt(hex.slice(4,6), 16) + (255 - parseInt(hex.slice(4,6),16)) * amount));
-
-    return `rgb(${r}, ${g}, ${b})`;
-}
-
-
-
-// ===== Helpers de color (para degradados) =====
-function darkenColor(color, amount = 0.08) {
-    const clamp = (v) => Math.max(0, Math.min(255, v));
-
-    // rgb / rgba
-    const rgb = String(color).replace(/\s+/g, '').match(/^rgba?\((\d+),(\d+),(\d+)(?:,([0-9.]+))?\)$/i);
-    if (rgb) {
-        const r = clamp(Math.round(parseInt(rgb[1], 10) * (1 - amount)));
-        const g = clamp(Math.round(parseInt(rgb[2], 10) * (1 - amount)));
-        const b = clamp(Math.round(parseInt(rgb[3], 10) * (1 - amount)));
-        const a = rgb[4] !== undefined ? parseFloat(rgb[4]) : null;
-        return a === null ? `rgb(${r},${g},${b})` : `rgba(${r},${g},${b},${a})`;
-    }
-
-    // hex #RGB o #RRGGBB
-    let hex = String(color).trim();
-    if (hex.startsWith('#')) hex = hex.slice(1);
-    if (hex.length === 3) hex = hex.split('').map(ch => ch + ch).join('');
-    if (hex.length !== 6) return color;
-
-    const r0 = parseInt(hex.slice(0, 2), 16);
-    const g0 = parseInt(hex.slice(2, 4), 16);
-    const b0 = parseInt(hex.slice(4, 6), 16);
-
-    const r = clamp(Math.round(r0 * (1 - amount)));
-    const g = clamp(Math.round(g0 * (1 - amount)));
-    const b = clamp(Math.round(b0 * (1 - amount)));
-
-    return `rgb(${r},${g},${b})`;
-}
-
-
 
 class StreamGraphicsApp {
     constructor() {
@@ -363,6 +301,7 @@ class StreamGraphicsApp {
             { tipo: 'lugar', visible: visibility.lugarAlAire, id: 'grafico-lugar' }, // ✅ PRIMERO: Lugar (fondo)
             { tipo: 'invitadoRol', visible: visibility.graficoAlAire, id: 'grafico-invitado-rol' }, // ✅ SEGUNDO: Invitado (encima)
             { tipo: 'tema', visible: visibility.temaAlAire, id: 'grafico-tema' },
+            { tipo: 'lugar', visible: visibility.lugarAlAire, id: 'grafico-lugar' },
             { tipo: 'publicidad', visible: visibility.publicidadAlAire, id: 'grafico-publicidad' }
         ];
         
@@ -1224,39 +1163,17 @@ class StreamGraphicsApp {
     /**
      * 🔄 ACTUALIZAR FIREBASE (cuando se oculta automáticamente)
      */
-        async updateFirebaseVisibility(fieldName, value) {
-            try {
-                if (this.modules.firebaseClient) {
-                    // 🔧 MAPEO DE NOMBRES DE CAMPOS
-                    // La web usa: invitadoRol, tema, publicidad
-                    // Firebase espera: Mostrar_Invitado, Mostrar_Tema, Mostrar_Publicidad
-                    const fieldMap = {
-                        'invitadoRol': 'Mostrar_Invitado',
-                        'invitado': 'Mostrar_Invitado', // ✅ AGREGADO: Compatibilidad por seguridad
-                        'tema': 'Mostrar_Tema',
-                        'publicidad': 'Mostrar_Publicidad',
-                        'lugar': 'Mostrar_Lugar'
-                    };
-                    
-                    // Usar el nombre correcto del campo
-                    const firebaseFieldName = fieldMap[fieldName] || fieldName;
-                    
-                    const path = `CLAVE_STREAM_FB/STREAM_LIVE/GRAFICOS/${firebaseFieldName}`;
-                    
-                    await this.modules.firebaseClient.writeData(path, value);
-                    
-                    console.log(`✅ Firebase actualizado correctamente:`);
-                    console.log(`   - Campo local: ${fieldName}`);
-                    console.log(`   - Campo Firebase: ${firebaseFieldName}`);
-                    console.log(`   - Valor: ${value}`);
-                    console.log(`   - Ruta completa: ${path}`);
-                }
-            } catch (error) {
-                console.error('❌ Error actualizando Firebase:', error);
-                console.error(`   - Campo intentado: ${fieldName}`);
-                console.error(`   - Valor: ${value}`);
+    async updateFirebaseVisibility(fieldName, value) {
+        try {
+            if (this.modules.firebaseClient) {
+                const path = `CLAVE_STREAM_FB/STREAM_LIVE/GRAFICOS/${fieldName}`;
+                await this.modules.firebaseClient.writeData(path, value);
+                console.log(`✅ Firebase actualizado: ${fieldName} = ${value}`);
             }
+        } catch (error) {
+            console.error('❌ Error actualizando Firebase:', error);
         }
+    }
 
     /**
      * ⚙️ ACTUALIZAR CONFIGURACIÓN GLOBAL
