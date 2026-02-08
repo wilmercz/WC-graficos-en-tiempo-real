@@ -93,6 +93,8 @@ export class DataProcessor {
             secuenciaInvitadoTema: this.convertBoolean(data.mostrar_secuencia_invitado_tema),
             // ✅ NUEVO: Campo para controlar visibilidad del reloj
             horaAlAire: this.convertBoolean(data.Mostrar_Hora),
+            // 🛡️ NUEVO: Campo para Portada
+            portadaAlAire: this.convertBoolean(data.Mostrar_Portada),
         };
     }
 
@@ -114,7 +116,8 @@ export class DataProcessor {
     processImages(data) {
         return {
             logoUrl: this.cleanUrl(data.urlLogo),
-            publicidadUrl: this.cleanUrl(data.urlImagenPublicidad)
+            publicidadUrl: this.cleanUrl(data.urlImagenPublicidad),
+            portadaLogoUrl: this.cleanUrl(data.urlLogoPortada) // 🛡️ URL Logo Portada
         };
     }
 

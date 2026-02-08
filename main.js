@@ -10,6 +10,7 @@ import { logoManager } from './modules/logo-manager.js';
 import { animationEngine } from './modules/animations.js';
 import { clockInstance } from './modules/clock.js';
 import { debugTools } from './utils/debug-tools.js';
+import { SequenceManager } from './modules/sequence-manager.js'; // ✅ IMPORTACIÓN FALTANTE
 
 class StreamGraphicsApp {
     constructor() {
@@ -94,6 +95,9 @@ class StreamGraphicsApp {
             // 1. Validar elementos DOM críticos
             this.validateCriticalElements();
             
+            // 1.5 Crear elementos dinámicos (Portada)
+            this.createCoverElement();
+            
             // 2. Configurar Event Bus
             this.setupEventBus();
             
@@ -122,6 +126,24 @@ class StreamGraphicsApp {
             console.error('❌ Error crítico inicializando aplicación:', error);
             this.handleInitializationError(error);
             throw error;
+        }
+    }
+
+    /**
+     * 🛡️ Crear elemento de portada dinámicamente
+     */
+    createCoverElement() {
+        if (!document.getElementById('cover-overlay')) {
+            const cover = document.createElement('div');
+            cover.id = 'cover-overlay';
+            
+            const img = document.createElement('img');
+            img.id = 'cover-logo';
+            img.alt = 'Logo Portada';
+            
+            cover.appendChild(img);
+            document.body.appendChild(cover);
+            console.log('🛡️ Elemento de portada creado dinámicamente');
         }
     }
 
@@ -214,6 +236,7 @@ class StreamGraphicsApp {
             temaAlAire: processedData.visibility.temaAlAire,
             publicidadAlAire: processedData.visibility.publicidadAlAire,
             horaAlAire: processedData.visibility.horaAlAire,
+            portadaAlAire: processedData.visibility.portadaAlAire,
 
             // ✅ Campos originales para compatibilidad total
             Mostrar_Logo: rawData.Mostrar_Logo,
@@ -221,6 +244,7 @@ class StreamGraphicsApp {
             Mostrar_Tema: rawData.Mostrar_Tema,
             Mostrar_Publicidad: rawData.Mostrar_Publicidad,
             Mostrar_Hora: rawData.Mostrar_Hora,
+            Mostrar_Portada: rawData.Mostrar_Portada,
 
             // ✅ Mapear contenido
             Invitado: processedData.content.invitado,
@@ -400,6 +424,23 @@ class StreamGraphicsApp {
         } else {
             this.modules.clock.hide();
         }
+
+        // 🛡️ PORTADA DE EMERGENCIA
+        const coverOverlay = document.getElementById('cover-overlay');
+        if (coverOverlay) {
+            if (visibility.portadaAlAire) {
+                if (!coverOverlay.classList.contains('visible')) {
+                    console.log('🛡️ Activando PORTADA');
+                    coverOverlay.classList.add('visible');
+                }
+            } else {
+                if (coverOverlay.classList.contains('visible')) {
+                    console.log('🛡️ Desactivando PORTADA');
+                    coverOverlay.classList.remove('visible');
+                }
+            }
+        }
+
         /* LO DESACTIVO 2025-08-20, porque la linea: this.modules.animations.applyDynamicAnimationFromOldSystem(el, tipo, false);
             la linea anterior comentada ya aplica animacion por eso lo desactvo este bloque, porqu evitar duplicidad
         // 👤 INVITADO/ROL
@@ -542,6 +583,15 @@ class StreamGraphicsApp {
             }
         } else {
             console.log('ℹ️ No hay URL de publicidad nueva - manteniendo existente');
+        }
+
+        // 🛡️ Logo Portada
+        if (images.portadaLogoUrl) {
+            const coverLogo = document.getElementById('cover-logo');
+            if (coverLogo && coverLogo.src !== images.portadaLogoUrl) {
+                coverLogo.src = images.portadaLogoUrl;
+                console.log('✅ Logo de portada actualizado');
+            }
         }
     }
 
@@ -1480,3 +1530,47 @@ window.changeLogoAnimation = function(type) {
 };
 
 console.log('🎨 Sistema de animaciones Enhanced cargado permanentemente');
+
+// ===== FUNCIONES DE UTILIDAD PARA COLORES (FALTANTES) =====
+function darkenColor(hex, percent) {
+    if (!hex) return '#000000';
+    
+    // Asegurar formato #RRGGBB
+    hex = hex.replace(/^\s*#|\s*$/g, '');
+    if (hex.length === 3) {
+        hex = hex.replace(/(.)/g, '$1$1');
+    }
+    
+    let r = parseInt(hex.substr(0, 2), 16);
+    let g = parseInt(hex.substr(2, 2), 16);
+    let b = parseInt(hex.substr(4, 2), 16);
+
+    if (isNaN(r) || isNaN(g) || isNaN(b)) return '#000000';
+
+    r = Math.floor(r * (1 - percent));
+    g = Math.floor(g * (1 - percent));
+    b = Math.floor(b * (1 - percent));
+
+    return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
+}
+
+function lightenColor(hex, percent) {
+    if (!hex) return '#ffffff';
+    
+    hex = hex.replace(/^\s*#|\s*$/g, '');
+    if (hex.length === 3) {
+        hex = hex.replace(/(.)/g, '$1$1');
+    }
+
+    let r = parseInt(hex.substr(0, 2), 16);
+    let g = parseInt(hex.substr(2, 2), 16);
+    let b = parseInt(hex.substr(4, 2), 16);
+
+    if (isNaN(r) || isNaN(g) || isNaN(b)) return '#ffffff';
+
+    r = Math.floor(r + (255 - r) * percent);
+    g = Math.floor(g + (255 - g) * percent);
+    b = Math.floor(b + (255 - b) * percent);
+
+    return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
+}
