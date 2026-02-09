@@ -52,12 +52,14 @@ export class SequenceManager {
             });
         } else if (typeof data === 'object') {
             Object.values(data).forEach(item => {
-                if (item?.url) urls.push(item.url);
+                // ✅ MEJORA: Soportar strings directos en objetos (ej: {id1: "url1", id2: "url2"})
+                if (typeof item === 'string') urls.push(item);
+                else if (item?.url) urls.push(item.url);
             });
         }
 
         this.adPlaylist = urls;
-        console.log(`📺 Playlist actualizada: ${this.adPlaylist.length} anuncios cargados`);
+        console.log(`📺 Playlist actualizada: ${this.adPlaylist.length} anuncios cargados`, this.adPlaylist);
     }
 
     /**
@@ -176,6 +178,11 @@ export class SequenceManager {
     getNextAd() {
         if (this.adPlaylist.length === 0) return "";
         
+        // ✅ Protección: Asegurar que el índice es válido si la lista cambió de tamaño
+        if (this.currentAdIndex >= this.adPlaylist.length) {
+            this.currentAdIndex = 0;
+        }
+
         const url = this.adPlaylist[this.currentAdIndex];
         
         // Avanzar índice (rotación circular)
