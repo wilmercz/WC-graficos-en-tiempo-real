@@ -149,7 +149,14 @@ class StreamGraphicsApp {
             video.id = 'cover-video';
             video.loop = true;
             video.muted = true; // Necesario para autoplay en muchos navegadores
+            video.muted = false; // 🔊 CAMBIO: Audio activado (OJO: Puede bloquear autoplay)
             video.playsInline = true;
+            
+            // ✅ FIX: Atributos explícitos para asegurar compatibilidad
+            video.setAttribute('muted', '');
+            // video.setAttribute('muted', ''); // 🔊 Comentado para permitir audio
+            video.setAttribute('playsinline', '');
+            video.setAttribute('loop', '');
             
             const img = document.createElement('img');
             img.id = 'cover-logo';
@@ -267,8 +274,7 @@ class StreamGraphicsApp {
             Mostrar_Publicidad: rawData.Mostrar_Publicidad,
             Mostrar_Hora: rawData.Mostrar_Hora,
             Mostrar_Portada: rawData.Mostrar_Portada,
-            Mostar_PortadaVideo: rawData.Mostar_PortadaVideo,
-
+            Mostar_PortadaVideo: rawData.Most,
             // ✅ Mapear contenido
             Invitado: processedData.content.invitado,
             Rol: processedData.content.rol,

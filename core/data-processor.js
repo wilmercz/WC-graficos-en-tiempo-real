@@ -96,7 +96,8 @@ export class DataProcessor {
             // 🛡️ NUEVO: Campo para Portada
             portadaAlAire: this.convertBoolean(data.Mostrar_Portada),
             // 🎥 NUEVO: Campo para Video de Portada
-            portadaVideoAlAire: this.convertBoolean(data.Mostar_PortadaVideo),
+            // ✅ CORRECCIÓN: Aceptar "Mostrar" (correcto) y "Mostar" (legacy/typo)
+            portadaVideoAlAire: this.convertBoolean(data.Mostrar_PortadaVideo) || this.convertBoolean(data.Mostar_PortadaVideo),
         };
     }
 
