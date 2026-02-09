@@ -1083,6 +1083,11 @@ class StreamGraphicsApp {
             return animationEngine.applyDynamicAnimationFromOldSystem(element, type, show, config);
         };
         
+        // ✅ AGREGADO: Función global para actualizar visibilidad (necesaria para lower-thirds.js via scheduler)
+        window.actualizarVisibilidadEnFirebase = (fieldName, value) => {
+            this.updateFirebaseVisibility(fieldName, value);
+        };
+
         console.log('✅ Compatibilidad configurada');
     }
 
@@ -1272,9 +1277,20 @@ class StreamGraphicsApp {
     async updateFirebaseVisibility(fieldName, value) {
         try {
             if (this.modules.firebaseClient) {
-                const path = `CLAVE_STREAM_FB/STREAM_LIVE/GRAFICOS/${fieldName}`;
+                // ✅ MAPEO DE CAMPOS: Convertir nombre interno a nombre de campo Firebase
+                const fieldMap = {
+                    'invitadoRol': 'Mostrar_Invitado',
+                    'invitado': 'Mostrar_Invitado',
+                    'tema': 'Mostrar_Tema',
+                    'publicidad': 'Mostrar_Publicidad',
+                    'lugar': 'Mostrar_Lugar',
+                    'logo': 'Mostrar_Logo'
+                };
+
+                const firebaseField = fieldMap[fieldName] || fieldName;
+                const path = `CLAVE_STREAM_FB/STREAM_LIVE/GRAFICOS/${firebaseField}`;
                 await this.modules.firebaseClient.writeData(path, value);
-                console.log(`✅ Firebase actualizado: ${fieldName} = ${value}`);
+                console.log(`✅ Firebase actualizado: ${firebaseField} (${fieldName}) = ${value}`);
             }
         } catch (error) {
             console.error('❌ Error actualizando Firebase:', error);
