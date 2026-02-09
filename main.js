@@ -117,6 +117,9 @@ class StreamGraphicsApp {
             // 5. Configurar comunicación entre módulos
             this.setupModuleCommunication();
             
+            // 5.5 Activar Listeners de Firebase (AHORA ES SEGURO)
+            this.setupSingleFirebaseListener();
+            
             // 6. Iniciar scheduler global
             this.startGlobalScheduler();
             
@@ -188,9 +191,6 @@ class StreamGraphicsApp {
         this.modules.firebaseClient = await initializeFirebaseClient(firebaseConfig);
         
         console.log('✅ Firebase conectado');
-        
-        // ⭐ CONFIGURAR SOLO LA RUTA QUE EXISTE
-        this.setupSingleFirebaseListener();
     }
 
     /**
@@ -212,6 +212,12 @@ class StreamGraphicsApp {
      */
     procesarDatosFirebase(rawData) {
         console.log('📊 Datos RAW recibidos de Firebase:', rawData);
+        
+        // 🛡️ PROTECCIÓN CONTRA DATOS NULOS O MÓDULOS NO CARGADOS
+        if (!rawData || !this.modules.dataProcessor) {
+            console.warn('⚠️ Datos nulos o DataProcessor no listo. Ignorando actualización.');
+            return;
+        }
         
         // ✅ DETECTAR ACTIVACIÓN DE SECUENCIA DESDE FIREBASE
         // Si el campo 'mostrar_secuencia_invitado_tema' está en TRUE y no estamos corriendo, iniciamos.
@@ -474,6 +480,14 @@ class StreamGraphicsApp {
                         
                         // 🔊 AUTOPLAY INTELIGENTE:
                         // 1. Intentar reproducir CON audio (Funciona en CameraFi)
+                    }
+
+                    // Ocultamos el logo estático si mostramos video a pantalla completa
+                    if (coverLogo) coverLogo.style.display = 'none';
+
+                    // 🔊 AUTOPLAY INTELIGENTE: Reactivar si está pausado
+                    if (coverVideo.paused) {
+                        coverVideo.currentTime = 0; // Reiniciar video
                         coverVideo.muted = false;
                         coverVideo.play().catch(e => {
                             console.warn('⚠️ Autoplay con audio bloqueado. Activando modo silencio (fallback)...', e);
