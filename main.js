@@ -148,12 +148,10 @@ class StreamGraphicsApp {
             const video = document.createElement('video');
             video.id = 'cover-video';
             video.loop = true;
-            video.muted = true; // Necesario para autoplay en muchos navegadores
-            video.muted = false; // 🔊 CAMBIO: Audio activado (OJO: Puede bloquear autoplay)
+            video.muted = false; // 🔊 INTENTO 1: Audio activado por defecto (CameraFi)
             video.playsInline = true;
             
             // ✅ FIX: Atributos explícitos para asegurar compatibilidad
-            video.setAttribute('muted', '');
             // video.setAttribute('muted', ''); // 🔊 Comentado para permitir audio
             video.setAttribute('playsinline', '');
             video.setAttribute('loop', '');
@@ -473,7 +471,17 @@ class StreamGraphicsApp {
                 if (showVideo && coverVideo) {
                     if (coverVideo.style.display !== 'block') {
                         coverVideo.style.display = 'block';
-                        coverVideo.play().catch(e => console.warn('Autoplay video portada:', e));
+                        
+                        // 🔊 AUTOPLAY INTELIGENTE:
+                        // 1. Intentar reproducir CON audio (Funciona en CameraFi)
+                        coverVideo.muted = false;
+                        coverVideo.play().catch(e => {
+                            console.warn('⚠️ Autoplay con audio bloqueado. Activando modo silencio (fallback)...', e);
+                            // 2. Si falla, silenciar y reproducir (Funciona en Chrome/Web)
+                            coverVideo.muted = true;
+                            coverVideo.play().catch(e2 => console.error('❌ Falló incluso silenciado:', e2));
+                        });
+
                         // Ocultamos el logo estático si mostramos video a pantalla completa
                         if (coverLogo) coverLogo.style.display = 'none';
                     }
