@@ -137,10 +137,18 @@ class StreamGraphicsApp {
             const cover = document.createElement('div');
             cover.id = 'cover-overlay';
             
+            // 🎥 Elemento de Video (Fondo)
+            const video = document.createElement('video');
+            video.id = 'cover-video';
+            video.loop = true;
+            video.muted = true; // Necesario para autoplay en muchos navegadores
+            video.playsInline = true;
+            
             const img = document.createElement('img');
             img.id = 'cover-logo';
             img.alt = 'Logo Portada';
             
+            cover.appendChild(video); // Primero el video (fondo)
             cover.appendChild(img);
             document.body.appendChild(cover);
             console.log('🛡️ Elemento de portada creado dinámicamente');
@@ -237,6 +245,7 @@ class StreamGraphicsApp {
             publicidadAlAire: processedData.visibility.publicidadAlAire,
             horaAlAire: processedData.visibility.horaAlAire,
             portadaAlAire: processedData.visibility.portadaAlAire,
+            portadaVideoAlAire: processedData.visibility.portadaVideoAlAire,
 
             // ✅ Campos originales para compatibilidad total
             Mostrar_Logo: rawData.Mostrar_Logo,
@@ -245,6 +254,7 @@ class StreamGraphicsApp {
             Mostrar_Publicidad: rawData.Mostrar_Publicidad,
             Mostrar_Hora: rawData.Mostrar_Hora,
             Mostrar_Portada: rawData.Mostrar_Portada,
+            Mostar_PortadaVideo: rawData.Mostar_PortadaVideo,
 
             // ✅ Mapear contenido
             Invitado: processedData.content.invitado,
@@ -427,16 +437,43 @@ class StreamGraphicsApp {
 
         // 🛡️ PORTADA DE EMERGENCIA
         const coverOverlay = document.getElementById('cover-overlay');
+        const coverVideo = document.getElementById('cover-video');
+        const coverLogo = document.getElementById('cover-logo');
+
         if (coverOverlay) {
-            if (visibility.portadaAlAire) {
+            const showVideo = visibility.portadaVideoAlAire;
+            const showStatic = visibility.portadaAlAire;
+
+            if (showVideo || showStatic) {
                 if (!coverOverlay.classList.contains('visible')) {
                     console.log('🛡️ Activando PORTADA');
                     coverOverlay.classList.add('visible');
+                }
+
+                // Lógica: Video tiene prioridad visual o reemplaza al logo estático
+                if (showVideo && coverVideo) {
+                    if (coverVideo.style.display !== 'block') {
+                        coverVideo.style.display = 'block';
+                        coverVideo.play().catch(e => console.warn('Autoplay video portada:', e));
+                        // Ocultamos el logo estático si mostramos video a pantalla completa
+                        if (coverLogo) coverLogo.style.display = 'none';
+                    }
+                } else {
+                    // Modo estático (Color + Logo)
+                    if (coverVideo) {
+                        coverVideo.style.display = 'none';
+                        coverVideo.pause();
+                    }
+                    if (coverLogo) coverLogo.style.display = 'block';
                 }
             } else {
                 if (coverOverlay.classList.contains('visible')) {
                     console.log('🛡️ Desactivando PORTADA');
                     coverOverlay.classList.remove('visible');
+                    // Pausar video al ocultar
+                    if (coverVideo) {
+                        setTimeout(() => coverVideo.pause(), 800); // Esperar transición
+                    }
                 }
             }
         }
@@ -593,6 +630,15 @@ class StreamGraphicsApp {
                 console.log('✅ Logo de portada actualizado');
             }
         }
+
+        // 🎥 Video Portada
+        if (images.portadaVideoUrl) {
+            const coverVideo = document.getElementById('cover-video');
+            if (coverVideo && coverVideo.src !== images.portadaVideoUrl) {
+                coverVideo.src = images.portadaVideoUrl;
+                console.log('✅ Video de portada actualizado');
+            }
+        }
     }
 
     /**
@@ -715,6 +761,16 @@ class StreamGraphicsApp {
             window.logoConfig = window.logoConfig || {};
             window.logoConfig.colores = window.logoConfig.colores || {};
             window.logoConfig.colores.fondoLogos = colors.fondoLogos;
+        }
+
+        // 🛡️ Aplicar color dinámico a la PORTADA
+        const coverOverlay = document.getElementById('cover-overlay');
+        if (coverOverlay && colors.portadaFondo) {
+            const base = colors.portadaFondo;
+            // Oscurecer el color base un 40% para el borde exterior (simulando el efecto original)
+            const dark = darkenColor(base, 0.40); 
+            
+            coverOverlay.style.background = `radial-gradient(circle at center, ${base} 0%, ${dark} 100%)`;
         }
     }
 

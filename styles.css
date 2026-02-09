@@ -740,10 +740,21 @@ html, body {
     pointer-events: all;
 }
 
+#cover-video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 0; /* Detrás del logo si se mostrara */
+}
+
 #cover-logo {
-    width: 60px; /* Tamaño solicitado: 60x60 */
+    width: 65px; /* Tamaño aumentado +5px */
     height: auto;
     object-fit: contain;
+    z-index: 1; /* Encima del video/fondo */
     
     /* Estado inicial animación: pequeño */
     transform: scale(0.5);

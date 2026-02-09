@@ -95,6 +95,8 @@ export class DataProcessor {
             horaAlAire: this.convertBoolean(data.Mostrar_Hora),
             // 🛡️ NUEVO: Campo para Portada
             portadaAlAire: this.convertBoolean(data.Mostrar_Portada),
+            // 🎥 NUEVO: Campo para Video de Portada
+            portadaVideoAlAire: this.convertBoolean(data.Mostar_PortadaVideo),
         };
     }
 
@@ -117,7 +119,8 @@ export class DataProcessor {
         return {
             logoUrl: this.cleanUrl(data.urlLogo),
             publicidadUrl: this.cleanUrl(data.urlImagenPublicidad),
-            portadaLogoUrl: this.cleanUrl(data.urlLogoPortada) // 🛡️ URL Logo Portada
+            portadaLogoUrl: this.cleanUrl(data.portada_urlLogo), // 🛡️ URL Logo Portada
+            portadaVideoUrl: this.cleanUrl(data.portada_urlVideo) // 🎥 URL Video Portada
         };
     }
 
@@ -135,7 +138,10 @@ export class DataProcessor {
             letra3: data.colorLetra3 || '#000000',
             
             // Color de fondo para logos
-            fondoLogos: data.colorFondoLogos || null
+            fondoLogos: data.colorFondoLogos || null,
+
+            // 🛡️ Color base para la portada (si no viene, usa el azul por defecto)
+            portadaFondo: data.portada_color || '#2E5BBA'
         };
     }
 
