@@ -35,6 +35,13 @@ class StreamGraphicsApp {
     }
 
     /**
+     * 🛡️ Helper para detectar si estamos en modo MONITOR (Solo ver, no tocar)
+     */
+    isMonitorMode() {
+        return new URLSearchParams(window.location.search).has('monitor');
+    }
+
+    /**
      * Verificar elementos DOM críticos
      */
     validateCriticalElements() {
@@ -204,9 +211,15 @@ class StreamGraphicsApp {
         // ✅ DETECTAR ACTIVACIÓN DE SECUENCIA DESDE FIREBASE
         // Si el campo 'mostrar_secuencia_invitado_tema' está en TRUE y no estamos corriendo, iniciamos.
         if (rawData.mostrar_secuencia_invitado_tema === true) {
-            if (this.modules.sequenceManager && !this.modules.sequenceManager.isActive) {
-                console.log('🎬 Trigger de secuencia detectado desde Firebase: INICIANDO');
-                this.modules.sequenceManager.startGuestAdSequence();
+            // 🛡️ PROTECCIÓN MULTI-INSTANCIA:
+            // Solo la instancia MAESTRA (sin ?monitor=true) ejecuta la lógica.
+            if (!this.isMonitorMode()) {
+                if (this.modules.sequenceManager && !this.modules.sequenceManager.isActive) {
+                    console.log('🎬 Trigger de secuencia detectado: INICIANDO (Modo Maestro)');
+                    this.modules.sequenceManager.startGuestAdSequence();
+                }
+            } else {
+                console.log('👀 Modo Monitor: Ignorando ejecución de secuencia local');
             }
         } else {
             // Si el usuario apaga el interruptor manualmente (o viene false), detenemos si está activa
@@ -1216,6 +1229,9 @@ class StreamGraphicsApp {
      * ⏰ TIMER AUTOMÁTICO CORREGIDO
      */
     startAutoHideTimer(elementType, duration) {
+        // 🛡️ PROTECCIÓN: Los monitores NO deben gestionar tiempos ni escribir en Firebase
+        if (this.isMonitorMode()) return;
+
         // Inicializar contenedor de timers si no existe
         if (!window.autoHideTimers) {
             window.autoHideTimers = {};

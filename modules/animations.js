@@ -423,6 +423,21 @@ applyDynamicAnimationFromOldSystem(elemento, tipoElemento, mostrar, config = {})
         elemento.style.opacity = '0'; // ✅ FIX: Forzar opacidad para evitar que se quede invisible
         // 🔧 CRÍTICO: Limpiar transiciones previas antes de aplicar nuevas
         elemento.style.transition = 'none';
+        
+        // ✅ FIX CRÍTICO: Pre-establecer estado inicial para evitar "flash" visual
+        // Esto asegura que el elemento esté recortado/movido ANTES de hacerse visible
+        if (animacion.includes('WIPE')) {
+             if (animacion === 'WIPE_IN_RIGHT') elemento.style.clipPath = 'inset(0 100% 0 0)';
+             else if (animacion === 'WIPE_IN_LEFT') elemento.style.clipPath = 'inset(0 0 0 100%)';
+             else if (animacion === 'WIPE_IN_TOP') elemento.style.clipPath = 'inset(100% 0 0 0)';
+             else if (animacion === 'WIPE_IN_BOTTOM') elemento.style.clipPath = 'inset(0 0 100% 0)';
+        } else if (animacion.includes('SLIDE')) {
+             if (animacion === 'SLIDE_IN_RIGHT') elemento.style.transform = 'translateX(100%)';
+             else if (animacion === 'SLIDE_IN_LEFT') elemento.style.transform = 'translateX(-100%)';
+             else if (animacion === 'SLIDE_IN_TOP') elemento.style.transform = 'translateY(-100%)';
+             else if (animacion === 'SLIDE_IN_BOTTOM') elemento.style.transform = 'translateY(100%)';
+        }
+
         elemento.offsetHeight; // Forzar reflow para limpiar transiciones
     }
     

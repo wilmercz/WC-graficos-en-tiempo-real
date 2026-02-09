@@ -8,6 +8,9 @@ export class SequenceManager {
         this.currentStep = 0;
         this.timer = null;
         
+        this.originalLugar = ""; // Para guardar el lugar original
+        this.hasPendingAd = false; // ✅ Control de publicidad pre-cargada
+
         // 🎵 Playlist de Publicidad (URLs)
         this.adPlaylist = [];
         this.currentAdIndex = 0;
@@ -73,18 +76,92 @@ export class SequenceManager {
 
         console.log('🎬 INICIANDO SECUENCIA: Invitado + Publicidad');
         this.isActive = true;
+        this.hasPendingAd = false;
 
-        // --- PASO 1: INVITADO + LUGAR (0s - 20s) ---
-        console.log('👉 PASO 1: Mostrar Invitado y Lugar');
+        // --- PRE-CARGA DE PUBLICIDAD ---
+        // 🚀 Actualizamos la imagen AHORA para que tenga ~26s para cargar antes de mostrarse
+        this.preloadAd();
+
+        // --- PASO 0: FECHA (0s - 6s) ---
+        // Guardar lugar original para restaurarlo después
+        this.originalLugar = window.lastFirebaseData?.Lugar || "En Vivo";
+        
+        // Generar fecha actual (Ej: "Lunes 9 de febrero")
+        const date = new Date();
+        const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+        const fechaTexto = date.toLocaleDateString('es-ES', options);
+        // Capitalizar primera letra
+        const fechaFinal = fechaTexto.charAt(0).toUpperCase() + fechaTexto.slice(1);
+
+        console.log(`👉 PASO 0: Mostrar Fecha (${fechaFinal})`);
+
+        // 1. Ocultar Lugar actual (si está visible) para transición suave
         await this.updateFirebase({
             Mostrar_Invitado: false,
             Mostrar_Tema: false,
             Mostrar_Publicidad: false,
-            Mostrar_Lugar: true,
+            Mostrar_Lugar: false // <--- Ocultar primero
         });
 
-        // Programar Paso 2
-        this.timer = setTimeout(() => this.step1_Invitado(), 800); // 1 segundos
+        // 2. Esperar animación de salida (800ms)
+        this.timer = setTimeout(async () => {
+            if (!this.isActive) return;
+
+            // Cambiar icono a calendario localmente
+            const lugarEl = document.getElementById('grafico-lugar');
+            if (lugarEl) lugarEl.classList.add('show-calendar');
+
+            // Mostrar Fecha
+            await this.updateFirebase({
+                Lugar: fechaFinal,
+                Mostrar_Lugar: true
+            });
+
+            // Esperar 7 segundos (Aumentado +1s) y cambiar a Lugar original
+            this.timer = setTimeout(() => this.step0_RestoreLugar(), 7000); 
+        }, 800);
+    }
+
+    async preloadAd() {
+        const nextAdUrl = this.getNextAd();
+        if (nextAdUrl) {
+            this.hasPendingAd = true;
+            console.log(`🔄 Pre-cargando publicidad al inicio: ${nextAdUrl}`);
+            if (this.app.modules.firebaseClient) {
+                await this.app.modules.firebaseClient.writeData(
+                    'CLAVE_STREAM_FB/STREAM_LIVE/GRAFICOS/urlImagenPublicidad', 
+                    nextAdUrl
+                );
+            }
+        }
+    }
+
+    async step0_RestoreLugar() {
+        if (!this.isActive) return;
+        console.log(`👉 RESTAURANDO LUGAR: ${this.originalLugar}`);
+
+        // 1. Ocultar Fecha para transición suave
+        await this.updateFirebase({
+            Mostrar_Lugar: false
+        });
+
+        // 2. Esperar animación de salida (800ms)
+        this.timer = setTimeout(async () => {
+            if (!this.isActive) return;
+
+            // Restaurar icono original
+            const lugarEl = document.getElementById('grafico-lugar');
+            if (lugarEl) lugarEl.classList.remove('show-calendar');
+
+            // Restaurar texto original y mostrar
+            await this.updateFirebase({
+                Lugar: this.originalLugar,
+                Mostrar_Lugar: true
+            });
+
+            // Continuar con la secuencia normal (Invitado)
+            this.timer = setTimeout(() => this.step1_Invitado(), 1000);
+        }, 800);
     }
 
     async step1_Invitado() {
@@ -97,65 +174,57 @@ export class SequenceManager {
         });
 
         // Programar Paso 2
-        this.timer = setTimeout(() => this.step2_Tema(), 15000); // 15 segundos
+        this.timer = setTimeout(() => this.step2_Tema(), 12000); // Reducido a 12 segundos (-3s)
     }
 
     async step2_Tema() {
         if (!this.isActive) return;
         console.log('👉 PASO 2: Ocultar Invitado, Mostrar Tema (Lugar sigue)');
         
+        // 1. Ocultar Invitado primero (Transición suave tipo Fecha)
         await this.updateFirebase({
-            Mostrar_Invitado: false,
-            Mostrar_Tema: true
-            // Lugar sigue true
+            Mostrar_Invitado: false
         });
 
-        // Programar Paso 3
-        this.timer = setTimeout(() => this.step3_Publicidad(), 10000); // 10 segundos
+        // 2. Esperar a que salga (600ms) antes de mostrar el Tema
+        this.timer = setTimeout(async () => {
+            if (!this.isActive) return;
+            await this.updateFirebase({ Mostrar_Tema: true });
+            
+            // Programar Paso 3
+            this.timer = setTimeout(() => this.step3_Publicidad(), 7000);
+        }, 600);
     }
 
     async step3_Publicidad() {
         if (!this.isActive) return;
         console.log('👉 PASO 3: Ocultar Tema, Mostrar Publicidad');
 
-        // 1. Determinar qué publicidad mostrar (Playlist o Estática)
-        let nextAdUrl = this.getNextAd();
-        let usingPlaylist = true;
-
-        // Si no hay playlist, intentar usar la publicidad estática actual
-        if (!nextAdUrl) {
-            console.log('⚠️ Playlist vacía. Verificando publicidad estática...');
-            nextAdUrl = window.lastFirebaseData?.urlImagenPublicidad;
-            usingPlaylist = false;
-        }
-
-        // Si definitivamente no hay publicidad, saltar este paso y terminar
-        if (!nextAdUrl) {
+        // Verificar si hay publicidad disponible (Pre-cargada o Estática)
+        const currentUrl = window.lastFirebaseData?.urlImagenPublicidad;
+        
+        if (!this.hasPendingAd && !currentUrl) {
             console.log('⚠️ No hay publicidad disponible. Finalizando secuencia anticipadamente...');
             await this.updateFirebase({ Mostrar_Tema: false }); // Apagar tema previo
             this.step4_Final();
             return;
         }
 
-        console.log(`📺 Mostrando publicidad: ${usingPlaylist ? 'Rotativa' : 'Estática'} - ${nextAdUrl}`);
+        console.log('📺 Activando publicidad (Imagen ya precargada al inicio)');
 
-        // 2. Actualizar Firebase (Imagen + Visibilidad)
-        // Solo actualizamos la URL si viene de la playlist
-        if (usingPlaylist && this.app.modules.firebaseClient) {
-            await this.app.modules.firebaseClient.writeData(
-                'CLAVE_STREAM_FB/STREAM_LIVE/GRAFICOS/urlImagenPublicidad', 
-                nextAdUrl
-            );
-        }
-
+        // 1. Ocultar Tema primero
         await this.updateFirebase({
-            Mostrar_Tema: false,
-            Mostrar_Publicidad: true
-            // Lugar sigue true
+            Mostrar_Tema: false
         });
 
-        // Programar Paso 4 (Final)
-        this.timer = setTimeout(() => this.step4_Final(), 15000); // 15 segundos
+        // 2. Esperar a que salga (600ms) antes de mostrar Publicidad
+        this.timer = setTimeout(async () => {
+            if (!this.isActive) return;
+            await this.updateFirebase({ Mostrar_Publicidad: true });
+            
+            // Programar Paso 4 (Final)
+            this.timer = setTimeout(() => this.step4_Final(), 8000);
+        }, 600);
     }
 
     async step4_Final() {
@@ -198,6 +267,16 @@ export class SequenceManager {
 
     stopSequence() {
         if (this.timer) clearTimeout(this.timer);
+        
+        // Si detenemos mientras mostramos la fecha, restaurar el lugar inmediatamente
+        const lugarEl = document.getElementById('grafico-lugar');
+        if (lugarEl && lugarEl.classList.contains('show-calendar')) {
+            lugarEl.classList.remove('show-calendar');
+            if (this.originalLugar) {
+                this.updateFirebase({ Lugar: this.originalLugar });
+            }
+        }
+
         this.isActive = false;
         console.log('🛑 Secuencia detenida manualmente');
     }

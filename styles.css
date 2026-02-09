@@ -379,6 +379,12 @@ html, body {
     mask-repeat: no-repeat;
 }
 
+/* 📅 ICONO DE CALENDARIO (Para cuando se muestra la fecha) */
+#grafico-lugar.show-calendar h1::before {
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 18H5V8h16v13z'/%3E%3C/svg%3E");
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 18H5V8h16v13z'/%3E%3C/svg%3E");
+}
+
 /* Animaciones de entrada/salida (igual que tema) */
 #grafico-lugar.wipe-ready {
     clip-path: inset(0 100% 0 0);
