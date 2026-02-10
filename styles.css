@@ -102,6 +102,15 @@ html, body {
   transition: opacity 0.3s ease-in-out;
   background: var(--logo-bg);
   border-radius: var(--logo-radius);
+  
+  /* 🆕 FIX: Ocultar placeholder al inicio si no hay imagen */
+  opacity: 0;
+}
+
+/* Ocultar explícitamente si no tiene source o está vacío */
+#logo:not([src]), #logo[src=""] {
+  visibility: hidden;
+  display: none;
 }
 
 #logo, #logo-img { will-change: clip-path, opacity; }
