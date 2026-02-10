@@ -766,7 +766,7 @@ html, body {
 }
 
 #cover-logo {
-    width: 65px; /* Tamaño aumentado +5px */
+    width: 70px; /* Tamaño aumentado +5px */
     height: auto;
     object-fit: contain;
     z-index: 1; /* Encima del video/fondo */
