@@ -117,6 +117,9 @@ export class SequenceManager {
                 Mostrar_Lugar: true
             });
 
+            // ⚡ CORRECCIÓN: Mostrar invitado 2 segundos después (en paralelo a la fecha)
+            setTimeout(() => this.step1_Invitado(), 2000);
+
             // Esperar 7 segundos (Aumentado +1s) y cambiar a Lugar original
             this.timer = setTimeout(() => this.step0_RestoreLugar(), 7000); 
         }, 800);
@@ -159,8 +162,7 @@ export class SequenceManager {
                 Mostrar_Lugar: true
             });
 
-            // Continuar con la secuencia normal (Invitado)
-            this.timer = setTimeout(() => this.step1_Invitado(), 1000);
+            // YA NO LLAMAMOS A INVITADO AQUÍ (Se llamó en paralelo al inicio)
         }, 800);
     }
 
