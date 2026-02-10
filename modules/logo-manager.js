@@ -67,6 +67,22 @@ export class LogoManager {
     }
 
     /**
+     * Helper para obtener el valor de easing (Faltaba esta función)
+     */
+    getEasingValue(easingName) {
+        const easingTypes = {
+            'EASE': 'ease',
+            'EASE_IN': 'ease-in',
+            'EASE_OUT': 'ease-out',
+            'EASE_IN_OUT': 'ease-in-out',
+            'LINEAR': 'linear',
+            'BOUNCE': 'cubic-bezier(0.68, -0.55, 0.265, 1.55)',
+            'ELASTIC': 'cubic-bezier(0.25, 0.46, 0.45, 0.94)'
+        };
+        return easingTypes[easingName] || 'ease-in-out';
+    }
+
+    /**
      * Cargar configuración desde variables globales
      */
     loadConfiguration() {
