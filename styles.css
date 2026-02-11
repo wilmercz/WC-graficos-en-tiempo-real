@@ -30,7 +30,7 @@ html, body {
 
   --lt-h1-bg: rgba(16, 102, 220, 1);
   --lt-h1-fg: rgba(255, 255, 255, 1);
-  --lt-h1-font: 24px;
+  --lt-h1-font: 22px;
   --lt-h1-pad: 5px 40px 5px 20px;
   /* --lt-h1-left: 30px; DESACTIVADO POSICION */
   --lt-h1-left: 33px;
@@ -40,7 +40,7 @@ html, body {
 
   --lt-h2-bg: rgba(16, 102, 255, 1);
   --lt-h2-fg: rgba(255, 255, 255, 1);
-  --lt-h2-font: 19px;
+  --lt-h2-font: 17px;
   --lt-h2-pad: 3px 35px 3px 20px;
   /* --lt-h2-left: 100px; DESACTIVADO POSICION */
   --lt-h2-left: 103px;
@@ -58,17 +58,17 @@ html, body {
 
   --tema-h1-bg: transparent; /*rgba(16, 50, 100, 1);*/
   --tema-h1-fg: rgba(225, 255, 255, 1);
-  --tema-h1-font: 18px;
+  --tema-h1-font: 19px;
   --tema-h1-pad: 15px 15px;
   /* --tema-h1-left: 30px; DESACTIVADO POSICION */
   --tema-h1-left: 33px;
   /* --tema-h1-bottom: 5px; DESACTIVADO POSICION */
-  --tema-h1-bottom: 9px;
+  --tema-h1-bottom: 16px;
   --tema-h1-radius: 12px 12px 12px 12px;
 
   --tema-h2-bg: rgba(16, 102, 255, 1);
   --tema-h2-fg: #ffffff;
-  --tema-h2-font: 13px;
+  --tema-h2-font: 14px;
   /* --tema-h2-left: 37px; DESACTIVADO POSICION */
   --tema-h2-left: 40px;
   /* --tema-h2-bottom: 31px; DESACTIVADO POSICION */
