@@ -111,6 +111,9 @@ class StreamGraphicsApp {
             // 3. Conectar Firebase
             await this.connectFirebase();
             
+            // 3.5 Resetear estado remoto (Safety Reset)
+            await this.resetRemoteState();
+            
             // 4. Inicializar módulos
             this.initializeModules();
             
@@ -191,6 +194,44 @@ class StreamGraphicsApp {
         this.modules.firebaseClient = await initializeFirebaseClient(firebaseConfig);
         
         console.log('✅ Firebase conectado');
+    }
+
+    /**
+     * 🧹 Resetear estado remoto al inicio (Safety Reset)
+     * Garantiza que al cargar la página no aparezcan gráficos viejos
+     */
+    async resetRemoteState() {
+        // 1. Protección: No resetear si es monitor (solo visualizador)
+        if (this.isMonitorMode()) return;
+
+        // 2. Protección: Permitir omitir reset con ?noreset=true (útil si necesitas refrescar en vivo sin apagar todo)
+        if (new URLSearchParams(window.location.search).has('noreset')) {
+            console.log('🛡️ Safety Reset omitido por parámetro ?noreset');
+            return;
+        }
+
+        console.log('🧹 Ejecutando Safety Reset de estado remoto...');
+        
+        try {
+            // Campos a apagar obligatoriamente al inicio
+            const resetFields = {
+                'Mostrar_Invitado': false,
+                'Mostrar_Tema': false,
+                'Mostrar_Lugar': false,
+                'Mostrar_Publicidad': false,
+                'mostrar_secuencia_invitado_tema': false
+            };
+
+            const promises = Object.entries(resetFields).map(([field, value]) => {
+                const path = `CLAVE_STREAM_FB/STREAM_LIVE/GRAFICOS/${field}`;
+                return this.modules.firebaseClient.writeData(path, value);
+            });
+
+            await Promise.all(promises);
+            console.log('✅ Safety Reset completado: Gráficos apagados en Firebase');
+        } catch (error) {
+            console.warn('⚠️ Error en Safety Reset:', error);
+        }
     }
 
     /**
@@ -324,14 +365,15 @@ class StreamGraphicsApp {
             publicidadAlAire: window.lastFirebaseData.publicidadAlAire
         });
         
-        // ⚡ CRÍTICO: Trigger inmediato de visibilidad (como sistema viejo)
+        // 1️⃣ PRIMERO: Actualizar configuraciones de módulos (Logos, Colores, Textos)
+        // Esto asegura que window.logosAliados y logoManager.config estén listos ANTES de intentar rotar
+        this.processDataForModules(processedData);
+
+        // 2️⃣ SEGUNDO: Aplicar visibilidad (Ahora sí verá la lista de aliados cargada)
         this.triggerVisibilityChangeImmediate(processedData.visibility);
         
         // Emitir evento para módulos
         EventBus.emit('firebase-data-processed', processedData);
-        
-        // Procesar datos para módulos
-        this.processDataForModules(processedData);
     }
 
     /**
@@ -1588,24 +1630,36 @@ document.addEventListener('DOMContentLoaded', () => {
             logoManager.changeLogoEnhanced = function(targetLogo, nextDuration = null) {
                 if (!this.element) return;
 
-                const realDuration = 600;
-                const realDelay = 200;
+                // 🛡️ PROTECCIÓN RED LENTA (ENHANCED)
+                // No iniciar animación hasta que la imagen esté en memoria
+                const preloader = new Image();
+                preloader.src = targetLogo.url;
 
-                // Aplicar animación de salida
-                this.animateOutEnhanced();
+                const runAnimation = () => {
+                    const realDuration = 600;
+                    
+                    // Aplicar animación de salida
+                    this.animateOutEnhanced();
 
-                // Timing optimizado
-                setTimeout(() => {
-                    this.element.src = targetLogo.url;
-                    this.element.alt = targetLogo.alt;
-
-                    // Entrada después de cambiar
+                    // Timing optimizado
                     setTimeout(() => {
-                        this.animateInEnhanced();
-                    }, 100);
-                }, realDuration + 200);
+                        this.element.src = targetLogo.url;
+                        this.element.alt = targetLogo.alt;
 
-                console.log(`🎨 Logo Enhanced: ${targetLogo.name}`);
+                        // Entrada después de cambiar
+                        setTimeout(() => {
+                            this.animateInEnhanced();
+                        }, 100);
+                    }, realDuration + 200);
+                };
+
+                if (preloader.complete) {
+                    runAnimation();
+                } else {
+                    console.log('⏳ (Enhanced) Esperando imagen:', targetLogo.name);
+                    preloader.onload = runAnimation;
+                    // Si falla, no hacemos nada para no dejar el hueco vacío
+                }
             };
             
             console.log('✅ Animaciones Enhanced activadas permanentemente');

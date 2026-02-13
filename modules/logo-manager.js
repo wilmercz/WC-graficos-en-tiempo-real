@@ -28,6 +28,7 @@ export class LogoManager {
             currentLogo: null,
             isAnimating: false
         };
+        this.imageCache = new Map(); // 🧠 Memoria para evitar recargas
         
         this.animations = {
             duration: 700,
@@ -117,10 +118,33 @@ export class LogoManager {
             this.config.mainLogo.url = window.logoPrincipalUrl;
         }
         
+        // 🚀 PRECARGA INICIAL
+        this.preloadAllLogos();
+
         console.log('🖼️ Configuración cargada:', {
             enabled: this.config.enabled,
             mainLogo: !!this.config.mainLogo.url,
             aliados: this.config.aliados.length
+        });
+    }
+
+    /**
+     * 🚀 Precargar todos los logos en memoria
+     * Esto evita parpadeos en conexiones lentas
+     */
+    preloadAllLogos() {
+        const logosToLoad = [];
+        if (this.config.mainLogo.url) logosToLoad.push(this.config.mainLogo.url);
+        this.config.aliados.forEach(l => logosToLoad.push(l.url));
+
+        console.log(`🧠 Iniciando precarga de ${logosToLoad.length} logos...`);
+
+        logosToLoad.forEach(url => {
+            if (url && !this.imageCache.has(url)) {
+                const img = new Image();
+                img.src = url;
+                this.imageCache.set(url, img); // Guardar referencia para que el GC no la borre
+            }
         });
     }
 
@@ -239,6 +263,12 @@ export class LogoManager {
         console.log(`🔄 Rotación de logos iniciada - índice actual: ${this.config.currentIndex}`);
         EventBus.emit('logo-rotation-started');
         
+        // ✅ FIX: Iniciar el temporizador para la siguiente rotación
+        const currentDuration = (this.config.currentIndex === 0) 
+            ? this.config.mainLogo.duration 
+            : this.config.aliaDuration;
+        this.scheduleNextRotation(currentDuration);
+        
         return true;
     }
 
@@ -254,6 +284,26 @@ export class LogoManager {
         this.isRotating = false;
         console.log('🛑 Rotación de logos detenida');
         EventBus.emit('logo-rotation-stopped');
+    }
+
+    /**
+     * ✅ Programar la siguiente rotación (FALTABA ESTA FUNCIÓN)
+     */
+    scheduleNextRotation(delay) {
+        if (this.rotation.timer) clearTimeout(this.rotation.timer);
+        
+        if (!this.isRotating || !this.isVisible) return;
+
+        // Protección: Delay mínimo de 2 segundos para evitar bucles rápidos
+        const safeDelay = Math.max(delay || 5000, 2000);
+
+        console.log(`⏳ Próxima rotación programada en ${safeDelay / 1000}s`);
+        
+        this.rotation.timer = setTimeout(() => {
+            if (this.isRotating && this.isVisible) {
+                this.rotateNext();
+            }
+        }, safeDelay);
     }
 
     /**
@@ -326,6 +376,11 @@ export class LogoManager {
             logo: targetLogo,
             isMainLogo: index === 0
         });
+
+        // ✅ FIX: Programar el siguiente cambio después de la duración actual
+        if (this.isRotating) {
+            this.scheduleNextRotation(duration);
+        }
     }
 
     /**
@@ -345,31 +400,32 @@ export class LogoManager {
         const realDelay = 0;       // Sin delay
         const changeBuffer = 50;   // 🎯 REDUCIDO: Era +100ms → +50ms
 
-        // Aplicar animación de salida
-        this.animateOut();
+        // 🛡️ PROTECCIÓN DE RED LENTA:
+        // Verificar si la imagen está lista ANTES de iniciar la transición
+        const nextImg = new Image();
+        nextImg.src = targetLogo.url;
 
-        /* DESACTIVADO 2025-08-21
-        // Cambiar logo después de la animación de salida COMPLETA
-        setTimeout(() => {
-            this.element.src = targetLogo.url;
-            this.element.alt = targetLogo.alt;
+        const executeTransition = () => {
+            // Aplicar animación de salida
+            this.animateOut();
 
-            // Aplicar animación de entrada después de un frame
-            requestAnimationFrame(() => {
-                this.animateIn();
-            });
-        }, realDuration + realDelay + 100); // Tiempo suficiente
-        */
-
-        // 🚀 CAMBIO PRINCIPAL: Tiempo mucho más corto
+            // 🚀 CAMBIO PRINCIPAL: Tiempo mucho más corto
             setTimeout(() => {
                 this.element.src = targetLogo.url;
                 this.element.alt = targetLogo.alt;
 
-                // 🎯 ENTRADA INMEDIATA: Sin requestAnimationFrame innecesario
+                // 🎯 ENTRADA INMEDIATA
                 this.animateIn();
-                
-            }, realDuration + changeBuffer); // 🔥 350ms total (era 800ms)
+            }, realDuration + changeBuffer);
+        };
+
+        if (nextImg.complete) {
+            executeTransition();
+        } else {
+            console.log('⏳ Red lenta detectada: Esperando descarga de logo...', targetLogo.name);
+            nextImg.onload = executeTransition;
+            nextImg.onerror = () => console.warn('❌ Error descargando logo:', targetLogo.url);
+        }
 
         console.log(`🔄 Cambiando logo a: ${targetLogo.name}`);
         console.log(`🎬 URL: ${targetLogo.url}`);
@@ -540,6 +596,9 @@ export class LogoManager {
     updateConfig(newConfig) {
         Object.assign(this.config, newConfig);
         console.log('🖼️ Configuración actualizada:', this.config);
+        
+        // Recargar caché si cambia la configuración
+        this.preloadAllLogos();
     }
 
     /**
@@ -593,6 +652,12 @@ export class LogoManager {
         
         if (!enabled && this.isRotating) {
             this.stopRotation();
+        }
+        
+        // 🛡️ AUTO-START: Si se habilita, el logo está visible y hay aliados -> Arrancar
+        if (enabled && this.isVisible && !this.isRotating && this.config.aliados.length > 0) {
+            console.log('🔄 Auto-iniciando rotación al habilitar configuración...');
+            this.startRotation();
         }
         
         console.log(`🖼️ Rotación ${enabled ? 'habilitada' : 'deshabilitada'}`);
