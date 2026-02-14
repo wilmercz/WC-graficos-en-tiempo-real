@@ -295,6 +295,20 @@ class StreamGraphicsApp {
         const processedData = this.modules.dataProcessor.process(rawData);
         if (!processedData) return;
         
+        // ✅ LÓGICA DE SECUENCIA DE PUBLICIDAD (ROTACIÓN)
+        // Si está activa en Firebase, iniciamos el manager y forzamos visibilidad
+        if (processedData.visibility.secuenciaPublicidad) {
+            if (this.modules.sequenceManager && !this.modules.sequenceManager.isAdRotationActive) {
+                this.modules.sequenceManager.startAdRotation();
+            }
+            // Forzar visibilidad para que el sistema de renderizado lo muestre
+            processedData.visibility.publicidadAlAire = true;
+        } else {
+            if (this.modules.sequenceManager && this.modules.sequenceManager.isAdRotationActive) {
+                this.modules.sequenceManager.stopAdRotation();
+            }
+        }
+
         console.log('📊 Datos PROCESADOS:', processedData);
         
         // ⚠️ CRÍTICO: Actualizar AMBOS formatos para compatibilidad
@@ -319,7 +333,7 @@ class StreamGraphicsApp {
             Mostrar_Publicidad: rawData.Mostrar_Publicidad,
             Mostrar_Hora: rawData.Mostrar_Hora,
             Mostrar_Portada: rawData.Mostrar_Portada,
-            Mostar_PortadaVideo: rawData.Most,
+            Mostar_PortadaVideo: rawData.Mostar_PortadaVideo,
             // ✅ Mapear contenido
             Invitado: processedData.content.invitado,
             Rol: processedData.content.rol,
@@ -440,7 +454,14 @@ class StreamGraphicsApp {
                     } else {
                         durationKey = `duracion${tipo.charAt(0).toUpperCase() + tipo.slice(1)}`;
                     }
-                    this.startAutoHideTimer(tipo, window.currentConfig[durationKey]);
+                    
+                    // ✅ FIX: No iniciar timer global para publicidad si la rotación está activa
+                    // Dejamos que el SequenceManager maneje el ocultamiento al finalizar la lista
+                    if (tipo === 'publicidad' && this.modules.sequenceManager?.isAdRotationActive) {
+                        console.log('⏳ Timer automático omitido para publicidad (Rotación activa)');
+                    } else {
+                        this.startAutoHideTimer(tipo, window.currentConfig[durationKey]);
+                    }
                 }
                 
             } else {
@@ -476,7 +497,7 @@ class StreamGraphicsApp {
             }
             
             // ⭐ Verificar rotación sin resetear
-            if (this.modules.logoManager.config.enabled && window.logosAliados?.length > 0) {
+            if (this.modules.logoManager.config.enabled && this.modules.logoManager.config.aliados.length > 0) {
                 const rotationStarted = this.modules.logoManager.startRotation();
                 if (rotationStarted && !logoCurrentlyVisible) {
                     console.log('🔄 Rotación iniciada');
@@ -686,6 +707,13 @@ class StreamGraphicsApp {
         // Publicidad - PRESERVAR IMAGEN EXISTENTE SI NO HAY URL
         if (images.publicidadUrl) {
             const pubElement = document.getElementById('publicidad-img');
+            
+            // 🛡️ Si la rotación está activa, IGNORAR la imagen estática de Firebase
+            if (this.modules.sequenceManager && this.modules.sequenceManager.isAdRotationActive) {
+                console.log('🔄 Rotación de publicidad activa - Ignorando imagen estática de Firebase');
+                return; 
+            }
+
             if (pubElement) {
                 // ✅ Solo cambiar si hay una URL válida y es diferente a la actual
                 if (pubElement.src !== images.publicidadUrl) {

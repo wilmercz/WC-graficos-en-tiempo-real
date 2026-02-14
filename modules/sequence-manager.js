@@ -14,6 +14,11 @@ export class SequenceManager {
         // 🎵 Playlist de Publicidad (URLs)
         this.adPlaylist = [];
         this.currentAdIndex = 0;
+
+        // 🔄 Configuración para rotación exclusiva de publicidad
+        this.isAdRotationActive = false;
+        this.adRotationTimer = null;
+        this.adRotationDuration = 6000; // 6 segundos (Aumentado +1s)
         
         // Iniciar escucha de la lista remota
         this.setupRemotePlaylist();
@@ -39,6 +44,7 @@ export class SequenceManager {
      * Procesar datos de la lista remota
      */
     processRemotePlaylist(data) {
+        console.log('📥 RAW DATA recibido de Firebase (Lista Publicidad):', data);
         if (!data) {
             this.adPlaylist = [];
             console.log('⚠️ Playlist de publicidad vacía o nula en Firebase');
@@ -62,7 +68,8 @@ export class SequenceManager {
         }
 
         this.adPlaylist = urls;
-        console.log(`📺 Playlist actualizada: ${this.adPlaylist.length} anuncios cargados`, this.adPlaylist);
+        console.log(`📺 Playlist FINAL: ${this.adPlaylist.length} anuncios detectados.`);
+        this.adPlaylist.forEach((u, i) => console.log(`   🔹 [${i + 1}] ${u}`));
     }
 
     /**
@@ -244,6 +251,131 @@ export class SequenceManager {
     }
 
     /**
+     * 🔄 INICIAR ROTACIÓN CONTINUA DE PUBLICIDAD
+     * Trigger: Mostrar_SecuenciaPublicidad
+     */
+    startAdRotation() {
+        if (this.isAdRotationActive) return;
+        
+        // ✅ Protección: Lista vacía
+        if (this.adPlaylist.length === 0) {
+            console.warn('⚠️ Lista de publicidad vacía, no se puede iniciar rotación.');
+            return;
+        }
+
+        console.log('🔄 📺 INICIANDO ROTACIÓN DE PUBLICIDAD (Loop)');
+        this.isAdRotationActive = true;
+        
+        // ✅ REINICIAR ÍNDICE Y CONTADOR
+        this.currentAdIndex = 0;
+        this.itemsShownCount = 0; // ✅ Nuevo contador para control preciso
+        
+        // 1. Mostrar primera imagen inmediatamente
+        this.rotateAdStep();
+        
+        // ✅ FIX: Usar contador para verificar si ya terminamos (caso lista de 1 elemento)
+        if (this.itemsShownCount >= this.adPlaylist.length) {
+            return;
+        }
+
+        // 2. Iniciar timer
+        this.adRotationTimer = setInterval(() => {
+            this.rotateAdStep();
+        }, this.adRotationDuration);
+    }
+
+    /**
+     * 🛑 DETENER ROTACIÓN CONTINUA
+     */
+    stopAdRotation() {
+        if (!this.isAdRotationActive) return;
+        
+        console.log('🛑 📺 DETENIENDO ROTACIÓN DE PUBLICIDAD');
+        this.isAdRotationActive = false;
+        
+        if (this.adRotationTimer) {
+            clearInterval(this.adRotationTimer);
+            this.adRotationTimer = null;
+        }
+        
+        // Ocultar publicidad al terminar
+        if (this.app.modules.lowerThirds) {
+            this.app.modules.lowerThirds.hidePublicidad();
+        }
+    }
+
+    /**
+     * Paso individual de rotación
+     */
+    rotateAdStep() {
+        if (!this.isAdRotationActive) return;
+
+        // Usar la lógica existente para obtener siguiente URL
+        const url = this.getNextAd();
+        
+        if (url && this.app.modules.lowerThirds) {
+            this.itemsShownCount++; // ✅ Incrementar contador de mostrados
+
+            // Preload de la siguiente (para el próximo tick)
+            this.preloadNextAdInLoop();
+            
+            // Actualizar DOM
+            this.app.modules.lowerThirds.updatePublicidadContent({ url: url });
+            
+            // Asegurar que esté visible
+            this.app.modules.lowerThirds.showPublicidad();
+            
+            console.log(`📺 Publicidad mostrada (${this.itemsShownCount}/${this.adPlaylist.length}): ${url}`);
+
+            // ✅ DETECTAR FIN DE LISTA USANDO CONTADOR (Más seguro que el índice)
+            if (this.itemsShownCount >= this.adPlaylist.length) {
+                console.log('🏁 Fin de lista de publicidad. Programando apagado...');
+                
+                // Detener el intervalo para no repetir
+                if (this.adRotationTimer) {
+                    clearInterval(this.adRotationTimer);
+                    this.adRotationTimer = null;
+                }
+                
+                // Programar el apagado después de que termine de mostrarse este último anuncio
+                setTimeout(() => {
+                    this.finishAdSequence();
+                }, this.adRotationDuration);
+            }
+        }
+    }
+
+    /**
+     * Finalizar secuencia de publicidad y apagar en Firebase
+     */
+    async finishAdSequence() {
+        // Verificar si sigue activa (para evitar conflictos si se detuvo manualmente)
+        if (!this.isAdRotationActive) return;
+
+        console.log('🛑 📺 Secuencia de publicidad completada. Apagando...');
+        this.stopAdRotation(); // Detiene localmente y oculta
+
+        // Apagar interruptores en Firebase
+        await this.updateFirebase({
+            Mostrar_SecuenciaPublicidad: false,
+            Mostrar_Publicidad: false
+        });
+    }
+
+    /**
+     * Pre-cargar siguiente imagen en el loop
+     */
+    preloadNextAdInLoop() {
+        if (this.adPlaylist.length === 0) return;
+        const nextIndex = (this.currentAdIndex + 1) % this.adPlaylist.length;
+        const nextUrl = this.adPlaylist[nextIndex];
+        if (nextUrl) {
+            const img = new Image();
+            img.src = nextUrl;
+        }
+    }
+
+    /**
      * Obtener siguiente publicidad de la playlist
      */
     getNextAd() {
@@ -255,6 +387,7 @@ export class SequenceManager {
         }
 
         const url = this.adPlaylist[this.currentAdIndex];
+        console.log(`🔄 getNextAd: Índice ${this.currentAdIndex} de ${this.adPlaylist.length} -> ${url}`);
         
         // Avanzar índice (rotación circular)
         this.currentAdIndex = (this.currentAdIndex + 1) % this.adPlaylist.length;

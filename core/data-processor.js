@@ -96,8 +96,10 @@ export class DataProcessor {
             // 🛡️ NUEVO: Campo para Portada
             portadaAlAire: this.convertBoolean(data.Mostrar_Portada),
             // 🎥 NUEVO: Campo para Video de Portada
-            // ✅ CORRECCIÓN: Aceptar "Mostrar" (correcto) y "Mostar" (legacy/typo)
+            // ✅ CORRECCIÓN: Aceptar "Mostrar")
             portadaVideoAlAire: this.convertBoolean(data.Mostrar_PortadaVideo) || this.convertBoolean(data.Mostar_PortadaVideo),
+            // 🔄 NUEVO: Secuenciador de Publicidad (Rotación)
+            secuenciaPublicidad: this.convertBoolean(data.Mostrar_SecuenciaPublicidad) || this.convertBoolean(data.Mostar_SecuenciaPublicidad),
         };
     }
 
