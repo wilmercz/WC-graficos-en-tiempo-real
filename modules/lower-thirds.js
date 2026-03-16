@@ -222,6 +222,30 @@ export class LowerThirds {
         if (element.video) {
             element.video.currentTime = 0;
             element.video.play().catch(err => console.warn('⚠️ Error al reproducir video:', err));
+
+            // ⭐ NUEVO: Detectar duración del video para ajustar tiempo de visibilidad
+            // Ajuste solicitado: Duración del video + 5 segundos
+            if (element.video.style.display !== 'none' && element.video.src) {
+                const handleDuration = () => {
+                    const duration = element.video.duration;
+                    if (duration && isFinite(duration)) {
+                        console.log(`🎥 Video publicidad detectado: ${duration.toFixed(1)}s. Solicitando tiempo extendido (+5s).`);
+                        EventBus.emit('update-auto-hide-timer', {
+                            type: 'publicidad',
+                            duration: duration + 5 // ✅ SOLICITUD: Duración video + 5 segundos
+                        });
+                    }
+                };
+
+                // Verificar si metadata ya cargó o esperar al evento
+                if (element.video.readyState >= 1) {
+                    handleDuration();
+                } else {
+                    // Aseguramos limpiar listeners previos para no duplicar
+                    element.video.onloadedmetadata = null;
+                    element.video.onloadedmetadata = handleDuration;
+                }
+            }
         }
 
         // Aplicar animación de entrada

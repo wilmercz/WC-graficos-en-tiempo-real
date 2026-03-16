@@ -1156,6 +1156,14 @@ class StreamGraphicsApp {
             // El reloj se actualiza automáticamente
         });
 
+        // ✅ NUEVO: Listener para actualizar timers dinámicamente (Ej: Video publicidad + 5s)
+        EventBus.on('update-auto-hide-timer', (data) => {
+            if (window.currentConfig?.modoAutomatico) {
+                console.log(`⏱️ Actualizando timer dinámico para ${data.type} a ${data.duration.toFixed(1)}s`);
+                this.startAutoHideTimer(data.type, data.duration);
+            }
+        });
+
         console.log('✅ Comunicación entre módulos configurada');
     }
 
@@ -1488,7 +1496,7 @@ class StreamGraphicsApp {
         window.currentConfig = {
             duracionNombreRol: data.duracionNombreRol || 45,
             duracionTema: data.duracionTema || 45,
-            duracionPublicidad: data.duracionPublicidad || 30,
+            duracionPublicidad: data.duracionPublicidad || 15, // ✅ CAMBIO: 15s por defecto si es null en Firebase
             duracionLogoPrincipal: data.duracionLogoPrincipal || 60,
             duracionLogosAliados: data.duracionLogosAliados || 45,
             modoAutomatico: data.modoAutomatico !== false,
