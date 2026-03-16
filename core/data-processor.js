@@ -111,7 +111,8 @@ export class DataProcessor {
             invitado: this.cleanText(data.Invitado, 'Sin Invitado'),
             rol: this.cleanText(data.Rol, 'Sin Rol'),
             tema: this.cleanText(data.Tema, 'Sin Tema'),
-            lugar: this.cleanText(data.Lugar, 'Sin Lugar')
+            lugar: this.cleanText(data.Lugar, 'Sin Lugar'),
+            tipoPublicidad: data.tipoPublicidad // 'IMAGEN' o 'VIDEO'
         };
     }
 

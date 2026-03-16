@@ -132,20 +132,48 @@ export class LogoManager {
      * 🚀 Precargar todos los logos en memoria
      * Esto evita parpadeos en conexiones lentas
      */
-    preloadAllLogos() {
-        const logosToLoad = [];
-        if (this.config.mainLogo.url) logosToLoad.push(this.config.mainLogo.url);
-        this.config.aliados.forEach(l => logosToLoad.push(l.url));
+   preloadAllLogos() {
 
-        console.log(`🧠 Iniciando precarga de ${logosToLoad.length} logos...`);
+    const logosToLoad = [];
 
-        logosToLoad.forEach(url => {
-            if (url && !this.imageCache.has(url)) {
-                const img = new Image();
-                img.src = url;
-                this.imageCache.set(url, img); // Guardar referencia para que el GC no la borre
-            }
-        });
+    if (this.config.mainLogo.url)
+        logosToLoad.push(this.config.mainLogo.url);
+
+    this.config.aliados.forEach(l => logosToLoad.push(l.url));
+
+    console.log(`🧠 Precargando ${logosToLoad.length} logos`);
+
+    logosToLoad.forEach(url => {
+
+        if (!url || this.imageCache.has(url)) return;
+
+        const img = new Image();
+
+        img.onload = () => {
+
+            console.log("✅ Logo cargado:", url);
+
+            this.imageCache.set(url, {
+                status: "loaded",
+                img: img
+            });
+
+        };
+
+        img.onerror = () => {
+
+            console.warn("⚠️ Logo falló:", url);
+
+            this.imageCache.set(url, {
+                status: "error"
+            });
+
+        };
+
+        img.src = url;
+
+    });
+
     }
 
     /**
@@ -188,7 +216,7 @@ export class LogoManager {
         // ⭐ Solo configurar logo principal si NO está visible
         // (preservar el logo actual si ya está rotando)
         if (!this.isVisible) {
-            if (!this.element.src && this.config.mainLogo.url) {
+            if ((!this.element.src || this.element.src === "") && this.config.mainLogo.url) {
                 this.element.src = this.config.mainLogo.url;
                 this.element.alt = this.config.mainLogo.alt;
             }
@@ -394,34 +422,62 @@ export class LogoManager {
         const changeBuffer = 50;
     
         // ✅ MEJORA: Usar la caché interna para ser independiente de la red.
-        const cachedImage = this.imageCache.get(targetLogo.url);
+        const cached = this.imageCache.get(targetLogo.url);
     
         const executeTransition = () => {
-            console.log(`🔄 Cambiando logo a: ${targetLogo.name} (Desde caché: ${!!cachedImage})`);
-    
-            // Aplicar animación de salida
-            this.animateOut();
-    
-            // Cambiar la imagen a mitad de la animación de salida
-            setTimeout(() => {
-                this.element.src = targetLogo.url;
-                this.element.alt = targetLogo.alt;
-    
-                // Animar la entrada
-                this.animateIn();
-            }, realDuration + changeBuffer);
+
+        console.log(`🔄 Cambiando logo a: ${targetLogo.name}`);
+
+        this.animateOut();
+
+        setTimeout(() => {
+
+            this.element.src = targetLogo.url;
+            this.element.alt = targetLogo.alt;
+
+            this.animateIn();
+
+        }, realDuration + changeBuffer);
         };
     
         // Si la imagen está en nuestra caché, la transición es segura e instantánea.
-        if (cachedImage && cachedImage.complete) {
+        if (cached && cached.status === "loaded") {
+
             executeTransition();
-        } else {
-            // Fallback: si no está en caché, intentar cargarla (comportamiento original)
-            console.warn('⚠️ Logo no encontrado en caché, intentando carga normal:', targetLogo.name);
-            const nextImg = new Image();
-            nextImg.src = targetLogo.url;
-            nextImg.onload = executeTransition; // Proceder cuando cargue
-            nextImg.onerror = () => console.error('❌ Error crítico: No se pudo cargar el logo para rotación:', targetLogo.url);
+
+        } 
+        else if (cached && cached.status === "error") {
+
+            console.warn("⚠️ Logo falló, se mantiene el actual");
+
+        } 
+        else {
+
+            console.warn("⚠️ Logo no está en cache, intentando cargar:", targetLogo.name);
+
+            const img = new Image();
+
+            img.onload = () => {
+
+                this.imageCache.set(targetLogo.url, {
+                    status: "loaded",
+                    img: img
+                });
+
+                executeTransition();
+
+            };
+
+            img.onerror = () => {
+
+                this.imageCache.set(targetLogo.url, { status: "error" });
+
+                console.error("❌ Error cargando logo:", targetLogo.url);
+
+            };
+
+            img.src = targetLogo.url;
+
         }
     }
 
@@ -625,15 +681,51 @@ export class LogoManager {
      * Configurar logo principal
      */
     setMainLogo(url, alt = 'Logo Principal') {
-        this.config.mainLogo.url = url;
-        this.config.mainLogo.alt = alt;
-        
-        if (this.element && this.config.currentIndex === 0) {
+
+    this.config.mainLogo.url = url;
+    this.config.mainLogo.alt = alt;
+
+    if (!this.element || this.config.currentIndex !== 0) {
+        return;
+    }
+
+    const cached = this.imageCache.get(url);
+
+    // Si ya está cargado en cache
+    if (cached && cached.status === "loaded") {
+
+        this.element.src = url;
+        this.element.alt = alt;
+
+    } 
+    else {
+
+        console.log("⏳ Logo aún no cargado, esperando...");
+
+        const img = new Image();
+
+        img.onload = () => {
+
+            this.imageCache.set(url, { status: "loaded", img: img });
+
             this.element.src = url;
             this.element.alt = alt;
-        }
-        
-        console.log('🖼️ Logo principal configurado:', alt);
+
+            console.log("✅ Logo principal cargado y mostrado");
+
+        };
+
+        img.onerror = () => {
+
+            this.imageCache.set(url, { status: "error" });
+
+            console.warn("⚠️ Error cargando logo, se mantiene el logo por defecto del index");
+
+        };
+
+        img.src = url;
+    }
+
     }
 
     /**

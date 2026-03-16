@@ -724,6 +724,13 @@ class StreamGraphicsApp {
             // --- LÓGICA HÍBRIDA (VIDEO / IMAGEN) ---
             if (tipo === 'VIDEO' && videoElement) {
                 // 🎥 MODO VIDEO
+                
+                // FIX: Asegurar que el video oculte errores si falla
+                videoElement.onerror = () => {
+                    videoElement.style.display = 'none';
+                    console.error('❌ Error cargando video de publicidad');
+                };
+
                 // Solo cargar si la URL cambió para no reiniciar el video constantemente
                 if (videoElement.src !== images.publicidadUrl) {
                     console.log('⏳ Cargando video de publicidad...');
@@ -747,6 +754,13 @@ class StreamGraphicsApp {
                 }
             } else if (imgElement) {
                 // 🖼️ MODO IMAGEN
+
+                // FIX: Asegurar que la imagen oculte errores
+                imgElement.onerror = () => {
+                    imgElement.style.display = 'none';
+                    console.error('❌ Error cargando imagen de publicidad');
+                };
+
                 if (imgElement.src !== images.publicidadUrl) {
                     console.log('⏳ Precargando imagen publicidad...');
                     const preloader = new Image();
@@ -758,6 +772,11 @@ class StreamGraphicsApp {
                         imgElement.style.display = 'block';
                         imgElement.src = images.publicidadUrl;
                         console.log('✅ Imagen publicidad aplicada tras precarga');
+                    };
+                    // Manejar error en precarga también
+                    preloader.onerror = () => {
+                        console.error('❌ Falló precarga de imagen publicidad');
+                        // No hacemos nada en el DOM para no romper lo que ya está, o ocultamos si es crítico
                     };
                     preloader.src = images.publicidadUrl;
                 } else {
@@ -1074,6 +1093,14 @@ class StreamGraphicsApp {
 
         EventBus.on('logo-rotate', (data) => {
             this.modules.logoManager.rotateTo(data.index);
+        });
+
+        // ✅ NUEVO: Escuchar estado de carga de logos y notificar a Firebase
+        EventBus.on('logos-load-status', (status) => {
+            if (this.modules.firebaseClient) {
+                console.log('📡 Enviando estado de logos a Firebase para la App...');
+                this.modules.firebaseClient.writeData('CLAVE_STREAM_FB/STREAM_LIVE/ESTADO_LOGOS', status);
+            }
         });
 
         /* === desactivado 2025-08-20: lower-third-changed ===

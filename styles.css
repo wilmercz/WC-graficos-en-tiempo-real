@@ -116,6 +116,14 @@ html, body {
 #logo, #logo-img { will-change: clip-path, opacity; }
 #logo, #logo-container { overflow: hidden; }
 
+/* 🛡️ FIX: Ocultar imágenes/videos rotos o vacíos para evitar icono de error */
+img:not([src]), img[src=""], img[src="null"], img[src="undefined"],
+video:not([src]), video[src=""], video[src="null"] {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+}
+
 
 /* ====== INVITADO / ROL UNIFICADO ====== */
 #grafico-invitado-rol {
