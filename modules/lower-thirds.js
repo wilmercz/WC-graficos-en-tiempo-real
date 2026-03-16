@@ -220,31 +220,35 @@ export class LowerThirds {
 
         // ✅ LOGICA DE REINICIO DE VIDEO
         if (element.video) {
+            // 1. Asegurar que NO haya loop
+            element.video.loop = false;
+            
+            // 2. Limpiar listeners anteriores para evitar duplicados
+            element.video.onended = null;
+
             element.video.currentTime = 0;
             element.video.play().catch(err => console.warn('⚠️ Error al reproducir video:', err));
 
             // ⭐ NUEVO: Detectar duración del video para ajustar tiempo de visibilidad
             // Ajuste solicitado: Duración del video + 5 segundos
             if (element.video.style.display !== 'none' && element.video.src) {
-                const handleDuration = () => {
-                    const duration = element.video.duration;
-                    if (duration && isFinite(duration)) {
-                        console.log(`🎥 Video publicidad detectado: ${duration.toFixed(1)}s. Solicitando tiempo extendido (+5s).`);
-                        EventBus.emit('update-auto-hide-timer', {
-                            type: 'publicidad',
-                            duration: duration + 5 // ✅ SOLICITUD: Duración video + 5 segundos
-                        });
-                    }
+                // ✅ MEJORA CRÍTICA: Usar evento 'ended' en lugar de timers fijos.
+                // Esto corrige que el video se corte si hubo buffering ("tropezones") 
+                // y evita el loop infinito.
+                
+                element.video.onended = () => {
+                    console.log('🏁 Video publicidad terminó. Esperando 5s de seguridad...');
+                    
+                    setTimeout(() => {
+                        console.log('👋 Ocultando publicidad tras video + 5s');
+                        this.autoHide('publicidad');
+                    }, 5000); // 5 segundos de espera tras finalizar
                 };
 
-                // Verificar si metadata ya cargó o esperar al evento
-                if (element.video.readyState >= 1) {
-                    handleDuration();
-                } else {
-                    // Aseguramos limpiar listeners previos para no duplicar
-                    element.video.onloadedmetadata = null;
-                    element.video.onloadedmetadata = handleDuration;
-                }
+                console.log('🎥 Video configurado: Loop OFF, AutoHide al finalizar + 5s');
+                
+                // NOTA: Ya no emitimos 'update-auto-hide-timer' aquí porque el evento 'ended'
+                // es mucho más seguro para videos que pueden pausarse por red.
             }
         }
 

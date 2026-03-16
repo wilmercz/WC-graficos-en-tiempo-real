@@ -735,15 +735,20 @@ class StreamGraphicsApp {
                 if (videoElement.src !== images.publicidadUrl) {
                     console.log('⏳ Cargando video de publicidad...');
                     videoElement.src = images.publicidadUrl;
+                    videoElement.preload = 'auto'; // 🚀 FORZAR PRECARGA
                     videoElement.load(); // Cargar nueva fuente
                     
                     // ✨ ESPERAR A QUE TENGA DATOS (Evita pantalla negra o icono de carga)
-                    videoElement.onloadeddata = () => {
+                    // CAMBIO: Usar 'canplaythrough' en lugar de 'loadeddata' para evitar tropezones
+                    videoElement.oncanplaythrough = () => {
                         if (imgElement) imgElement.style.display = 'none';
                         videoElement.style.display = 'block';
-                        videoElement.play().catch(e => console.warn('⚠️ Autoplay video publicidad:', e));
-                        console.log('✅ Video publicidad listo y reproduciendo');
+                        // La reproducción se gestiona en lower-thirds.js o aquí si es necesario, 
+                        // pero aseguramos que ya está listo para "play through" sin buffering.
+                        console.log('✅ Video publicidad descargado y listo para reproducir fluido');
                     };
+                    // Fallback por si canplaythrough tarda mucho (red muy lenta)
+                    videoElement.onerror = () => console.error('❌ Error cargando video');
                 } else {
                     // Si es el mismo video, solo asegurar visibilidad
                     if (imgElement) imgElement.style.display = 'none';
