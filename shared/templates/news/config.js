@@ -117,7 +117,8 @@ export const newsTemplateConfig = {
         content: [
             'Invitado',           // Nombre del invitado
             'Rol',                // Rol/cargo del invitado
-            'Tema'                // Tema del segmento
+            'Tema',               // Tema del segmento
+            'tipoPublicidad'      // 'IMAGEN' o 'VIDEO'
         ],
         
         // Campos de imágenes

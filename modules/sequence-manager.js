@@ -419,10 +419,15 @@ export class SequenceManager {
     async updateFirebase(updates) {
         if (!this.app.modules.firebaseClient) return;
         
-        // Actualizar cada campo
-        for (const [key, value] of Object.entries(updates)) {
-            const path = `CLAVE_STREAM_FB/STREAM_LIVE/GRAFICOS/${key}`;
-            await this.app.modules.firebaseClient.writeData(path, value);
+        try {
+            // Actualizar cada campo
+            for (const [key, value] of Object.entries(updates)) {
+                const path = `CLAVE_STREAM_FB/STREAM_LIVE/GRAFICOS/${key}`;
+                await this.app.modules.firebaseClient.writeData(path, value);
+            }
+        } catch (error) {
+            console.error(`❌ ERROR en secuencia: Falló la escritura en Firebase para las actualizaciones:`, updates, error);
+            this.stopSequence(); // Detener la secuencia para evitar comportamiento inesperado.
         }
     }
 }

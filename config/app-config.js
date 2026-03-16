@@ -69,6 +69,7 @@ export const AppConfig = {
             temaH1: '#grafico-tema h1',
             publicidadContainer: '#grafico-publicidad',
             publicidadImg: '#publicidad-img',
+            publicidadVideo: '#publicidad-video',
             clock: '#stream-clock'
         }
     },
@@ -137,7 +138,8 @@ export const AppConfig = {
             content: {
                 invitado: 'Invitado',
                 rol: 'Rol',
-                tema: 'Tema'
+                tema: 'Tema',
+                tipoPublicidad: 'tipoPublicidad' // 'IMAGEN' o 'VIDEO'
             },
             images: {
                 logo: 'urlLogo',

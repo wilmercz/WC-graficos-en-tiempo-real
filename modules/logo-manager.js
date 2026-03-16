@@ -387,50 +387,42 @@ export class LogoManager {
      * Cambiar logo con animación
      */
     changeLogo(targetLogo, nextDuration = null) {
-        if (!this.element) return;
-
-        /* dtos obtenidos de firebase
-        // Obtener duración real de animación desde configuración
-        const realDuration = window.animacionConfig?.logo?.duracion || 700;
-        const realDelay = window.animacionConfig?.logo?.delay || 0;
-        */
-
-        // 🔧 TIMING CORREGIDO: Más rápido y fluido
-        const realDuration = 300;  // 🎯 FIJO: Era variable 700ms → 300ms fijo
-        const realDelay = 0;       // Sin delay
-        const changeBuffer = 50;   // 🎯 REDUCIDO: Era +100ms → +50ms
-
-        // 🛡️ PROTECCIÓN DE RED LENTA:
-        // Verificar si la imagen está lista ANTES de iniciar la transición
-        const nextImg = new Image();
-        nextImg.src = targetLogo.url;
-
+        if (!this.element || !targetLogo || !targetLogo.url) return;
+    
+        const realDuration = 300;
+        const realDelay = 0;
+        const changeBuffer = 50;
+    
+        // ✅ MEJORA: Usar la caché interna para ser independiente de la red.
+        const cachedImage = this.imageCache.get(targetLogo.url);
+    
         const executeTransition = () => {
+            console.log(`🔄 Cambiando logo a: ${targetLogo.name} (Desde caché: ${!!cachedImage})`);
+    
             // Aplicar animación de salida
             this.animateOut();
-
-            // 🚀 CAMBIO PRINCIPAL: Tiempo mucho más corto
+    
+            // Cambiar la imagen a mitad de la animación de salida
             setTimeout(() => {
                 this.element.src = targetLogo.url;
                 this.element.alt = targetLogo.alt;
-
-                // 🎯 ENTRADA INMEDIATA
+    
+                // Animar la entrada
                 this.animateIn();
             }, realDuration + changeBuffer);
         };
-
-        if (nextImg.complete) {
+    
+        // Si la imagen está en nuestra caché, la transición es segura e instantánea.
+        if (cachedImage && cachedImage.complete) {
             executeTransition();
         } else {
-            console.log('⏳ Red lenta detectada: Esperando descarga de logo...', targetLogo.name);
-            nextImg.onload = executeTransition;
-            nextImg.onerror = () => console.warn('❌ Error descargando logo:', targetLogo.url);
+            // Fallback: si no está en caché, intentar cargarla (comportamiento original)
+            console.warn('⚠️ Logo no encontrado en caché, intentando carga normal:', targetLogo.name);
+            const nextImg = new Image();
+            nextImg.src = targetLogo.url;
+            nextImg.onload = executeTransition; // Proceder cuando cargue
+            nextImg.onerror = () => console.error('❌ Error crítico: No se pudo cargar el logo para rotación:', targetLogo.url);
         }
-
-        console.log(`🔄 Cambiando logo a: ${targetLogo.name}`);
-        console.log(`🎬 URL: ${targetLogo.url}`);
-        console.log(`⏱️ Timing: ${realDuration}ms + ${realDelay}ms`);
-
     }
 
     /**

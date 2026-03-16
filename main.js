@@ -654,7 +654,7 @@ class StreamGraphicsApp {
         
         // 🖼️ APLICAR IMÁGENES SIN ELIMINAR LAS EXISTENTES
         console.log('🖼️ Aplicando imágenes:', data.images);
-        this.applyImagesPreservingExisting(data.images);
+        this.applyImagesPreservingExisting(data.images, data.content);
         
         // Aplicar colores
         console.log('🎨 Aplicando colores:', data.colors);
@@ -672,7 +672,7 @@ class StreamGraphicsApp {
     /**
      * 🔧 APLICAR IMÁGENES PRESERVANDO LAS EXISTENTES
      */
-    applyImagesPreservingExisting(images) {
+    applyImagesPreservingExisting(images, content = {}) {
         // Logo principal - PRESERVAR IMAGEN EXISTENTE SI NO HAY URL
         if (images.logoUrl) {
     const logoElement = document.getElementById('logo');
@@ -687,8 +687,13 @@ class StreamGraphicsApp {
             // 1. No hay rotación activa, O
             // 2. Estamos actualmente en el logo principal
             if (!isRotating || isCurrentlyOnMainLogo) {
-                logoElement.src = images.logoUrl;
-                console.log('✅ Logo aplicado:', images.logoUrl);
+                // ✨ PRECARGA: Evita que el logo parpadee o salga vacío
+                const preloader = new Image();
+                preloader.onload = () => {
+                    logoElement.src = images.logoUrl;
+                    console.log('✅ Logo aplicado (precargado):', images.logoUrl);
+                };
+                preloader.src = images.logoUrl;
             } else {
                 console.log('🔄 Rotación activa en aliado - NO cambiando imagen del DOM');
                 console.log(`   Current index: ${currentIndex}, isRotating: ${isRotating}`);
@@ -706,28 +711,65 @@ class StreamGraphicsApp {
 
         // Publicidad - PRESERVAR IMAGEN EXISTENTE SI NO HAY URL
         if (images.publicidadUrl) {
-            const pubElement = document.getElementById('publicidad-img');
+            const imgElement = document.getElementById('publicidad-img');
+            const videoElement = document.getElementById('publicidad-video');
+            const tipo = content.tipoPublicidad || 'IMAGEN'; // Detectar tipo
             
             // 🛡️ Si la rotación está activa, IGNORAR la imagen estática de Firebase
             if (this.modules.sequenceManager && this.modules.sequenceManager.isAdRotationActive) {
-                console.log('🔄 Rotación de publicidad activa - Ignorando imagen estática de Firebase');
+                console.log('🔄 Rotación de publicidad activa - Ignorando media de Firebase');
                 return; 
             }
 
-            if (pubElement) {
-                // ✅ Solo cambiar si hay una URL válida y es diferente a la actual
-                if (pubElement.src !== images.publicidadUrl) {
-                    pubElement.src = images.publicidadUrl;
-                    console.log('✅ Publicidad aplicada:', images.publicidadUrl);
+            // --- LÓGICA HÍBRIDA (VIDEO / IMAGEN) ---
+            if (tipo === 'VIDEO' && videoElement) {
+                // 🎥 MODO VIDEO
+                // Solo cargar si la URL cambió para no reiniciar el video constantemente
+                if (videoElement.src !== images.publicidadUrl) {
+                    console.log('⏳ Cargando video de publicidad...');
+                    videoElement.src = images.publicidadUrl;
+                    videoElement.load(); // Cargar nueva fuente
+                    
+                    // ✨ ESPERAR A QUE TENGA DATOS (Evita pantalla negra o icono de carga)
+                    videoElement.onloadeddata = () => {
+                        if (imgElement) imgElement.style.display = 'none';
+                        videoElement.style.display = 'block';
+                        videoElement.play().catch(e => console.warn('⚠️ Autoplay video publicidad:', e));
+                        console.log('✅ Video publicidad listo y reproduciendo');
+                    };
                 } else {
-                    console.log('ℹ️ Publicidad ya está actualizada');
+                    // Si es el mismo video, solo asegurar visibilidad
+                    if (imgElement) imgElement.style.display = 'none';
+                    if (videoElement.style.display !== 'block') {
+                        videoElement.style.display = 'block';
+                        videoElement.play().catch(() => {});
+                    }
                 }
-                
-                // Actualizar contenido en módulo
-                this.modules.lowerThirds.updatePublicidadContent({
-                    url: images.publicidadUrl,
-                    alt: 'Publicidad'
-                });
+            } else if (imgElement) {
+                // 🖼️ MODO IMAGEN
+                if (imgElement.src !== images.publicidadUrl) {
+                    console.log('⏳ Precargando imagen publicidad...');
+                    const preloader = new Image();
+                    preloader.onload = () => {
+                        if (videoElement) {
+                            videoElement.pause();
+                            videoElement.style.display = 'none';
+                        }
+                        imgElement.style.display = 'block';
+                        imgElement.src = images.publicidadUrl;
+                        console.log('✅ Imagen publicidad aplicada tras precarga');
+                    };
+                    preloader.src = images.publicidadUrl;
+                } else {
+                    // Si ya es la misma imagen, asegurar visibilidad inmediata
+                    if (videoElement) {
+                        videoElement.pause();
+                        videoElement.style.display = 'none';
+                    }
+                    if (imgElement.style.display !== 'block') {
+                        imgElement.style.display = 'block';
+                    }
+                }
             }
         } else {
             console.log('ℹ️ No hay URL de publicidad nueva - manteniendo existente');
