@@ -58,6 +58,9 @@ export class LogoManager {
             return;
         }
         
+        // ✅ AJUSTE DE Z-INDEX PARA EL LOGO
+        this.element.style.zIndex = '1000';
+
         // Guardar logo principal si existe
         if (this.element.src) {
             this.config.mainLogo.url = this.element.src;

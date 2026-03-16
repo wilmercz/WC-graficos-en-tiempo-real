@@ -25,6 +25,7 @@ export class LowerThirds {
             publicidad: {
                 container: null,
                 img: null,
+                video: null,
                 isVisible: false
             }
         };
@@ -71,6 +72,15 @@ export class LowerThirds {
         this.elements.publicidad.container = document.getElementById('grafico-publicidad');
         if (this.elements.publicidad.container) {
             this.elements.publicidad.img = this.elements.publicidad.container.querySelector('img');
+            this.elements.publicidad.video = this.elements.publicidad.container.querySelector('video');
+
+            // ✅ AJUSTES DE POSICIÓN Y Z-INDEX PARA PUBLICIDAD
+            const adContainer = this.elements.publicidad.container;
+            // Se asume que el body o un wrapper es el contenedor relativo
+            adContainer.style.position = 'absolute';
+            adContainer.style.left = '0px';
+            adContainer.style.bottom = '0px';
+            adContainer.style.zIndex = '1001';
         }
 
         console.log('📺 Lower thirds elements found:', {
@@ -208,6 +218,12 @@ export class LowerThirds {
             this.updatePublicidadContent(data);
         }
 
+        // ✅ LOGICA DE REINICIO DE VIDEO
+        if (element.video) {
+            element.video.currentTime = 0;
+            element.video.play().catch(err => console.warn('⚠️ Error al reproducir video:', err));
+        }
+
         // Aplicar animación de entrada
         //this.animateIn(element, 'publicidad');
         
@@ -223,6 +239,11 @@ export class LowerThirds {
     hidePublicidad() {
         const element = this.elements.publicidad;
         if (!element.container || !element.isVisible) return;
+
+        // ✅ PAUSAR VIDEO AL OCULTAR (Para evitar consumo en fondo)
+        if (element.video) {
+            element.video.pause();
+        }
 
         // Aplicar animación de salida
         //this.animateOut(element, 'publicidad');
