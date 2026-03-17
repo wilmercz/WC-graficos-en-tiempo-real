@@ -769,19 +769,32 @@ class StreamGraphicsApp {
                 if (imgElement.src !== images.publicidadUrl) {
                     console.log('⏳ Precargando imagen publicidad...');
                     const preloader = new Image();
+                    
                     preloader.onload = () => {
                         if (videoElement) {
                             videoElement.pause();
                             videoElement.style.display = 'none';
                         }
-                        imgElement.style.display = 'block';
+                        
+                        // 🛡️ FIX: Configurar onload en el elemento DOM antes de asignar src
+                        // Esto evita que se muestre el icono de imagen rota mientras renderiza
+                        imgElement.onload = () => {
+                            imgElement.style.display = 'block';
+                            console.log('✅ Imagen publicidad mostrada (Render completo)');
+                            imgElement.onload = null; // Limpiar listener
+                        };
+
                         imgElement.src = images.publicidadUrl;
-                        console.log('✅ Imagen publicidad aplicada tras precarga');
+                        
+                        // Verificación inmediata por si viene de caché (onload no siempre dispara en caché)
+                        if (imgElement.complete && imgElement.naturalWidth > 0) {
+                            imgElement.style.display = 'block';
+                        }
                     };
+
                     // Manejar error en precarga también
                     preloader.onerror = () => {
                         console.error('❌ Falló precarga de imagen publicidad');
-                        // No hacemos nada en el DOM para no romper lo que ya está, o ocultamos si es crítico
                     };
                     preloader.src = images.publicidadUrl;
                 } else {
@@ -790,8 +803,11 @@ class StreamGraphicsApp {
                         videoElement.pause();
                         videoElement.style.display = 'none';
                     }
-                    if (imgElement.style.display !== 'block') {
-                        imgElement.style.display = 'block';
+                    // Solo mostrar si realmente tiene contenido válido
+                    if (imgElement.complete && imgElement.naturalWidth > 0) {
+                        if (imgElement.style.display !== 'block') {
+                            imgElement.style.display = 'block';
+                        }
                     }
                 }
             }
