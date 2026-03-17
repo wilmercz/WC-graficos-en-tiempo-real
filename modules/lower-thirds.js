@@ -218,8 +218,13 @@ export class LowerThirds {
             this.updatePublicidadContent(data);
         }
 
+        // 💡 Detectar el tipo de medio actual para evitar reproducir un video sobre una imagen.
+        const adType = window.lastProcessedFirebaseData?.content?.tipoPublicidad || 'IMAGEN';
+
         // ✅ LOGICA DE REINICIO DE VIDEO
-        if (element.video) {
+        // ❗ CORRECCIÓN: Esta lógica solo debe ejecutarse si la publicidad es un VIDEO.
+        if (element.video && adType === 'VIDEO') {
+            console.log('▶️ Gestionando reproducción de VIDEO publicitario.');
             // 1. Asegurar que NO haya loop
             element.video.loop = false;
             
@@ -229,13 +234,9 @@ export class LowerThirds {
             element.video.currentTime = 0;
             element.video.play().catch(err => console.warn('⚠️ Error al reproducir video:', err));
 
-            // ⭐ NUEVO: Detectar duración del video para ajustar tiempo de visibilidad
-            // Ajuste solicitado: Duración del video + 5 segundos
+            // ⭐ Detectar duración del video para ajustar tiempo de visibilidad
             if (element.video.style.display !== 'none' && element.video.src) {
-                // ✅ MEJORA CRÍTICA: Usar evento 'ended' en lugar de timers fijos.
-                // Esto corrige que el video se corte si hubo buffering ("tropezones") 
-                // y evita el loop infinito.
-                
+                // Usar evento 'ended' en lugar de timers fijos.
                 element.video.onended = () => {
                     console.log('🏁 Video publicidad terminó. Esperando 5s de seguridad...');
                     
@@ -246,10 +247,9 @@ export class LowerThirds {
                 };
 
                 console.log('🎥 Video configurado: Loop OFF, AutoHide al finalizar + 5s');
-                
-                // NOTA: Ya no emitimos 'update-auto-hide-timer' aquí porque el evento 'ended'
-                // es mucho más seguro para videos que pueden pausarse por red.
             }
+        } else {
+            console.log('🖼️ Gestionando publicidad ESTÁTICA (imagen). No se intenta reproducir video.');
         }
 
         // Aplicar animación de entrada
