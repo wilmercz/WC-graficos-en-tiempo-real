@@ -13,6 +13,7 @@ export class SequenceManager {
 
         // 🎵 Playlist de Publicidad (URLs)
         this.adPlaylist = [];
+        this.currentAd = null; // 💾 Referencia al anuncio actual (para saber su duración)
         this.currentAdIndex = 0;
 
         // 🔄 Configuración para rotación exclusiva de publicidad
@@ -51,25 +52,37 @@ export class SequenceManager {
             return;
         }
 
-        const urls = [];
+        const playlist = [];
+        
+        // Función interna para formatear cada item y darle valores seguros
+        const processItem = (item) => {
+            if (typeof item === 'string') return { url: item, tipo: 'IMAGEN', duracion: 8000 };
+            if (item && item.url) {
+                let dur = 8000; // 8s por defecto
+                if (item.duracion) dur = item.duracion * 1000; // Convertir segundos a milisegundos
+                else if (item.tipo === 'VIDEO') dur = 20000; // 20s por defecto para video
+                
+                return { url: item.url, tipo: item.tipo || 'IMAGEN', duracion: dur };
+            }
+            return null;
+        };
         
         // Manejar si es Array o Objeto (Firebase devuelve objetos para listas con IDs)
         if (Array.isArray(data)) {
             data.forEach(item => {
-                if (typeof item === 'string') urls.push(item);
-                else if (item?.url) urls.push(item.url);
+                const parsed = processItem(item);
+                if (parsed) playlist.push(parsed);
             });
         } else if (typeof data === 'object') {
             Object.values(data).forEach(item => {
-                // ✅ MEJORA: Soportar strings directos en objetos (ej: {id1: "url1", id2: "url2"})
-                if (typeof item === 'string') urls.push(item);
-                else if (item?.url) urls.push(item.url);
+                const parsed = processItem(item);
+                if (parsed) playlist.push(parsed);
             });
         }
 
-        this.adPlaylist = urls;
+        this.adPlaylist = playlist;
         console.log(`📺 Playlist FINAL: ${this.adPlaylist.length} anuncios detectados.`);
-        this.adPlaylist.forEach((u, i) => console.log(`   🔹 [${i + 1}] ${u}`));
+        this.adPlaylist.forEach((ad, i) => console.log(`   🔹 [${i + 1}] [${ad.tipo}] ${ad.url} (${ad.duracion/1000}s)`));
     }
 
     /**
@@ -133,14 +146,18 @@ export class SequenceManager {
     }
 
     async preloadAd() {
-        const nextAdUrl = this.getNextAd();
-        if (nextAdUrl) {
+        const nextAd = this.getNextAd();
+        if (nextAd && nextAd.url) {
             this.hasPendingAd = true;
-            console.log(`🔄 Pre-cargando publicidad al inicio: ${nextAdUrl}`);
+            console.log(`🔄 Pre-cargando publicidad al inicio: ${nextAd.url} [${nextAd.tipo}]`);
             if (this.app.modules.firebaseClient) {
                 await this.app.modules.firebaseClient.writeData(
                     'CLAVE_STREAM_FB/STREAM_LIVE/GRAFICOS/urlImagenPublicidad', 
-                    nextAdUrl
+                    nextAd.url
+                );
+                await this.app.modules.firebaseClient.writeData(
+                    'CLAVE_STREAM_FB/STREAM_LIVE/GRAFICOS/tipoPublicidad', 
+                    nextAd.tipo || 'IMAGEN'
                 );
             }
         }
@@ -231,8 +248,14 @@ export class SequenceManager {
             if (!this.isActive) return;
             await this.updateFirebase({ Mostrar_Publicidad: true });
             
-            // Programar Paso 4 (Final)
-            this.timer = setTimeout(() => this.step4_Final(), 8000);
+            // 🕒 Calcular tiempo dinámico según el tipo y duración
+            let waitTime = 8000;
+            if (this.currentAd) {
+                waitTime = this.currentAd.duracion || (this.currentAd.tipo === 'VIDEO' ? 20000 : 8000);
+            }
+            
+            console.log(`⏳ Ocultando publicidad en ${waitTime/1000}s...`);
+            this.timer = setTimeout(() => this.step4_Final(), waitTime);
         }, 600);
     }
 
@@ -278,10 +301,7 @@ export class SequenceManager {
             return;
         }
 
-        // 2. Iniciar timer
-        this.adRotationTimer = setInterval(() => {
-            this.rotateAdStep();
-        }, this.adRotationDuration);
+        // Nota: En la rotación, el timer se gestiona dentro de rotateAdStep dinámicamente
     }
 
     /**
@@ -294,7 +314,7 @@ export class SequenceManager {
         this.isAdRotationActive = false;
         
         if (this.adRotationTimer) {
-            clearInterval(this.adRotationTimer);
+            clearTimeout(this.adRotationTimer); // Cambiado a clearTimeout
             this.adRotationTimer = null;
         }
         
@@ -310,37 +330,43 @@ export class SequenceManager {
     rotateAdStep() {
         if (!this.isAdRotationActive) return;
 
-        // Usar la lógica existente para obtener siguiente URL
-        const url = this.getNextAd();
+        const ad = this.getNextAd();
         
-        if (url && this.app.modules.lowerThirds) {
+        if (ad && ad.url && this.app.modules.lowerThirds) {
             this.itemsShownCount++; // ✅ Incrementar contador de mostrados
 
             // Preload de la siguiente (para el próximo tick)
             this.preloadNextAdInLoop();
             
+            // Notificar tipo de anuncio a Firebase (importante para que lower-thirds use <video>)
+            this.updateFirebase({
+                urlImagenPublicidad: ad.url,
+                tipoPublicidad: ad.tipo || 'IMAGEN'
+            });
+            
             // Actualizar DOM
-            this.app.modules.lowerThirds.updatePublicidadContent({ url: url });
+            this.app.modules.lowerThirds.updatePublicidadContent({ url: ad.url });
             
             // Asegurar que esté visible
             this.app.modules.lowerThirds.showPublicidad();
             
-            console.log(`📺 Publicidad mostrada (${this.itemsShownCount}/${this.adPlaylist.length}): ${url}`);
+            // Definir cuánto tiempo se mostrará (dinámico)
+            const duration = ad.duracion || (ad.tipo === 'VIDEO' ? 20000 : this.adRotationDuration);
+            console.log(`📺 Publicidad mostrada (${this.itemsShownCount}/${this.adPlaylist.length}): ${ad.url} [${duration/1000}s]`);
 
             // ✅ DETECTAR FIN DE LISTA USANDO CONTADOR (Más seguro que el índice)
             if (this.itemsShownCount >= this.adPlaylist.length) {
                 console.log('🏁 Fin de lista de publicidad. Programando apagado...');
                 
-                // Detener el intervalo para no repetir
-                if (this.adRotationTimer) {
-                    clearInterval(this.adRotationTimer);
-                    this.adRotationTimer = null;
-                }
-                
                 // Programar el apagado después de que termine de mostrarse este último anuncio
-                setTimeout(() => {
+                this.adRotationTimer = setTimeout(() => {
                     this.finishAdSequence();
-                }, this.adRotationDuration);
+                }, duration);
+            } else {
+                // Programar el siguiente ciclo con el tiempo correspondiente a ESTE anuncio
+                this.adRotationTimer = setTimeout(() => {
+                    this.rotateAdStep();
+                }, duration);
             }
         }
     }
@@ -368,10 +394,10 @@ export class SequenceManager {
     preloadNextAdInLoop() {
         if (this.adPlaylist.length === 0) return;
         const nextIndex = (this.currentAdIndex + 1) % this.adPlaylist.length;
-        const nextUrl = this.adPlaylist[nextIndex];
-        if (nextUrl) {
+        const nextAd = this.adPlaylist[nextIndex];
+        if (nextAd && nextAd.tipo === 'IMAGEN') { // Solo precargar si es imagen para evitar consumo de red pesado en videos
             const img = new Image();
-            img.src = nextUrl;
+            img.src = nextAd.url;
         }
     }
 
@@ -379,24 +405,26 @@ export class SequenceManager {
      * Obtener siguiente publicidad de la playlist
      */
     getNextAd() {
-        if (this.adPlaylist.length === 0) return "";
+        if (this.adPlaylist.length === 0) return null;
         
         // ✅ Protección: Asegurar que el índice es válido si la lista cambió de tamaño
         if (this.currentAdIndex >= this.adPlaylist.length) {
             this.currentAdIndex = 0;
         }
 
-        const url = this.adPlaylist[this.currentAdIndex];
-        console.log(`🔄 getNextAd: Índice ${this.currentAdIndex} de ${this.adPlaylist.length} -> ${url}`);
+        const ad = this.adPlaylist[this.currentAdIndex];
+        console.log(`🔄 getNextAd: Índice ${this.currentAdIndex} de ${this.adPlaylist.length} -> ${ad.url}`);
+        
+        this.currentAd = ad; // Guardar referencia global al anuncio actual
         
         // Avanzar índice (rotación circular)
         this.currentAdIndex = (this.currentAdIndex + 1) % this.adPlaylist.length;
         
-        return url;
+        return ad;
     }
 
-    addAdToPlaylist(url) {
-        this.adPlaylist.push(url);
+    addAdToPlaylist(adObject) {
+        this.adPlaylist.push(adObject);
         console.log(`➕ Publicidad agregada. Total: ${this.adPlaylist.length}`);
     }
 

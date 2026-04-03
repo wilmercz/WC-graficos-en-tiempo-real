@@ -80,7 +80,7 @@ html, body {
   --ads-left: 123px;
   /* --ads-bottom: 20px; DESACTIVADO POSICION */
   /* --ads-bottom: 24px; DESACTIVADO POSICION */
-  --ads-bottom: 32px;
+  --ads-bottom: 35px;
   --ads-img-w: 100%; /* ✅ Cambiado para que la imagen ocupe el 100% del ancho de su contenedor. */
   --ads-img-h: auto; /* ✅ Cambiado para que la altura se ajuste automáticamente y mantenga la proporción. */
   --ads-radius: 0px;
