@@ -455,12 +455,13 @@ export class LogoManager {
 
         } 
         else {
-
             console.warn("⚠️ Logo no está en cache, intentando cargar:", targetLogo.name);
 
             const img = new Image();
+            let loadTimeout = null; // 🛡️ Variable para el timeout
 
             img.onload = () => {
+                if (loadTimeout) clearTimeout(loadTimeout); // Cancelar timeout si carga a tiempo
 
                 this.imageCache.set(targetLogo.url, {
                     status: "loaded",
@@ -468,16 +469,31 @@ export class LogoManager {
                 });
 
                 executeTransition();
-
             };
 
             img.onerror = () => {
+                if (loadTimeout) clearTimeout(loadTimeout); // Cancelar timeout si falla
 
                 this.imageCache.set(targetLogo.url, { status: "error" });
 
                 console.error("❌ Error cargando logo:", targetLogo.url);
-
+                
+                // 🛡️ Si estamos rotando, pasar al siguiente para no trabar el ciclo
+                if (this.isRotating) {
+                    this.scheduleNextRotation(100); // Pasar rápido al siguiente
+                }
             };
+
+            // 🛡️ PROTECCIÓN PARA REDES LENTAS: Timeout de 5 segundos
+            loadTimeout = setTimeout(() => {
+                console.warn(`⏳ Timeout: El logo ${targetLogo.name} tardó demasiado en cargar. Red inestable.`);
+                img.src = ''; // Cancelar la carga de la imagen
+                this.imageCache.set(targetLogo.url, { status: "error" });
+                // Forzar el pase al siguiente ciclo sin romper la rotación
+                if (this.isRotating) {
+                    this.scheduleNextRotation(100); // Pasar rápido al siguiente
+                }
+            }, 5000);
 
             img.src = targetLogo.url;
 

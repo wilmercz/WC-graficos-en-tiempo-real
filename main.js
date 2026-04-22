@@ -1779,12 +1779,27 @@ document.addEventListener('DOMContentLoaded', () => {
                     }, realDuration + 200);
                 };
 
+            // ✅ MANEJO DE ERROR SI LA RED FALLA
+            preloader.onerror = () => {
+                if (loadTimeout) clearTimeout(loadTimeout);
+                console.error('❌ Error (Enhanced) cargando imagen:', targetLogo.name);
+                if (this.isRotating) this.scheduleNextRotation(100); // Forzar pase rápido
+            };
+
+            // 🛡️ PROTECCIÓN PARA REDES LENTAS: Timeout de 5 segundos
+            loadTimeout = setTimeout(() => {
+                console.warn(`⏳ Timeout (Enhanced): El logo ${targetLogo.name} tardó demasiado.`);
+                preloader.src = ''; // Cancelar descarga colgada
+                if (this.isRotating) this.scheduleNextRotation(100); // Forzar pase rápido sin romper el ciclo
+            }, 5000);
+
+            preloader.src = targetLogo.url;
+
                 if (preloader.complete) {
                     runAnimation();
                 } else {
                     console.log('⏳ (Enhanced) Esperando imagen:', targetLogo.name);
                     preloader.onload = runAnimation;
-                    // Si falla, no hacemos nada para no dejar el hueco vacío
                 }
             };
             
