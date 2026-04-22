@@ -1757,13 +1757,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!this.element) return;
 
                 // 🛡️ PROTECCIÓN RED LENTA (ENHANCED)
-                // No iniciar animación hasta que la imagen esté en memoria
                 const preloader = new Image();
-                preloader.src = targetLogo.url;
+                let loadTimeout = null; // ✅ AHORA SÍ: Declaración correcta de la variable
 
                 const runAnimation = () => {
+                    if (loadTimeout) clearTimeout(loadTimeout); // ✅ Apagar el timeout si cargó bien
                     const realDuration = 600;
-                    
                     // Aplicar animación de salida
                     this.animateOutEnhanced();
 
@@ -1779,41 +1778,37 @@ document.addEventListener('DOMContentLoaded', () => {
                     }, realDuration + 200);
                 };
 
-            // ✅ MANEJO DE ERROR SI LA RED FALLA
-            preloader.onerror = () => {
-                if (loadTimeout) clearTimeout(loadTimeout);
-                console.error('❌ Error (Enhanced) cargando imagen:', targetLogo.name);
-                if (this.isRotating) this.scheduleNextRotation(100); // Forzar pase rápido
-            };
+                // ✅ MANEJO DE ERROR SI LA RED FALLA
+                preloader.onerror = () => {
+                    if (loadTimeout) clearTimeout(loadTimeout);
+                    console.error('❌ Error (Enhanced) cargando imagen:', targetLogo.name);
+                    if (this.isRotating) this.scheduleNextRotation(100); // Forzar pase rápido
+                };
 
-            // 🛡️ PROTECCIÓN PARA REDES LENTAS: Timeout de 5 segundos
-            loadTimeout = setTimeout(() => {
-                console.warn(`⏳ Timeout (Enhanced): El logo ${targetLogo.name} tardó demasiado.`);
-                preloader.src = ''; // Cancelar descarga colgada
-                if (this.isRotating) this.scheduleNextRotation(100); // Forzar pase rápido sin romper el ciclo
-            }, 5000);
+                // 🛡️ PROTECCIÓN PARA REDES LENTAS: Timeout de 5 segundos
+                loadTimeout = setTimeout(() => {
+                    console.warn(`⏳ Timeout (Enhanced): El logo ${targetLogo.name} tardó demasiado.`);
+                    preloader.src = ''; // Cancelar descarga colgada
+                    if (this.isRotating) this.scheduleNextRotation(100); // Forzar pase rápido sin romper el ciclo
+                }, 5000);
 
-            preloader.src = targetLogo.url;
+                preloader.onload = runAnimation; // ✅ Atar el evento ANTES de asignar el SRC
+                preloader.src = targetLogo.url;
 
                 if (preloader.complete) {
-                    runAnimation();
+                    if (preloader.naturalWidth > 0) runAnimation();
                 } else {
                     console.log('⏳ (Enhanced) Esperando imagen:', targetLogo.name);
-                    preloader.onload = runAnimation;
                 }
             };
-            
-            console.log('✅ Animaciones Enhanced activadas permanentemente');
         }
-        
-    }, 3000); // Esperar 3 segundos para que todo esté cargado
+    }, 1000); // Dar un poco de tiempo para que carguen los demás módulos
 });
 
-// ===== FUNCIONES GLOBALES PARA CAMBIAR ANIMACIONES =====
-window.changeLogoAnimation = function(type) {
+// Función global para probar las animaciones
+window.setLogoAnimation = function(type) {
     const configs = {
-        'flip': 'LOGO_FLIP_3D',      // Corporativo elegante
-        'zoom': 'LOGO_ZOOM_ROTATE',  // Dinámico deportivo  
+        'flip': 'LOGO_FLIP_3D',      // C
         'cube': 'LOGO_CUBE',         // Dramático impactante
         'spin': 'LOGO_SLIDE_SPIN',   // Energético divertido
         'bounce': 'LOGO_BOUNCE',     // Juguetón rebote
