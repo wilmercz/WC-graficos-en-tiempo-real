@@ -295,6 +295,12 @@ class StreamGraphicsApp {
         const processedData = this.modules.dataProcessor.process(rawData);
         if (!processedData) return;
         
+        // ✅ CONTROL DIRECTO DE ROTACIÓN DE LOGOS DESDE FIREBASE
+        if (rawData.Rotacion_Logos !== undefined) {
+            if (!processedData.logos) processedData.logos = {};
+            processedData.logos.habilitado = rawData.Rotacion_Logos;
+        }
+        
         // ✅ LÓGICA DE SECUENCIA DE PUBLICIDAD (ROTACIÓN)
         // Si está activa en Firebase, iniciamos el manager y forzamos visibilidad
         if (processedData.visibility.secuenciaPublicidad) {
@@ -328,6 +334,7 @@ class StreamGraphicsApp {
 
             // ✅ Campos originales para compatibilidad total
             Mostrar_Logo: rawData.Mostrar_Logo,
+            Rotacion_Logos: rawData.Rotacion_Logos,
             Mostrar_Invitado: rawData.Mostrar_Invitado,
             Mostrar_Tema: rawData.Mostrar_Tema,
             Mostrar_Publicidad: rawData.Mostrar_Publicidad,

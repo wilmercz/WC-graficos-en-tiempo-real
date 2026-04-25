@@ -755,6 +755,12 @@ export class LogoManager {
         
         if (!enabled && this.isRotating) {
             this.stopRotation();
+            
+            // 🛡️ REGRESAR AL LOGO PRINCIPAL: Si se apaga la rotación, forzamos el logo 0
+            if (this.config.currentIndex !== 0 && this.isVisible) {
+                console.log('🔄 Rotación apagada - Regresando inmediatamente al Logo Principal');
+                this.rotateTo(0);
+            }
         }
         
         // 🛡️ AUTO-START: Si se habilita, el logo está visible y hay aliados -> Arrancar
