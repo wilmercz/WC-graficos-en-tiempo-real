@@ -393,6 +393,9 @@ applySalidaAnimation(element, animationType) {
 applyDynamicAnimationFromOldSystem(elemento, tipoElemento, mostrar, config = {}) {
     console.log(`🔥 USANDO SISTEMA VIEJO: ${tipoElemento} - ${mostrar ? 'MOSTRAR' : 'OCULTAR'}`);
     
+    // 🛡️ ESCUDO ANTI-COLISIÓN (Sistema Viejo): Registrar estado actual
+    elemento.dataset.oldAnimState = mostrar ? 'showing' : 'hiding';
+
     // Obtener configuración (prioridad: parámetro > Firebase > defecto)
     const animConfig = config.animaciones || window.animacionConfig?.[tipoElemento] || this.getAnimationConfig(tipoElemento);
     
@@ -466,6 +469,13 @@ applyDynamicAnimationFromOldSystem(elemento, tipoElemento, mostrar, config = {})
         const finish = () => {
             if (done) return;
             done = true;
+            
+            // 🛡️ VERIFICAR ESCUDO ANTES DE APAGAR
+            if (elemento.dataset.oldAnimState === 'showing') {
+                console.log(`🛡️ [ESCUDO ACTIVADO - OLD] Evitando apagar el elemento [${tipoElemento}] porque la rotación ordenó mostrarlo de nuevo.`);
+                return; // 🛑 Abortar el apagado
+            }
+
             elemento.style.display = 'none';
             elemento.style.visibility = 'hidden'; // ✅ FIX: Forzar ocultamiento visual
             elemento.removeEventListener('transitionend', finish);
@@ -759,6 +769,26 @@ aplicarAnimacionPorTipoCorregido(elemento, tipoAnimacion, mostrar, duracion, del
                 }, 16);
             }
             break;    
+            
+        case 'ZOOM_IN':
+        case 'ZOOM_OUT':
+            console.log(`🎭 ZOOM CORREGIDA - mostrar: ${mostrar}`);
+            elemento.style.transition = `transform ${duracion}ms ${easing} ${delay}ms, opacity ${duracion}ms ${easing} ${delay}ms`;
+            
+            if (mostrar) {
+                elemento.style.transform = 'scale(0)';
+                elemento.style.opacity = '0';
+                elemento.offsetHeight; // Reflow
+                requestAnimationFrame(() => {
+                    elemento.style.transform = 'scale(1)';
+                    elemento.style.opacity = '1';
+                });
+            } else {
+                elemento.style.transform = 'scale(0)';
+                elemento.style.opacity = '0';
+            }
+            break;
+            
         default:
             console.warn(`⚠️ Tipo de animación no reconocido: ${tipoAnimacion}`);
             elemento.style.opacity = mostrar ? '1' : '0';
@@ -1281,6 +1311,9 @@ AnimationEngine.prototype.applyEnhancedLogoAnimation = function(element, animati
     
     console.log(`🎨 Aplicando animación mejorada: ${animationType} (${show ? 'IN' : 'OUT'})`);
     
+    // 🛡️ ESCUDO ANTI-COLISIÓN: Registramos qué estamos haciendo actualmente con este elemento
+    element.dataset.enhancedState = show ? 'showing' : 'hiding';
+    
     const animConfig = this.getAnimationConfig('logo', config);
     const duration = animConfig.duracion || 600;
     const delay = animConfig.delay || 0;
@@ -1317,14 +1350,23 @@ AnimationEngine.prototype.applyEnhancedLogoAnimation = function(element, animati
     // Cleanup después de completar
     if (animation.cleanup) {
         setTimeout(() => {
-            animation.cleanup(element);
+            // 🛡️ Limpiar solo si la animación no ha sido interrumpida por otra
+            if (element.dataset.enhancedState === (show ? 'showing' : 'hiding')) {
+                animation.cleanup(element);
+            }
         }, duration + delay + 100);
     }
     
     // Para animaciones de salida, ocultar elemento al final
     if (!show) {
         setTimeout(() => {
-            element.style.display = 'none';
+            // 🛡️ Evitar apagar el logo si la animación de entrada ya comenzó
+            if (element.dataset.enhancedState === 'hiding') {
+                element.style.display = 'none';
+                console.log(`✅ [SIN COLISIÓN] Apagado normal completado para logo.`);
+            } else {
+                console.log('🛡️ [ESCUDO ACTIVADO - ENHANCED] Evitando apagar el logo porque la nueva rotación (IN) ya comenzó.');
+            }
         }, duration + delay + 150);
     } else {
         element.style.display = 'block';

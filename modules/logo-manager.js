@@ -135,48 +135,60 @@ export class LogoManager {
      * 🚀 Precargar todos los logos en memoria
      * Esto evita parpadeos en conexiones lentas
      */
-   preloadAllLogos() {
+    preloadAllLogos() {
+        const logosToLoad = [];
+        if (this.config.mainLogo.url) logosToLoad.push(this.config.mainLogo.url);
+        this.config.aliados.forEach(l => logosToLoad.push(l.url));
 
-    const logosToLoad = [];
+        const uniqueLogos = [...new Set(logosToLoad)];
+        console.log(`🧠 Iniciando precarga masiva de ${uniqueLogos.length} logos (Protección de Caché)...`);
 
-    if (this.config.mainLogo.url)
-        logosToLoad.push(this.config.mainLogo.url);
+        let loadedCount = 0;
+        let failedCount = 0;
+        let alreadyCached = 0;
+        const totalToProcess = uniqueLogos.length;
 
-    this.config.aliados.forEach(l => logosToLoad.push(l.url));
-
-    console.log(`🧠 Precargando ${logosToLoad.length} logos`);
-
-    logosToLoad.forEach(url => {
-
-        if (!url || this.imageCache.has(url)) return;
-
-        const img = new Image();
-
-        img.onload = () => {
-
-            console.log("✅ Logo cargado:", url);
-
-            this.imageCache.set(url, {
-                status: "loaded",
-                img: img
-            });
-
+        const checkCompletion = () => {
+            const processed = loadedCount + failedCount + alreadyCached;
+            if (processed === totalToProcess) {
+                console.log(`📊 REPORTE DE PRECARGA LOGOS: ${loadedCount} nuevos descargados, ${alreadyCached} ya en caché, ${failedCount} fallidos. Total evaluados: ${totalToProcess}`);
+            }
         };
 
-        img.onerror = () => {
+        if (totalToProcess === 0) {
+            console.log("ℹ️ No hay logos configurados para precargar.");
+            return;
+        }
 
-            console.warn("⚠️ Logo falló:", url);
+        uniqueLogos.forEach((url, index) => {
+            if (!url) {
+                alreadyCached++;
+                checkCompletion();
+                return;
+            }
+            const cached = this.imageCache.get(url);
+            if (cached && cached.status === "loaded") {
+                alreadyCached++;
+                checkCompletion();
+                return;
+            }
 
-            this.imageCache.set(url, {
-                status: "error"
-            });
-
-        };
-
-        img.src = url;
-
-    });
-
+            console.log(`⏳ Intentando descargar logo ${index + 1}/${totalToProcess}...`);
+            const img = new Image();
+            img.onload = () => {
+                this.imageCache.set(url, { status: "loaded", img: img });
+                console.log(`✅ Logo precargado en memoria exitosamente: ${url}`);
+                loadedCount++;
+                checkCompletion();
+            };
+            img.onerror = () => {
+                console.warn("⚠️ Logo falló en precarga, se intentará de nuevo al rotar:", url);
+                this.imageCache.delete(url); // Lo borramos para reintentar luego
+                failedCount++;
+                checkCompletion();
+            };
+            img.src = url;
+        });
     }
 
     /**
@@ -475,6 +487,8 @@ export class LogoManager {
                 if (loadTimeout) clearTimeout(loadTimeout); // Cancelar timeout si falla
 
                 this.imageCache.set(targetLogo.url, { status: "error" });
+                // No lo guardamos como error permanente si se corta el internet momentáneamente
+                this.imageCache.delete(targetLogo.url);
 
                 console.error("❌ Error cargando logo:", targetLogo.url);
                 
@@ -488,7 +502,7 @@ export class LogoManager {
             loadTimeout = setTimeout(() => {
                 console.warn(`⏳ Timeout: El logo ${targetLogo.name} tardó demasiado en cargar. Red inestable.`);
                 img.src = ''; // Cancelar la carga de la imagen
-                this.imageCache.set(targetLogo.url, { status: "error" });
+                this.imageCache.delete(targetLogo.url);
                 // Forzar el pase al siguiente ciclo sin romper la rotación
                 if (this.isRotating) {
                     this.scheduleNextRotation(100); // Pasar rápido al siguiente
@@ -899,76 +913,6 @@ console.log('🖼️ Logo Manager module loaded');
 
 
 // 🎨 EXTENSIONES MEJORADAS PARA LOGO MANAGER
-// Agregar DESPUÉS de: console.log('🖼️ Logo Manager module loaded');
-
-// 🔄 Extensión del LogoManager para usar animaciones mejoradas
-LogoManager.prototype.animateInEnhanced = function() {
-    if (!this.element) return;
-    
-    this.element.style.display = 'block';
-    
-    // Obtener tipo de animación desde configuración
-    const animationType = window.animacionConfig?.logo?.entrada || 'LOGO_FLIP_3D';
-    
-    // Usar animación mejorada si está disponible
-    if (window.StreamGraphicsApp?.modules?.animations?.applyEnhancedLogoAnimation) {
-        window.StreamGraphicsApp.modules.animations.applyEnhancedLogoAnimation(
-            this.element, 
-            animationType, 
-            true
-        );
-    } else {
-        // Fallback a animación original
-        this.animateIn();
-    }
-};
-
-LogoManager.prototype.animateOutEnhanced = function() {
-    if (!this.element) return;
-    
-    // Obtener tipo de animación desde configuración
-    const animationType = window.animacionConfig?.logo?.salida || 'LOGO_FLIP_3D';
-    
-    // Usar animación mejorada si está disponible
-    if (window.StreamGraphicsApp?.modules?.animations?.applyEnhancedLogoAnimation) {
-        window.StreamGraphicsApp.modules.animations.applyEnhancedLogoAnimation(
-            this.element, 
-            animationType, 
-            false
-        );
-    } else {
-        // Fallback a animación original
-        this.animateOut();
-    }
-};
-
-// 🎯 Modificar el método changeLogo para usar animaciones mejoradas
-LogoManager.prototype.changeLogoEnhanced = function(targetLogo, nextDuration = null) {
-    if (!this.element) return;
-
-    const realDuration = window.animacionConfig?.logo?.duracion || 700;
-    const realDelay = window.animacionConfig?.logo?.delay || 0;
-
-    // Aplicar animación de salida mejorada
-    this.animateOutEnhanced();
-
-    // Cambiar logo después de la animación COMPLETA
-    setTimeout(() => {
-        this.element.src = targetLogo.url;
-        this.element.alt = targetLogo.alt;
-
-        // Aplicar animación de entrada mejorada después de un frame
-        requestAnimationFrame(() => {
-            this.animateInEnhanced();
-        });
-    }, realDuration + realDelay + 100);
-
-    console.log(`🎨 Logo mejorado cambiando a: ${targetLogo.name}`);
-};
-
-console.log('🎨 Logo Manager Enhanced Extensions loaded');
-
-// 🎨 EXTENSIONES MEJORADAS PARA LOGO MANAGER
 LogoManager.prototype.animateInEnhanced = function() {
     if (!this.element) return;
     
@@ -1012,24 +956,53 @@ LogoManager.prototype.animateOutEnhanced = function() {
 LogoManager.prototype.changeLogoEnhanced = function(targetLogo, nextDuration = null) {
     if (!this.element) return;
 
-    const realDuration = window.animacionConfig?.logo?.duracion || 700;
-    const realDelay = window.animacionConfig?.logo?.delay || 0;
+    const executeTransition = () => {
+        const realDuration = window.animacionConfig?.logo?.duracion || 700;
+        const realDelay = window.animacionConfig?.logo?.delay || 0;
 
-    // Aplicar animación de salida mejorada
-    this.animateOutEnhanced();
+        this.animateOutEnhanced();
+        setTimeout(() => {
+            this.element.src = targetLogo.url;
+            this.element.alt = targetLogo.alt;
+            requestAnimationFrame(() => {
+                this.animateInEnhanced();
+            });
+        }, realDuration + realDelay + 50);
+    };
 
-    // Cambiar logo después de la animación COMPLETA
-    setTimeout(() => {
-        this.element.src = targetLogo.url;
-        this.element.alt = targetLogo.alt;
+    // 🧠 VERIFICACIÓN DE CACHÉ PRIMERO
+    const cached = this.imageCache.get(targetLogo.url);
+    
+    if (cached && cached.status === "loaded") {
+        console.log(`⚡ Logo en caché, mostrando instantáneamente: ${targetLogo.name}`);
+        executeTransition();
+    } else {
+        console.log(`⏳ Logo NO en caché, intentando descargar: ${targetLogo.name}`);
+        const preloader = new Image();
+        let loadTimeout = null;
 
-        // Aplicar animación de entrada mejorada después de un frame
-        requestAnimationFrame(() => {
-            this.animateInEnhanced();
-        });
-    }, realDuration + realDelay + 100);
+        preloader.onload = () => {
+            if (loadTimeout) clearTimeout(loadTimeout);
+            this.imageCache.set(targetLogo.url, { status: "loaded", img: preloader });
+            executeTransition();
+        };
 
-    console.log(`🎨 Logo mejorado cambiando a: ${targetLogo.name}`);
+        preloader.onerror = () => {
+            if (loadTimeout) clearTimeout(loadTimeout);
+            console.error(`❌ Error descargando: ${targetLogo.name}`);
+            this.imageCache.delete(targetLogo.url); // Eliminar para reintentar después
+            if (this.isRotating) this.scheduleNextRotation(100);
+        };
+
+        loadTimeout = setTimeout(() => {
+            console.warn(`⏳ Timeout descargando logo: ${targetLogo.name}. Saltando...`);
+            preloader.src = '';
+            this.imageCache.delete(targetLogo.url);
+            if (this.isRotating) this.scheduleNextRotation(100);
+        }, 5000);
+
+        preloader.src = targetLogo.url;
+    }
 };
 
 console.log('🎨 Logo Manager Enhanced Extensions loaded');

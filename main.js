@@ -1038,11 +1038,8 @@ class StreamGraphicsApp {
                     this.modules.logoManager.config.aliados = [];
                     logos.lista.forEach(logo => this.modules.logoManager.addAliadoLogo(logo));
 
-                    // ⭐ Precarga simple solo si cambió
-                    this.modules.logoManager.config.aliados.forEach(l => {
-                        const img = new Image();
-                        img.src = l.url;
-                    });
+                    // ⭐ Precarga masiva y segura usando el manager
+                    this.modules.logoManager.preloadAllLogos();
                 } else {
                     console.log('📌 Lista de logos sin cambios - preservando');
                 }
@@ -1756,56 +1753,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     this.changeLogoEnhanced(targetLogo, nextDuration);
                 } else {
                     this._originalChangeLogo(targetLogo, nextDuration);
-                }
-            };
-
-            // 4. TIMING MEJORADO PARA CHANGELOGO
-            logoManager.changeLogoEnhanced = function(targetLogo, nextDuration = null) {
-                if (!this.element) return;
-
-                // 🛡️ PROTECCIÓN RED LENTA (ENHANCED)
-                const preloader = new Image();
-                let loadTimeout = null; // ✅ AHORA SÍ: Declaración correcta de la variable
-
-                const runAnimation = () => {
-                    if (loadTimeout) clearTimeout(loadTimeout); // ✅ Apagar el timeout si cargó bien
-                    const realDuration = 600;
-                    // Aplicar animación de salida
-                    this.animateOutEnhanced();
-
-                    // Timing optimizado
-                    setTimeout(() => {
-                        this.element.src = targetLogo.url;
-                        this.element.alt = targetLogo.alt;
-
-                        // Entrada después de cambiar
-                        setTimeout(() => {
-                            this.animateInEnhanced();
-                        }, 100);
-                    }, realDuration + 200);
-                };
-
-                // ✅ MANEJO DE ERROR SI LA RED FALLA
-                preloader.onerror = () => {
-                    if (loadTimeout) clearTimeout(loadTimeout);
-                    console.error('❌ Error (Enhanced) cargando imagen:', targetLogo.name);
-                    if (this.isRotating) this.scheduleNextRotation(100); // Forzar pase rápido
-                };
-
-                // 🛡️ PROTECCIÓN PARA REDES LENTAS: Timeout de 5 segundos
-                loadTimeout = setTimeout(() => {
-                    console.warn(`⏳ Timeout (Enhanced): El logo ${targetLogo.name} tardó demasiado.`);
-                    preloader.src = ''; // Cancelar descarga colgada
-                    if (this.isRotating) this.scheduleNextRotation(100); // Forzar pase rápido sin romper el ciclo
-                }, 5000);
-
-                preloader.onload = runAnimation; // ✅ Atar el evento ANTES de asignar el SRC
-                preloader.src = targetLogo.url;
-
-                if (preloader.complete) {
-                    if (preloader.naturalWidth > 0) runAnimation();
-                } else {
-                    console.log('⏳ (Enhanced) Esperando imagen:', targetLogo.name);
                 }
             };
         }
