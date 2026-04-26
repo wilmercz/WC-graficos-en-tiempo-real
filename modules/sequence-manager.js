@@ -395,9 +395,18 @@ export class SequenceManager {
         if (this.adPlaylist.length === 0) return;
         const nextIndex = (this.currentAdIndex + 1) % this.adPlaylist.length;
         const nextAd = this.adPlaylist[nextIndex];
-        if (nextAd && nextAd.tipo === 'IMAGEN') { // Solo precargar si es imagen para evitar consumo de red pesado en videos
-            const img = new Image();
-            img.src = nextAd.url;
+        
+        if (nextAd) {
+            if (nextAd.tipo === 'IMAGEN') {
+                const img = new Image();
+                img.src = nextAd.url;
+            } else if (nextAd.tipo === 'VIDEO') {
+                // 🚀 PRECARGA DE VIDEO EN SEGUNDO PLANO (Beneficia redes lentas)
+                console.log(`⏳ Precargando video en segundo plano para fluidez: ${nextAd.url}`);
+                const vidPreloader = document.createElement('video');
+                vidPreloader.preload = 'auto'; // Forzar descarga en caché
+                vidPreloader.src = nextAd.url;
+            }
         }
     }
 

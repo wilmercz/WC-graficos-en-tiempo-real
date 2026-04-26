@@ -741,6 +741,11 @@ class StreamGraphicsApp {
                 // Solo cargar si la URL cambió para no reiniciar el video constantemente
                 if (videoElement.src !== images.publicidadUrl) {
                     console.log('⏳ Cargando video de publicidad...');
+                    
+                    // 🛡️ FIX: Ocultar el video inmediatamente para evitar mostrar el "reproductor" negro cargando
+                    videoElement.style.opacity = '0';
+                    videoElement.controls = false; // Asegurar que no haya controles de UI
+                    
                     videoElement.src = images.publicidadUrl;
                     videoElement.preload = 'auto'; // 🚀 FORZAR PRECARGA
                     videoElement.load(); // Cargar nueva fuente
@@ -750,17 +755,26 @@ class StreamGraphicsApp {
                     videoElement.oncanplaythrough = () => {
                         if (imgElement) imgElement.style.display = 'none';
                         videoElement.style.display = 'block';
+                        
+                        // 🛡️ Mostrar suavemente solo cuando ya está 100% listo y descargado
+                        videoElement.style.transition = 'opacity 0.3s ease';
+                        videoElement.style.opacity = '1';
+                        
                         // La reproducción se gestiona en lower-thirds.js o aquí si es necesario, 
                         // pero aseguramos que ya está listo para "play through" sin buffering.
                         console.log('✅ Video publicidad descargado y listo para reproducir fluido');
                     };
                     // Fallback por si canplaythrough tarda mucho (red muy lenta)
-                    videoElement.onerror = () => console.error('❌ Error cargando video');
+                    videoElement.onerror = () => {
+                        videoElement.style.display = 'none';
+                        console.error('❌ Error cargando video');
+                    };
                 } else {
                     // Si es el mismo video, solo asegurar visibilidad
                     if (imgElement) imgElement.style.display = 'none';
                     if (videoElement.style.display !== 'block') {
                         videoElement.style.display = 'block';
+                        videoElement.style.opacity = '1';
                         videoElement.play().catch(() => {});
                     }
                 }

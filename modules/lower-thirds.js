@@ -227,27 +227,44 @@ export class LowerThirds {
             console.log('▶️ Gestionando reproducción de VIDEO publicitario.');
             // 1. Asegurar que NO haya loop
             element.video.loop = false;
+            element.video.controls = false; // 🛡️ Ocultar controles nativos del navegador
             
             // 2. Limpiar listeners anteriores para evitar duplicados
             element.video.onended = null;
 
-            element.video.currentTime = 0;
-            element.video.play().catch(err => console.warn('⚠️ Error al reproducir video:', err));
+            // 🛡️ FIX: Solo darle Play cuando el video esté listo para reproducirse
+            const playWhenReady = () => {
+                element.video.currentTime = 0;
+                const playPromise = element.video.play();
+                if (playPromise !== undefined) {
+                    playPromise.catch(err => console.warn('⚠️ Error al reproducir video (quizás internet lento):', err));
+                }
+            };
+
+            // Verificar si ya tiene datos suficientes para reproducir
+            if (element.video.readyState >= 3) { // HAVE_FUTURE_DATA (Ya tiene suficiente buffer)
+                playWhenReady();
+            } else {
+                console.log('⏳ El video publicitario aún se está descargando, esperando confirmación de red...');
+                // Hook temporal que se dispara en cuanto descargue lo suficiente
+                element.video.oncanplay = () => {
+                    playWhenReady();
+                    element.video.oncanplay = null; // Limpiar para no repetir
+                };
+            }
 
             // ⭐ Detectar duración del video para ajustar tiempo de visibilidad
-            if (element.video.style.display !== 'none' && element.video.src) {
-                // Usar evento 'ended' en lugar de timers fijos.
-                element.video.onended = () => {
-                    console.log('🏁 Video publicidad terminó. Esperando 5s de seguridad...');
-                    
-                    setTimeout(() => {
-                        console.log('👋 Ocultando publicidad tras video + 5s');
-                        this.autoHide('publicidad');
-                    }, 5000); // 5 segundos de espera tras finalizar
-                };
+            // Usar evento 'ended' en lugar de timers fijos.
+            element.video.onended = () => {
+                console.log('🏁 Video publicidad terminó. Esperando 5s de seguridad...');
+                
+                setTimeout(() => {
+                    console.log('👋 Ocultando publicidad tras video + 5s');
+                    this.autoHide('publicidad');
+                }, 5000); // 5 segundos de espera tras finalizar
+            };
 
-                console.log('🎥 Video configurado: Loop OFF, AutoHide al finalizar + 5s');
-            }
+            console.log('🎥 Video configurado: Loop OFF, Esperando red, AutoHide al finalizar + 5s');
         } else {
             console.log('🖼️ Gestionando publicidad ESTÁTICA (imagen). No se intenta reproducir video.');
         }
