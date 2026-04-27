@@ -824,6 +824,11 @@ video:not([src]), video[src=""], video[src="null"] {
     text-transform: uppercase; 
 }
 
+/* Cambiar el color del "ojo" (círculo interior) de los pines amarillos de Mapbox */
+.mapboxgl-marker svg circle {
+    fill: rgba(46, 91, 186, 0.85) !important;
+}
+
 /* Marcadores 3D Flotantes */
 .marker-tv {
     background: rgba(46, 91, 186, 0.85); color: #ffffff; padding: 6px 12px; font-weight: bold;
