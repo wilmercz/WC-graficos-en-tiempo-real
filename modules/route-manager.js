@@ -63,8 +63,16 @@ export class RouteManager {
         if (this.flightAnimationId) cancelAnimationFrame(this.flightAnimationId);
         this.isFlying = false;
 
-        // 1. Convertir string "Lon, Lat" de Android a Array [Lon, Lat]
-        const parseCoords = (str) => str.split(',').map(n => parseFloat(n.trim()));
+        // 1. Convertir string a Array [Lon, Lat] con Auto-Corrección Inteligente
+        const parseCoords = (str) => {
+            let c = str.split(',').map(n => parseFloat(n.trim()));
+            // Si el primer número parece Latitud (pequeño) y el segundo Longitud (-70s) de Google Maps:
+            if (Math.abs(c[0]) < 20 && Math.abs(c[1]) > 50) {
+                console.log(`🔄 Auto-corrigiendo coordenada invertida: [${c[1]}, ${c[0]}]`);
+                return [c[1], c[0]]; // Forzar siempre el orden [Longitud, Latitud]
+            }
+            return c;
+        };
         const coordsA = parseCoords(data.origenCoords);
         const coordsC = parseCoords(data.destinoCoords);
 
@@ -225,6 +233,12 @@ export class RouteManager {
         let anguloObjetivoFijo = null;
         const coordsC = this.rutaCoordenadas[this.rutaCoordenadas.length - 1];
 
+        // ✅ Variables para la dirección inteligente de la órbita (Atajo más corto)
+        let orbitEnterDir = 1;
+        let orbitExitDir = 1;
+        let enterCalculated = false;
+        let exitCalculated = false;
+
         const animarFrame = () => {
             if (!this.isFlying) return;
 
@@ -254,7 +268,8 @@ export class RouteManager {
             this.map.getSource('linea-ruta').setData({ 'type': 'Feature', 'properties': {}, 'geometry': { 'type': 'LineString', 'coordinates': lineaCreciente } });
 
             // ESTABILIZACIÓN CINEMÁTICA (Heading Lock)
-            const puntosAdelante = Math.min(indexPuntoActual + 150, this.rutaCoordenadas.length - 1);
+            // 1. Mirar más adelante para ignorar curvas pequeñas (antes 150)
+            const puntosAdelante = Math.min(indexPuntoActual + 250, this.rutaCoordenadas.length - 1);
             let anguloRutaFutura = this.map.getBearing();
             if (indexPuntoActual < puntosAdelante) {
                 anguloRutaFutura = turf.bearing(turf.point(puntoActual), turf.point(this.rutaCoordenadas[puntosAdelante]));
@@ -266,11 +281,17 @@ export class RouteManager {
             } else {
                 let desvio = anguloRutaFutura - anguloObjetivoFijo;
                 desvio = ((desvio + 540) % 360) - 180; 
-                if (Math.abs(desvio) > 15) anguloObjetivoFijo = anguloRutaFutura;
+                
+                // 2. Aumentar umbral para iniciar un giro (antes 15)
+                // Solo si la desviación es mayor a 25 grados, consideramos un nuevo ángulo objetivo.
+                if (Math.abs(desvio) > 25) {
+                    anguloObjetivoFijo = anguloRutaFutura;
+                }
                 
                 let diff = anguloObjetivoFijo - ultimoAngulo;
                 diff = ((diff + 540) % 360) - 180; 
-                ultimoAngulo += diff * 0.02;
+                // 3. Suavizar el giro de forma más controlada (antes 0.02)
+                ultimoAngulo += diff * 0.015;
             }
 
             // COREOGRAFÍA RELIVE (Órbita entre 20% y 70%)
@@ -279,21 +300,44 @@ export class RouteManager {
 
             if (progreso > 0.20 && progreso < 0.70) {
                 if (progreso < 0.35) {
+                    if (!enterCalculated) {
+                        // Mirar adelante para decidir por qué lado entrar a la órbita
+                        let pAdelante = Math.min(indexPuntoActual + 200, this.rutaCoordenadas.length - 1);
+                        let angFuturo = turf.bearing(turf.point(puntoActual), turf.point(this.rutaCoordenadas[pAdelante]));
+                        let diffCurva = ((angFuturo - ultimoAngulo + 540) % 360) - 180;
+                        orbitEnterDir = diffCurva < 0 ? -1 : 1; // Orbitar hacia el lado de la curva
+                        enterCalculated = true;
+                    }
                     let t = (progreso - 0.20) / 0.15;
                     let smoothT = -(Math.cos(Math.PI * t) - 1) / 2;
-                    offsetAngulo = smoothT * 180; offsetZoom = smoothT * 1.8; offsetPitch = -(smoothT * 20);
+                    offsetAngulo = orbitEnterDir * smoothT * 180; 
+                    offsetZoom = smoothT * 1.8; 
+                    offsetPitch = -(smoothT * 20);
                 } else if (progreso >= 0.35 && progreso < 0.50) {
-                    offsetAngulo = 180; offsetZoom = 1.8; offsetPitch = -20;
+                    offsetAngulo = orbitEnterDir * 180; 
+                    offsetZoom = 1.8; 
+                    offsetPitch = -20;
                 } else if (progreso >= 0.50 && progreso < 0.65) {
+                    if (!exitCalculated) {
+                        // Buscar el atajo más corto al regresar de la órbita
+                        let pAdelante = Math.min(indexPuntoActual + 200, this.rutaCoordenadas.length - 1);
+                        let angFuturo = turf.bearing(turf.point(puntoActual), turf.point(this.rutaCoordenadas[pAdelante]));
+                        let diffCurva = ((angFuturo - ultimoAngulo + 540) % 360) - 180;
+                        orbitExitDir = diffCurva < 0 ? -1 : 1; 
+                        exitCalculated = true;
+                    }
                     let t = (progreso - 0.50) / 0.15;
                     let smoothT = -(Math.cos(Math.PI * t) - 1) / 2;
-                    offsetAngulo = 180 + (smoothT * 180); offsetZoom = 1.8 - (smoothT * 1.8); offsetPitch = -20 + (smoothT * 20);
+                    offsetAngulo = (orbitEnterDir * 180) + (orbitExitDir * smoothT * 180); 
+                    offsetZoom = 1.8 - (smoothT * 1.8); 
+                    offsetPitch = -20 + (smoothT * 20);
                 }
             }
 
             this.map.jumpTo({ center: puntoActual, pitch: 68 + offsetPitch, bearing: ultimoAngulo + offsetAngulo, zoom: 12.8 - offsetZoom });
 
-            indexPuntoActual += 3;
+            // 4. Aumentar el salto de puntos para un vuelo más rápido y fluido (antes 3)
+            indexPuntoActual += 4;
             this.flightAnimationId = requestAnimationFrame(animarFrame);
         };
 
