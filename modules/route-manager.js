@@ -108,6 +108,12 @@ export class RouteManager {
                 pitch: 65,
                 bearing: 0
             });
+            
+            // 🧭 AGREGAR BRÚJULA (NORTE) PARA EL TELEVIDENTE
+            this.map.addControl(new mapboxgl.NavigationControl({
+                showZoom: false, // Ocultamos botones de + y -
+                visualizePitch: true // Que la brújula se incline en 3D
+            }), 'top-right');
 
             this.map.on('load', () => {
                 console.log('🗺️ [PASO 3] Mapa satelital base descargado con éxito.');
@@ -204,8 +210,9 @@ export class RouteManager {
             try {
                 let coords2 = Array.isArray(lineaCurvaOriginal) ? lineaCurvaOriginal : lineaCurvaOriginal.coordinates;
                 let rutaCam = turf.lineString(coords2);
-                rutaCam = turf.simplify(rutaCam, { tolerance: 0.0035, highQuality: true });
-                rutaCam = turf.bezierSpline(rutaCam, { resolution: 10000, sharpness: 0.5 });
+                // 🚀 DRON ESTRATOSFÉRICO: Ignorar curvas de hasta 3km, creando una línea casi recta entre ciudades
+                rutaCam = turf.simplify(rutaCam, { tolerance: 0.03, highQuality: true });
+                rutaCam = turf.bezierSpline(rutaCam, { resolution: 10000, sharpness: 0.1 });
                 const distCam = turf.length(rutaCam.geometry, { units: 'kilometers' });
                 for (let i = 0; i <= pasos; i++) {
                     const seg = turf.along(rutaCam.geometry, (i / pasos) * distCam, { units: 'kilometers' });
@@ -346,8 +353,8 @@ export class RouteManager {
                 ? this.rutaCamaraCoordenadas
                 : this.rutaCoordenadas; // fallback
 
-            // Lookahead más largo porque la ruta de cámara es más corta en variaciones
-            const maxLookahead = Math.floor(fuenteAngulo.length * 0.15);
+            // 🔭 MIRAR MÁS LEJOS: 25% de visión anticipada para no asustarse con montañas
+            const maxLookahead = Math.floor(fuenteAngulo.length * 0.25);
             const puntosAdelante = Math.min(indexPuntoActual + maxLookahead, fuenteAngulo.length - 1);
             let anguloRutaFutura = this.map.getBearing();
             if (indexPuntoActual < puntosAdelante) {
@@ -362,7 +369,8 @@ export class RouteManager {
             } else {
                 let diff = anguloRutaFutura - ultimoAngulo;
                 diff = ((diff + 540) % 360) - 180;
-                ultimoAngulo += diff * 0.015; // Lerp levemente más suave que el 0.02 original
+                // 🎥 GIMBAL DE CINE: Aún más pesado para anular baches topográficos abruptos
+                ultimoAngulo += diff * 0.003; 
             }
 
             // COREOGRAFÍA RELIVE (Órbita entre 20% y 70%)
@@ -405,7 +413,9 @@ export class RouteManager {
                 }
             }
 
-            this.map.jumpTo({ center: puntoActual, pitch: 68 + offsetPitch, bearing: ultimoAngulo + offsetAngulo, zoom: 12.8 - offsetZoom });
+            // 🚁 VUELO MÁS ALTO: Aléjate a zoom 11.8 y mira un poco más abajo (pitch 62). 
+            // Esto elimina la sensación de "sube y baja" al cruzar topografía pesada.
+            this.map.jumpTo({ center: puntoActual, pitch: 62 + offsetPitch, bearing: ultimoAngulo + offsetAngulo, zoom: 11.8 - offsetZoom });
 
             // 4. Aumentar el salto de puntos para un vuelo más rápido y fluido (antes 3)
             indexPuntoActual += 4;
