@@ -15,6 +15,7 @@ export class RouteManager {
         // Configuración de motor
         this.token = 'pk.eyJ1IjoiYXJraS1tZWRlczE5ODUiLCJhIjoiY21vZzNqeXdrMDZlMTJ2cTNoZDJoMXE4MSJ9.poOFAaOccIhbmzTSLiqn5A';
         this.rutaCoordenadas = [];
+        this.rutaCamaraCoordenadas = []; // ✅ Array exclusivo para el heading del dron
         this.marcadores = [];
         this.flightAnimationId = null;
         this.currentData = null; // Guardará la info de la ruta actual
@@ -185,9 +186,8 @@ export class RouteManager {
             let coords = Array.isArray(lineaCurvaOriginal) ? lineaCurvaOriginal : lineaCurvaOriginal.coordinates;
             let rutaFeature = turf.lineString(coords);
             
-            // 🚀 MAGIA ANTI-VIBRACIÓN: Simplificar baches (0.0004) y crear una curva Bezier perfecta
-            rutaFeature = turf.simplify(rutaFeature, { tolerance: 0.0004, highQuality: true });
-            rutaFeature = turf.bezierSpline(rutaFeature, { resolution: 10000, sharpness: 0.85 });
+            // 🚀 FIX: Mantenemos la fidelidad de OSRM para la LÍNEA AMARILLA.
+            // Ya no le aplicamos Bezier aquí para que no "corte" las curvas en las calles.
             
             const geometry = rutaFeature.geometry;
             this.currentRouteGeometry = geometry; // ✅ Guardar geometría para el encuadre final
@@ -200,6 +200,23 @@ export class RouteManager {
             }
             console.log(`🗺️ [PASO 7] ✅ Precarga LISTA. Distancia: ${distancia.toFixed(1)}km, Puntos calculados: ${this.rutaCoordenadas.length}`);
             
+            this.rutaCamaraCoordenadas = [];
+            try {
+                let coords2 = Array.isArray(lineaCurvaOriginal) ? lineaCurvaOriginal : lineaCurvaOriginal.coordinates;
+                let rutaCam = turf.lineString(coords2);
+                rutaCam = turf.simplify(rutaCam, { tolerance: 0.0035, highQuality: true });
+                rutaCam = turf.bezierSpline(rutaCam, { resolution: 10000, sharpness: 0.5 });
+                const distCam = turf.length(rutaCam.geometry, { units: 'kilometers' });
+                for (let i = 0; i <= pasos; i++) {
+                    const seg = turf.along(rutaCam.geometry, (i / pasos) * distCam, { units: 'kilometers' });
+                    this.rutaCamaraCoordenadas.push(seg.geometry.coordinates);
+                }
+                console.log(`📷 Ruta de cámara lista: ${this.rutaCamaraCoordenadas.length} puntos suavizados`);
+            } catch(e) {
+                console.warn('⚠️ Falló ruta de cámara, usando fallback.', e);
+                this.rutaCamaraCoordenadas = [...this.rutaCoordenadas];
+            }
+
             // ✅ Si se ordenó "Mostrar" mientras cargaba, lanzarlo ahora
             if (this.pendingShow) {
                 console.log('🗺️ [PASO 8] pendingShow estaba activo. Lanzando mapa automáticamente...');
@@ -314,27 +331,38 @@ export class RouteManager {
                 return;
             }
 
-            const puntoActual = this.rutaCoordenadas[indexPuntoActual];
+            // El dron vuela sobre la ruta suavizada, la línea se dibuja en la real
+            const puntoActual = this.rutaCamaraCoordenadas.length > 0
+                ? this.rutaCamaraCoordenadas[indexPuntoActual]
+                : this.rutaCoordenadas[indexPuntoActual];
+                
             const lineaCreciente = this.rutaCoordenadas.slice(0, indexPuntoActual + 1);
             
             // Dibujar la línea gradualmente
             this.map.getSource('linea-ruta').setData({ 'type': 'Feature', 'properties': {}, 'geometry': { 'type': 'LineString', 'coordinates': lineaCreciente } });
 
-            // ESTABILIZACIÓN CINEMÁTICA (Heading Lock)
-            // Como la línea ya es una curva de Bezier perfecta, el seguimiento puede ser continuo
-            const puntosAdelante = Math.min(indexPuntoActual + 150, this.rutaCoordenadas.length - 1);
+            // ESTABILIZACIÓN CINEMÁTICA (lee de la ruta de cámara ultra-suavizada)
+            const fuenteAngulo = this.rutaCamaraCoordenadas.length > 0
+                ? this.rutaCamaraCoordenadas
+                : this.rutaCoordenadas; // fallback
+
+            // Lookahead más largo porque la ruta de cámara es más corta en variaciones
+            const maxLookahead = Math.floor(fuenteAngulo.length * 0.15);
+            const puntosAdelante = Math.min(indexPuntoActual + maxLookahead, fuenteAngulo.length - 1);
             let anguloRutaFutura = this.map.getBearing();
             if (indexPuntoActual < puntosAdelante) {
-                anguloRutaFutura = turf.bearing(turf.point(puntoActual), turf.point(this.rutaCoordenadas[puntosAdelante]));
+                anguloRutaFutura = turf.bearing(
+                    turf.point(fuenteAngulo[indexPuntoActual]),  // ✅ origen desde array de cámara
+                    turf.point(fuenteAngulo[puntosAdelante])     // ✅ destino desde array de cámara
+                );
             }
 
             if (ultimoAngulo === null) {
                 ultimoAngulo = anguloRutaFutura;
             } else {
                 let diff = anguloRutaFutura - ultimoAngulo;
-                diff = ((diff + 540) % 360) - 180; 
-                // Lerp suave y continuo sin saltos bruscos
-                ultimoAngulo += diff * 0.02;
+                diff = ((diff + 540) % 360) - 180;
+                ultimoAngulo += diff * 0.015; // Lerp levemente más suave que el 0.02 original
             }
 
             // COREOGRAFÍA RELIVE (Órbita entre 20% y 70%)
