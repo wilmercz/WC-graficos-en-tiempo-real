@@ -23,6 +23,7 @@ export class RouteManager {
         this.currentRouteGeometry = null; // ✅ Guardará la geometría para el encuadre final
         this.hideTimeoutId = null; // ✅ Control para el temporizador de ocultamiento suave
         this.flightStartTimeout = null; // ✅ Control del arranque del dron para evitar "drones fantasma"
+        this.pobladosRuta = []; // ✅ Poblados detectados a lo largo de la ruta
     }
 
     /**
@@ -146,6 +147,11 @@ export class RouteManager {
         // Borrar pines anteriores
         this.marcadores.forEach(m => m.remove());
         this.marcadores = [];
+        
+        if (this.pobladosRuta) {
+            this.pobladosRuta.forEach(p => { if (p.marcador) p.marcador.remove(); });
+        }
+        this.pobladosRuta = [];
 
         // Crear Pines y Textos
         const addLabel = (coords, text) => {
@@ -224,6 +230,10 @@ export class RouteManager {
                 this.rutaCamaraCoordenadas = [...this.rutaCoordenadas];
             }
 
+            // 🏘️ Detectar poblados en segundo plano (no bloquea el vuelo)
+            this.pobladosRuta = [];
+            this.detectarPobladosEnRuta(geometry, distancia); // Sin await, corre en paralelo
+
             // ✅ Si se ordenó "Mostrar" mientras cargaba, lanzarlo ahora
             if (this.pendingShow) {
                 console.log('🗺️ [PASO 8] pendingShow estaba activo. Lanzando mapa automáticamente...');
@@ -231,6 +241,53 @@ export class RouteManager {
                 this.showMapAndFly();
             }
         } catch(e) { console.error("🚨 [ERROR MATEMÁTICO] Falló el suavizado de curvas con Turf.js:", e); }
+    }
+
+    async detectarPobladosEnRuta(geometry, distancia) {
+        // 🧠 INTELIGENCIA DE INTERVALOS: Adaptar búsqueda según distancia para no saturar la API
+        let intervaloKm = 5; 
+        if (distancia > 80) intervaloKm = 10;
+        if (distancia > 250) intervaloKm = 20;
+        if (distancia > 800) intervaloKm = 50;
+
+        const totalMuestras = Math.floor(distancia / intervaloKm);
+        console.log(`🏘️ Buscando poblados cada ${intervaloKm}km (Máx ${totalMuestras} búsquedas para cuidar la API)...`);
+        
+        const nombresYaAgregados = new Set();
+        
+        // Evitar buscar en km 0 y destino final (ya tienen sus propios pines dorados)
+        for (let i = 1; i < totalMuestras; i++) {
+            const kmActual = i * intervaloKm;
+            const punto = turf.along(geometry, kmActual, { units: 'kilometers' });
+            const [lng, lat] = punto.geometry.coordinates;
+            
+            try {
+                const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${this.token}&types=place,locality&language=es&limit=1`;
+                const res = await fetch(url);
+                const json = await res.json();
+                
+                if (json.features && json.features.length > 0) {
+                    const nombre = json.features[0].text;
+                    
+                    // Evitar duplicados y que no sea el mismo nombre que origen o destino
+                    if (!nombresYaAgregados.has(nombre) && nombre !== this.currentData.origenNombre && nombre !== this.currentData.destinoNombre) {
+                        nombresYaAgregados.add(nombre);
+                        
+                        // Calcular en qué índice del vuelo cae este km
+                        const indexVuelo = Math.floor((kmActual / distancia) * this.rutaCoordenadas.length);
+                        
+                        this.pobladosRuta.push({ nombre, coords: [lng, lat], indexVuelo, marcador: null, mostrado: false });
+                        console.log(`📍 Poblado detectado: ${nombre} en km ${kmActual.toFixed(1)}`);
+                    }
+                }
+            } catch(e) {
+                // Silencioso para no bloquear si falla una muestra
+            }
+            
+            // Pausa entre requests para no saturar la API de Mapbox (100ms)
+            await new Promise(r => setTimeout(r, 100));
+        }
+        console.log(`🏘️ Total poblados únicos descubiertos en ruta: ${this.pobladosRuta.length}`);
     }
 
     showMapAndFly(data) {
@@ -309,6 +366,7 @@ export class RouteManager {
         let indexPuntoActual = 0;
         let ultimoAngulo = null;
         const coordsC = this.rutaCoordenadas[this.rutaCoordenadas.length - 1];
+        let frameCounter = 0; // ⏱️ Contador de frames para el arranque cinemático
 
         // ✅ Variables para la dirección inteligente de la órbita (Atajo más corto)
         let orbitEnterDir = 1;
@@ -318,6 +376,7 @@ export class RouteManager {
 
         const animarFrame = () => {
             if (!this.isFlying) return;
+            frameCounter++;
 
             if (indexPuntoActual >= this.rutaCoordenadas.length) {
                 // Llegada a destino
@@ -364,20 +423,41 @@ export class RouteManager {
                 );
             }
 
-            if (ultimoAngulo === null) {
-                ultimoAngulo = anguloRutaFutura;
-            } else {
-                let diff = anguloRutaFutura - ultimoAngulo;
-                diff = ((diff + 540) % 360) - 180;
-                // 🎥 GIMBAL DE CINE: Aún más pesado para anular baches topográficos abruptos
-                ultimoAngulo += diff * 0.003; 
-            }
-
-            // COREOGRAFÍA RELIVE (Órbita entre 20% y 70%)
+            // COREOGRAFÍA RELIVE: Calcular progreso general
             let progreso = indexPuntoActual / this.rutaCoordenadas.length;
             let offsetAngulo = 0, offsetZoom = 0, offsetPitch = 0;
+            let saltoPuntos = 4; // 🚀 VELOCIDAD DINÁMICA: Ajustable según la fase del vuelo
 
-            if (progreso > 0.20 && progreso < 0.70) {
+            if (ultimoAngulo === null) {
+                ultimoAngulo = 0; // 🧭 Empieza mirando exactamente al Norte (0 grados)
+            }
+
+            let diff = anguloRutaFutura - ultimoAngulo;
+            diff = ((diff + 540) % 360) - 180;
+            
+            let velocidadGimbal = 0.003; // 🎥 GIMBAL DE CINE normal por defecto
+
+            // ⏱️ FASE DE ARRANQUE CINEMÁTICO (Independiente de la longitud de la ruta)
+            if (frameCounter < 90) { 
+                // Segundos 0 a 1.5: Vuelo casi estático mirando al Norte (Contexto del mapa)
+                saltoPuntos = 1; 
+                velocidadGimbal = 0.0001; 
+            } else if (frameCounter >= 90 && frameCounter < 160) {
+                // Segundos 1.5 a 2.6: Gira la cámara hacia la ruta progresivamente y arranca
+                saltoPuntos = 2;
+                velocidadGimbal = 0.02; // Ágil pero suave
+            }
+
+            ultimoAngulo += diff * velocidadGimbal;
+
+            // FASES DEL VUELO BASADAS EN PROGRESO
+            if (progreso > 0.03 && progreso <= 0.20) {
+                // 🚁 ACERCAMIENTO PRE-ÓRBITA: Baja un poco para ver los primeros detalles del terreno
+                let t = (progreso - 0.03) / 0.17; 
+                let smoothT = Math.sin(t * Math.PI); // Curva de campana (0 -> 1 -> 0)
+                offsetZoom = -(smoothT * 1.8); // 🔍 Acercar MÁS en pre-órbita (zoom 13.6)
+                offsetPitch = smoothT * 12;    // Levanta más la mirada
+            } else if (progreso > 0.20 && progreso < 0.70) {
                 if (progreso < 0.35) {
                     if (!enterCalculated) {
                         // Mirar adelante para decidir por qué lado entrar a la órbita
@@ -411,14 +491,64 @@ export class RouteManager {
                     offsetZoom = 1.8 - (smoothT * 1.8); 
                     offsetPitch = -20 + (smoothT * 20);
                 }
+            } else if (progreso >= 0.70 && progreso < 0.85) {
+                // 🚁 NUEVA FASE: VUELO RASANTE CINEMÁTICO (TRACKING SHOT LATERAL)
+                if (progreso < 0.73) {
+                    // Picada muy rápida con giro hacia el lado OPUESTO de la montaña
+                    let t = (progreso - 0.70) / 0.03;
+                    let smoothT = -(Math.cos(Math.PI * t) - 1) / 2;
+                    offsetZoom = -(smoothT * 1.3); // 🔭 Menos zoom (13.1 máx) para no comerse las montañas
+                    offsetPitch = smoothT * 10;    // Levanta la mirada un poco (pitch 72)
+                    // 🎥 Gira -75° (lado opuesto) para volar viendo la ruta de frente y la montaña al fondo
+                    offsetAngulo = -orbitExitDir * smoothT * 75; 
+                    saltoPuntos = 4 + Math.round(smoothT * 3);
+                } else if (progreso >= 0.73 && progreso < 0.74) {
+                    // Mantener vuelo paralelo (TIEMPO MUY REDUCIDO)
+                    offsetZoom = -1.3;
+                    offsetPitch = 10;
+                    offsetAngulo = -orbitExitDir * 75;
+                    saltoPuntos = 7; // Vuelo rápido sostenido
+                } else if (progreso >= 0.74 && progreso < 0.85) {
+                    // Volver a tomar altitud y mirar al frente progresivamente
+                    let t = (progreso - 0.74) / 0.11;
+                    let smoothT = -(Math.cos(Math.PI * t) - 1) / 2; 
+                    offsetZoom = -1.3 + (smoothT * 1.3); 
+                    offsetPitch = 10 - (smoothT * 10);
+                    offsetAngulo = (-orbitExitDir * 75) - (-orbitExitDir * smoothT * 75); // Regresa al frente
+                    // 🚀 ANTI-ILUSIÓN ÓPTICA: Aceleración más agresiva al subir rápido (7 a 10)
+                    saltoPuntos = 7 + Math.round(t * 3); 
+                }
             }
 
             // 🚁 VUELO MÁS ALTO: Aléjate a zoom 11.8 y mira un poco más abajo (pitch 62). 
             // Esto elimina la sensación de "sube y baja" al cruzar topografía pesada.
             this.map.jumpTo({ center: puntoActual, pitch: 62 + offsetPitch, bearing: ultimoAngulo + offsetAngulo, zoom: 11.8 - offsetZoom });
 
-            // 4. Aumentar el salto de puntos para un vuelo más rápido y fluido (antes 3)
-            indexPuntoActual += 4;
+            // 🏘️ DETECTOR DE POBLADOS: Mostrar etiqueta y efecto al pasar cerca
+            for (const poblado of this.pobladosRuta) {
+                if (!poblado.mostrado && indexPuntoActual >= poblado.indexVuelo) {
+                    poblado.mostrado = true;
+                    
+                    // Crear marcador con estilo TV si no existe
+                    if (!poblado.marcador) {
+                        const el = document.createElement('div');
+                        el.className = 'etiqueta-poblado';
+                        el.innerText = `📍 ${poblado.nombre}`;
+                        
+                        poblado.marcador = new mapboxgl.Marker({ element: el, anchor: 'bottom' }).setLngLat(poblado.coords).addTo(this.map);
+                        
+                        // Aparecer con animación
+                        setTimeout(() => el.classList.add('visible'), 50);
+                        
+                        // Desaparecer a los 4 segundos
+                        setTimeout(() => { if (el) el.classList.remove('visible'); setTimeout(() => { if (poblado.marcador) { poblado.marcador.remove(); poblado.marcador = null; } }, 500); }, 4000);
+                    }
+                    console.log(`🏘️ Pasando por: ${poblado.nombre}`);
+                }
+            }
+
+            // 4. Avanzar el dron (Velocidad dinámica adaptativa)
+            indexPuntoActual += saltoPuntos;
             this.flightAnimationId = requestAnimationFrame(animarFrame);
         };
 
@@ -448,6 +578,12 @@ export class RouteManager {
         this.pendingShow = false;
         if (this.flightStartTimeout) clearTimeout(this.flightStartTimeout);
         if (this.flightAnimationId) cancelAnimationFrame(this.flightAnimationId);
+        
+        // Limpiar poblados que hayan quedado en pantalla
+        if (this.pobladosRuta) {
+            this.pobladosRuta.forEach(p => { if (p.marcador) p.marcador.remove(); });
+            this.pobladosRuta = [];
+        }
         
         // ✅ Ocultar completamente del DOM después de que termine el desvanecimiento
         this.hideTimeoutId = setTimeout(() => {

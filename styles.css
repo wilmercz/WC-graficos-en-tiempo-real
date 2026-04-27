@@ -856,3 +856,23 @@ video:not([src]), video[src=""], video[src="null"] {
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6) !important;
     padding: 3px 8px !important;
 }
+
+/* ====== POBLADOS EN RUTA (AUTO-DETECTADOS) ====== */
+.etiqueta-poblado {
+    background: rgba(0, 0, 0, 0.75);
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 5px 12px;
+    border-radius: 20px;
+    border-left: 4px solid #FFD700;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.5s ease-out, transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.etiqueta-poblado.visible {
+    opacity: 1;
+    transform: translateY(0px);
+}
