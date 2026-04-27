@@ -849,3 +849,10 @@ video:not([src]), video[src=""], video[src="null"] {
     border-left: 4px solid #fffb00; box-shadow: 0 4px 10px rgba(0,0,0,0.5);
     pointer-events: none;
 }
+
+/* Contenedor oscuro para resaltar la hora sobre el mapa/video */
+#stream-clock.mapa-activo {
+    background: rgba(0, 0, 0, 1) !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6) !important;
+    padding: 3px 8px !important;
+}

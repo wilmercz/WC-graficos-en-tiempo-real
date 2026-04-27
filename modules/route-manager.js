@@ -19,6 +19,7 @@ export class RouteManager {
         this.flightAnimationId = null;
         this.currentData = null; // Guardará la info de la ruta actual
         this.pendingShow = false; // ✅ Control si piden Mostrar antes de que termine de Preparar
+        this.currentRouteGeometry = null; // ✅ Guardará la geometría para el encuadre final
     }
 
     /**
@@ -164,6 +165,7 @@ export class RouteManager {
         this.rutaCoordenadas = [];
         try {
             const geometry = Array.isArray(lineaCurvaOriginal) ? { type: 'LineString', coordinates: lineaCurvaOriginal } : lineaCurvaOriginal;
+            this.currentRouteGeometry = geometry; // ✅ Guardar geometría para el encuadre final
             const distancia = turf.length(geometry, { units: 'kilometers' });
             const pasos = Math.floor(distancia * 200); 
             
@@ -202,6 +204,10 @@ export class RouteManager {
         this.mapContainer.style.display = 'block';
         this.overlayContainer.style.display = 'block';
         
+        // ✅ Ponerle fondo oscuro al reloj solo cuando el mapa esté visible
+        const clock = document.getElementById('stream-clock');
+        if (clock) clock.classList.add('mapa-activo');
+
         // ✅ FIX CRÍTICO DEFINITIVO: Darle tiempo al navegador para aplicar display:block
         // antes de decirle a Mapbox que recalcule el tamaño de la pantalla.
         setTimeout(() => {
@@ -224,7 +230,19 @@ export class RouteManager {
 
             if (indexPuntoActual >= this.rutaCoordenadas.length) {
                 // Llegada a destino
-                this.map.flyTo({ center: coordsC, zoom: 10.5, pitch: 30, bearing: 0, duration: 4000 });
+                console.log('🏁 Vuelo finalizado. Centrando ruta completa en pantalla...');
+                if (this.currentRouteGeometry) {
+                    const bbox = turf.bbox(this.currentRouteGeometry);
+                    this.map.fitBounds(bbox, {
+                        padding: { top: 50, bottom: 200, left: 200, right: 50 },
+                        pitch: 30,
+                        bearing: 0,
+                        duration: 4000
+                    });
+                } else {
+                    // Fallback si la geometría no está disponible
+                    this.map.flyTo({ center: coordsC, zoom: 10.5, pitch: 30, bearing: 0, duration: 4000 });
+                }
                 this.isFlying = false;
                 return;
             }
@@ -289,6 +307,11 @@ export class RouteManager {
 
         this.mapContainer.style.display = 'none';
         this.overlayContainer.style.display = 'none';
+        
+        // ✅ Quitarle el fondo oscuro al reloj al cerrar el mapa
+        const clock = document.getElementById('stream-clock');
+        if (clock) clock.classList.remove('mapa-activo');
+
         this.isFlying = false;
         this.pendingShow = false;
         if (this.flightAnimationId) cancelAnimationFrame(this.flightAnimationId);
