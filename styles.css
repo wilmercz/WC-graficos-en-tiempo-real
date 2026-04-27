@@ -846,7 +846,7 @@ video:not([src]), video[src=""], video[src="null"] {
     background: rgba(46, 91, 186, 0.85); color: #FFFFFF;
     padding: 6px 12px; font-weight: bold; font-size: 15px;
     border-radius: 4px; white-space: nowrap; text-transform: uppercase;
-    border-left: 4px solid #fffb00; box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    border-left: 4px solid #ff8a3d; box-shadow: 0 4px 10px rgba(0,0,0,0.5);
     pointer-events: none;
 }
 
@@ -865,7 +865,7 @@ video:not([src]), video[src=""], video[src="null"] {
     font-weight: 600;
     padding: 5px 12px;
     border-radius: 20px;
-    border-left: 4px solid #FFD700;
+    border-left: 4px solid #ff8a3d;
     white-space: nowrap;
     pointer-events: none;
     opacity: 0;

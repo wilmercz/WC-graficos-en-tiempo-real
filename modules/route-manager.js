@@ -126,7 +126,7 @@ export class RouteManager {
 
                 // Capa vacía para la línea de ruta
                 this.map.addSource('linea-ruta', { 'type': 'geojson', 'data': { 'type': 'Feature', 'properties': {}, 'geometry': { 'type': 'LineString', 'coordinates': [] } } });
-                this.map.addLayer({ 'id': 'linea-amarilla', 'type': 'line', 'source': 'linea-ruta', 'layout': { 'line-join': 'round', 'line-cap': 'round' }, 'paint': { 'line-color': '#FFD700', 'line-width': 8, 'line-opacity': 0.9 } });
+                this.map.addLayer({ 'id': 'linea-amarilla', 'type': 'line', 'source': 'linea-ruta', 'layout': { 'line-join': 'round', 'line-cap': 'round' }, 'paint': { 'line-color': '#ff8a3d', 'line-width': 8, 'line-opacity': 0.9 } });
                 
                 this.calculateRouteAndMarkers(coordsA, coordsC, data);
             });
@@ -155,7 +155,7 @@ export class RouteManager {
 
         // Crear Pines y Textos
         const addLabel = (coords, text) => {
-            const marker = new mapboxgl.Marker({ color: '#FFD700' }).setLngLat(coords).addTo(this.map);
+            const marker = new mapboxgl.Marker({ color: '#ff8a3d' }).setLngLat(coords).addTo(this.map);
             const el = marker.getElement();
             const label = document.createElement('div');
             label.className = 'etiqueta-tv';
