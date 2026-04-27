@@ -11,6 +11,7 @@ import { animationEngine } from './modules/animations.js';
 import { clockInstance } from './modules/clock.js';
 import { debugTools } from './utils/debug-tools.js';
 import { SequenceManager } from './modules/sequence-manager.js'; // ✅ IMPORTACIÓN FALTANTE
+import { routeManager } from './modules/route-manager.js'; // ✅ IMPORTACIÓN RUTAS 3D
 
 class StreamGraphicsApp {
     constructor() {
@@ -25,7 +26,8 @@ class StreamGraphicsApp {
             animations: null,
             clock: null,
             debug: null,
-            sequenceManager: null // ✅ NUEVO: Gestor de secuencias
+            sequenceManager: null, // ✅ NUEVO: Gestor de secuencias
+            routeManager: null
         };
         this.performance = {
             initTime: 0,
@@ -289,8 +291,38 @@ class StreamGraphicsApp {
             console.log('🖼️ URL Publicidad encontrada en Firebase:', rawData.urlImagenPublicidad);
         }
         
-    
+        // =======================================================
+        // 🗺️ LÓGICA DE MOTOR 3D DE RUTAS
+        // =======================================================
+        window.lastRouteState = window.lastRouteState || { prepare: false, show: false };
         
+        // ✅ FIX: Soportar si se escribe 'true' (texto) manualmente en Firebase
+        const isPrepare = rawData.Preparar_Ruta === true || String(rawData.Preparar_Ruta).toLowerCase() === 'true';
+        const isShow = rawData.Mostrar_Ruta === true || String(rawData.Mostrar_Ruta).toLowerCase() === 'true';
+        const isManual = rawData.Ruta_Usar_Manual === true || String(rawData.Ruta_Usar_Manual).toLowerCase() === 'true';
+
+        const routeData = {
+            origenNombre: rawData.Ruta_Origen_Nombre || 'Origen',
+            origenCoords: rawData.Ruta_Origen_Coords || '-76.8828, 0.0844',
+            destinoNombre: rawData.Ruta_Destino_Nombre || 'Destino',
+            destinoCoords: rawData.Ruta_Destino_Coords || '-76.747250, 0.230720',
+            usarManual: isManual,
+            coordsManuales: rawData.Ruta_Coordenadas_Manual || '[]'
+        };
+
+        if (isPrepare && !window.lastRouteState.prepare) {
+            EventBus.emit('route-prepare', routeData);
+        }
+        if (isShow && !window.lastRouteState.show) {
+            EventBus.emit('route-show');
+        } else if (!isShow && window.lastRouteState.show) {
+            EventBus.emit('route-hide');
+        }
+        
+        window.lastRouteState.prepare = isPrepare;
+        window.lastRouteState.show = isShow;
+        // =======================================================
+
         // Usar el data processor
         const processedData = this.modules.dataProcessor.process(rawData);
         if (!processedData) return;
@@ -1104,6 +1136,10 @@ class StreamGraphicsApp {
         
         // ✅ Sequence Manager (Instanciado aquí mismo para simplificar)
         this.modules.sequenceManager = new SequenceManager(this);
+        
+        // Motor 3D de Rutas
+        this.modules.routeManager = routeManager;
+        this.modules.routeManager.init();
 
         console.log('✅ Módulos inicializados');
     }

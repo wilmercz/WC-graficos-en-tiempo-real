@@ -6,10 +6,21 @@
   <title>Gráficos en Tiempo Real - Sistema Modular v2.0</title>
   <link rel="stylesheet" href="styles.css"> <!-- Enlace al archivo CSS -->
   <link rel="icon" href="data:,"> <!-- 🔧 FIX: Evitar error 404 de favicon -->
+  
+  <!-- 🗺️ Librerías para Motor de Mapas 3D -->
+  <script src='https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js'></script>
+  <link href='https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css' rel='stylesheet' />
+  <script src='https://unpkg.com/@turf/turf@6/turf.min.js'></script>
 </head>
 <body>
   <img id="logo" src="https://res.cloudinary.com/dm5jp6bbj/image/upload/v1773680758/LOGO_ARKI_MEDES_CIRCULAR_rqtzmk.png" alt="Logo">
   
+  <!-- 🗺️ Contenedor del Mapa 3D (Carga en Segundo Plano) -->
+  <div id="map-container" style="display: none;"></div>
+  <div id="map-overlay" style="display: none;">
+      <h1 id="map-ruta-texto">ORIGEN ➔ DESTINO</h1>
+  </div>
+
   <!-- Elementos gráficos principales -->
   <div id="grafico-invitado-rol" class="animated-element" style="display: none;">
     <h1 id="invitado">INVITADO</h1>
