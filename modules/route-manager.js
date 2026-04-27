@@ -20,6 +20,7 @@ export class RouteManager {
         this.currentData = null; // Guardará la info de la ruta actual
         this.pendingShow = false; // ✅ Control si piden Mostrar antes de que termine de Preparar
         this.currentRouteGeometry = null; // ✅ Guardará la geometría para el encuadre final
+        this.hideTimeoutId = null; // ✅ Control para el temporizador de ocultamiento suave
     }
 
     /**
@@ -215,9 +216,33 @@ export class RouteManager {
             return;
         }
         
+        // ✅ Si había un temporizador de ocultamiento en curso, cancelarlo
+        if (this.hideTimeoutId) {
+            clearTimeout(this.hideTimeoutId);
+            this.hideTimeoutId = null;
+        }
+
         console.log('🗺️ [PASO 10] Forzando visibilidad en pantalla (display: block)...');
+        
+        // 🌟 Preparar animación de entrada suave (Fade In)
+        this.mapContainer.style.transition = 'none';
+        this.overlayContainer.style.transition = 'none';
+        this.mapContainer.style.opacity = '0';
+        this.overlayContainer.style.opacity = '0';
+        
         this.mapContainer.style.display = 'block';
         this.overlayContainer.style.display = 'block';
+        
+        // Forzar al navegador a registrar el estado inicial (reflow)
+        this.mapContainer.offsetHeight;
+        
+        // 🌟 Revelar suavemente en el siguiente frame visual
+        requestAnimationFrame(() => {
+            this.mapContainer.style.transition = 'opacity 0.8s ease-in-out';
+            this.overlayContainer.style.transition = 'opacity 0.8s ease-in-out';
+            this.mapContainer.style.opacity = '1';
+            this.overlayContainer.style.opacity = '1';
+        });
         
         // ✅ Ponerle fondo oscuro al reloj solo cuando el mapa esté visible
         const clock = document.getElementById('stream-clock');
@@ -345,8 +370,11 @@ export class RouteManager {
         console.log('🛑 Ocultando Mapa 3D y deteniendo vuelo.');
         if (!this.mapContainer) return;
 
-        this.mapContainer.style.display = 'none';
-        this.overlayContainer.style.display = 'none';
+        // 🌟 Animación de salida suave (Fade Out)
+        this.mapContainer.style.transition = 'opacity 0.8s ease-in-out';
+        this.overlayContainer.style.transition = 'opacity 0.8s ease-in-out';
+        this.mapContainer.style.opacity = '0';
+        this.overlayContainer.style.opacity = '0';
         
         // ✅ Quitarle el fondo oscuro al reloj al cerrar el mapa
         const clock = document.getElementById('stream-clock');
@@ -355,6 +383,12 @@ export class RouteManager {
         this.isFlying = false;
         this.pendingShow = false;
         if (this.flightAnimationId) cancelAnimationFrame(this.flightAnimationId);
+        
+        // ✅ Ocultar completamente del DOM después de que termine el desvanecimiento
+        this.hideTimeoutId = setTimeout(() => {
+            this.mapContainer.style.display = 'none';
+            this.overlayContainer.style.display = 'none';
+        }, 800);
     }
 
     debugEstado() {
