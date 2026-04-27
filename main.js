@@ -314,7 +314,7 @@ class StreamGraphicsApp {
             EventBus.emit('route-prepare', routeData);
         }
         if (isShow && !window.lastRouteState.show) {
-            EventBus.emit('route-show');
+            EventBus.emit('route-show', routeData);
         } else if (!isShow && window.lastRouteState.show) {
             EventBus.emit('route-hide');
         }

@@ -21,6 +21,7 @@ export class RouteManager {
         this.pendingShow = false; // ✅ Control si piden Mostrar antes de que termine de Preparar
         this.currentRouteGeometry = null; // ✅ Guardará la geometría para el encuadre final
         this.hideTimeoutId = null; // ✅ Control para el temporizador de ocultamiento suave
+        this.flightStartTimeout = null; // ✅ Control del arranque del dron para evitar "drones fantasma"
     }
 
     /**
@@ -48,7 +49,7 @@ export class RouteManager {
      */
     setupEventListeners() {
         EventBus.on('route-prepare', (data) => this.prepareMapAndRoute(data));
-        EventBus.on('route-show', () => this.showMapAndFly());
+        EventBus.on('route-show', (data) => this.showMapAndFly(data));
         EventBus.on('route-hide', () => this.hideMap());
     }
 
@@ -62,17 +63,25 @@ export class RouteManager {
 
         // Limpiar animaciones previas si se vuelve a preparar
         if (this.flightAnimationId) cancelAnimationFrame(this.flightAnimationId);
+        if (this.flightStartTimeout) clearTimeout(this.flightStartTimeout);
         this.isFlying = false;
 
-        // 1. Convertir string a Array [Lon, Lat] con Auto-Corrección Inteligente
+        // 1. Convertir string a Array [Lon, Lat] con Auto-Corrección Inteligente y soporte para comas decimales
         const parseCoords = (str) => {
-            let c = str.split(',').map(n => parseFloat(n.trim()));
+            // Extraer solo los números, soportando punto o coma como separador decimal
+            let matches = str.match(/-?\d+([.,]\d+)?/g);
+            if (!matches || matches.length < 2) return [0, 0];
+            
+            // Reemplazar coma por punto y convertir a número real
+            let n1 = parseFloat(matches[0].replace(',', '.'));
+            let n2 = parseFloat(matches[1].replace(',', '.'));
+            
             // Si el primer número parece Latitud (pequeño) y el segundo Longitud (-70s) de Google Maps:
-            if (Math.abs(c[0]) < 20 && Math.abs(c[1]) > 50) {
-                console.log(`🔄 Auto-corrigiendo coordenada invertida: [${c[1]}, ${c[0]}]`);
-                return [c[1], c[0]]; // Forzar siempre el orden [Longitud, Latitud]
+            if (Math.abs(n1) < 20 && Math.abs(n2) > 50) {
+                console.log(`🔄 Auto-corrigiendo coordenada invertida: [${n2}, ${n1}]`);
+                return [n2, n1]; // Forzar siempre el orden [Longitud, Latitud]
             }
-            return c;
+            return [n1, n2];
         };
         const coordsA = parseCoords(data.origenCoords);
         const coordsC = parseCoords(data.destinoCoords);
@@ -200,8 +209,16 @@ export class RouteManager {
         } catch(e) { console.error("🚨 [ERROR MATEMÁTICO] Falló el suavizado de curvas con Turf.js:", e); }
     }
 
-    showMapAndFly() {
-        console.log('️ [PASO 9] Recibida orden MOSTRAR (showMapAndFly)');
+    showMapAndFly(data) {
+        console.log('🗺️ [PASO 9] Recibida orden MOSTRAR (showMapAndFly)');
+        
+        // ✅ AUTOCORRECCIÓN: Si el usuario presiona "Mostrar" sin haber presionado "Preparar"
+        if (!this.map && data) {
+            console.warn('🗺️ [ALERTA] No se había preparado la ruta. Forzando preparación automática...');
+            this.prepareMapAndRoute(data);
+            this.pendingShow = true;
+            return;
+        }
         
         console.log('📊 ESTADO ACTUAL DEL MOTOR:', {
             LienzoExiste: !!this.mapContainer,
@@ -226,23 +243,28 @@ export class RouteManager {
         
         // 🌟 Preparar animación de entrada suave (Fade In)
         this.mapContainer.style.transition = 'none';
-        this.overlayContainer.style.transition = 'none';
         this.mapContainer.style.opacity = '0';
-        this.overlayContainer.style.opacity = '0';
-        
         this.mapContainer.style.display = 'block';
-        this.overlayContainer.style.display = 'block';
+        
+        if (this.overlayContainer) {
+            this.overlayContainer.style.transition = 'none';
+            this.overlayContainer.style.opacity = '0';
+            this.overlayContainer.style.display = 'block';
+        }
         
         // Forzar al navegador a registrar el estado inicial (reflow)
         this.mapContainer.offsetHeight;
         
-        // 🌟 Revelar suavemente en el siguiente frame visual
-        requestAnimationFrame(() => {
+        // 🌟 Revelar suavemente
+        setTimeout(() => {
             this.mapContainer.style.transition = 'opacity 0.8s ease-in-out';
-            this.overlayContainer.style.transition = 'opacity 0.8s ease-in-out';
             this.mapContainer.style.opacity = '1';
-            this.overlayContainer.style.opacity = '1';
-        });
+            
+            if (this.overlayContainer) {
+                this.overlayContainer.style.transition = 'opacity 0.8s ease-in-out';
+                this.overlayContainer.style.opacity = '1';
+            }
+        }, 50);
         
         // ✅ Ponerle fondo oscuro al reloj solo cuando el mapa esté visible
         const clock = document.getElementById('stream-clock');
@@ -363,7 +385,8 @@ export class RouteManager {
         };
 
         // Pequeña pausa antes de arrancar
-        setTimeout(() => { if (this.isFlying) animarFrame(); }, 800);
+        if (this.flightStartTimeout) clearTimeout(this.flightStartTimeout);
+        this.flightStartTimeout = setTimeout(() => { if (this.isFlying) animarFrame(); }, 800);
     }
 
     hideMap() {
@@ -372,9 +395,12 @@ export class RouteManager {
 
         // 🌟 Animación de salida suave (Fade Out)
         this.mapContainer.style.transition = 'opacity 0.8s ease-in-out';
-        this.overlayContainer.style.transition = 'opacity 0.8s ease-in-out';
         this.mapContainer.style.opacity = '0';
-        this.overlayContainer.style.opacity = '0';
+        
+        if (this.overlayContainer) {
+            this.overlayContainer.style.transition = 'opacity 0.8s ease-in-out';
+            this.overlayContainer.style.opacity = '0';
+        }
         
         // ✅ Quitarle el fondo oscuro al reloj al cerrar el mapa
         const clock = document.getElementById('stream-clock');
@@ -382,12 +408,15 @@ export class RouteManager {
 
         this.isFlying = false;
         this.pendingShow = false;
+        if (this.flightStartTimeout) clearTimeout(this.flightStartTimeout);
         if (this.flightAnimationId) cancelAnimationFrame(this.flightAnimationId);
         
         // ✅ Ocultar completamente del DOM después de que termine el desvanecimiento
         this.hideTimeoutId = setTimeout(() => {
             this.mapContainer.style.display = 'none';
-            this.overlayContainer.style.display = 'none';
+            if (this.overlayContainer) {
+                this.overlayContainer.style.display = 'none';
+            }
         }, 800);
     }
 
