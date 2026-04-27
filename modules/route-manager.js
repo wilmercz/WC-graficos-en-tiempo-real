@@ -172,7 +172,14 @@ export class RouteManager {
         // MATEMÁTICA: Suavizar con Turf para la cámara (200 puntos por km)
         this.rutaCoordenadas = [];
         try {
-            const geometry = Array.isArray(lineaCurvaOriginal) ? { type: 'LineString', coordinates: lineaCurvaOriginal } : lineaCurvaOriginal;
+            let coords = Array.isArray(lineaCurvaOriginal) ? lineaCurvaOriginal : lineaCurvaOriginal.coordinates;
+            let rutaFeature = turf.lineString(coords);
+            
+            // 🚀 MAGIA ANTI-VIBRACIÓN: Simplificar baches (0.0004) y crear una curva Bezier perfecta
+            rutaFeature = turf.simplify(rutaFeature, { tolerance: 0.0004, highQuality: true });
+            rutaFeature = turf.bezierSpline(rutaFeature, { resolution: 10000, sharpness: 0.85 });
+            
+            const geometry = rutaFeature.geometry;
             this.currentRouteGeometry = geometry; // ✅ Guardar geometría para el encuadre final
             const distancia = turf.length(geometry, { units: 'kilometers' });
             const pasos = Math.floor(distancia * 200); 
@@ -230,7 +237,6 @@ export class RouteManager {
 
         let indexPuntoActual = 0;
         let ultimoAngulo = null;
-        let anguloObjetivoFijo = null;
         const coordsC = this.rutaCoordenadas[this.rutaCoordenadas.length - 1];
 
         // ✅ Variables para la dirección inteligente de la órbita (Atajo más corto)
@@ -268,8 +274,8 @@ export class RouteManager {
             this.map.getSource('linea-ruta').setData({ 'type': 'Feature', 'properties': {}, 'geometry': { 'type': 'LineString', 'coordinates': lineaCreciente } });
 
             // ESTABILIZACIÓN CINEMÁTICA (Heading Lock)
-            // 1. Mirar más adelante para ignorar curvas pequeñas (antes 150)
-            const puntosAdelante = Math.min(indexPuntoActual + 250, this.rutaCoordenadas.length - 1);
+            // Como la línea ya es una curva de Bezier perfecta, el seguimiento puede ser continuo
+            const puntosAdelante = Math.min(indexPuntoActual + 150, this.rutaCoordenadas.length - 1);
             let anguloRutaFutura = this.map.getBearing();
             if (indexPuntoActual < puntosAdelante) {
                 anguloRutaFutura = turf.bearing(turf.point(puntoActual), turf.point(this.rutaCoordenadas[puntosAdelante]));
@@ -277,21 +283,11 @@ export class RouteManager {
 
             if (ultimoAngulo === null) {
                 ultimoAngulo = anguloRutaFutura;
-                anguloObjetivoFijo = anguloRutaFutura;
             } else {
-                let desvio = anguloRutaFutura - anguloObjetivoFijo;
-                desvio = ((desvio + 540) % 360) - 180; 
-                
-                // 2. Aumentar umbral para iniciar un giro (antes 15)
-                // Solo si la desviación es mayor a 25 grados, consideramos un nuevo ángulo objetivo.
-                if (Math.abs(desvio) > 25) {
-                    anguloObjetivoFijo = anguloRutaFutura;
-                }
-                
-                let diff = anguloObjetivoFijo - ultimoAngulo;
+                let diff = anguloRutaFutura - ultimoAngulo;
                 diff = ((diff + 540) % 360) - 180; 
-                // 3. Suavizar el giro de forma más controlada (antes 0.02)
-                ultimoAngulo += diff * 0.015;
+                // Lerp suave y continuo sin saltos bruscos
+                ultimoAngulo += diff * 0.02;
             }
 
             // COREOGRAFÍA RELIVE (Órbita entre 20% y 70%)
