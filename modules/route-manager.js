@@ -24,6 +24,7 @@ export class RouteManager {
         this.hideTimeoutId = null; // ✅ Control para el temporizador de ocultamiento suave
         this.flightStartTimeout = null; // ✅ Control del arranque del dron para evitar "drones fantasma"
         this.pobladosRuta = []; // ✅ Poblados detectados a lo largo de la ruta
+        this.routeDistance = 0; // ✅ Distancia total de la ruta actual
     }
 
     /**
@@ -164,12 +165,6 @@ export class RouteManager {
             this.marcadores.push(marker);
         };
 
-        addLabel(coordsA, data.origenNombre);
-        addLabel(coordsC, data.destinoNombre);
-
-        // Posicionar cámara lista en la salida
-        this.map.jumpTo({ center: coordsA, zoom: 13, pitch: 65, bearing: 0 });
-
         let lineaCurvaOriginal = null;
 
         // LOGICA HÍBRIDA: ¿Usar Archivo GPX Manual o Auto OSRM?
@@ -177,6 +172,14 @@ export class RouteManager {
             console.log('🗺️ [PASO 5] Usando ruta MANUAL GPX subida desde Android');
             try {
                 lineaCurvaOriginal = JSON.parse(data.coordsManuales);
+                
+                // 🚀 FIX: Auto-corregir coordsA y coordsC para que los pines y la cámara 
+                // se claven exactamente en el inicio y fin de la línea amarilla manual.
+                const manualCoords = Array.isArray(lineaCurvaOriginal) ? lineaCurvaOriginal : lineaCurvaOriginal.coordinates;
+                if (manualCoords && manualCoords.length > 0) {
+                    coordsA = manualCoords[0];
+                    coordsC = manualCoords[manualCoords.length - 1];
+                }
             } catch(e) { console.error("Error parseando coords manuales", e); }
         } 
         
@@ -192,6 +195,13 @@ export class RouteManager {
             } catch(e) { console.error("🚨 [ERROR OSRM] La API falló o no hay internet:", e); return; }
         }
 
+        // ✅ AHORA DIBUJAMOS LOS PINES (Garantizando que coinciden con la línea final)
+        addLabel(coordsA, data.origenNombre);
+        addLabel(coordsC, data.destinoNombre);
+
+        // Posicionar cámara lista en la salida exacta
+        this.map.jumpTo({ center: coordsA, zoom: 13, pitch: 65, bearing: 0 });
+
         // MATEMÁTICA: Suavizar con Turf para la cámara (200 puntos por km)
         this.rutaCoordenadas = [];
         try {
@@ -204,6 +214,7 @@ export class RouteManager {
             const geometry = rutaFeature.geometry;
             this.currentRouteGeometry = geometry; // ✅ Guardar geometría para el encuadre final
             const distancia = turf.length(geometry, { units: 'kilometers' });
+            this.routeDistance = distancia; // ✅ Guardar para decisiones de cámara
             const pasos = Math.floor(distancia * 200); 
             
             for (let i = 0; i <= pasos; i++) {
@@ -426,7 +437,12 @@ export class RouteManager {
             // COREOGRAFÍA RELIVE: Calcular progreso general
             let progreso = indexPuntoActual / this.rutaCoordenadas.length;
             let offsetAngulo = 0, offsetZoom = 0, offsetPitch = 0;
-            let saltoPuntos = 4; // 🚀 VELOCIDAD DINÁMICA: Ajustable según la fase del vuelo
+            
+            // 🧠 INTELIGENCIA DE VUELO: Distinguir entre ciudad y carretera
+            let isShortRoute = this.routeDistance < 15; // 🏙️ Menos de 15km es ruta urbana
+            let baseZoom = isShortRoute ? 14.8 : 11.8;
+            let basePitch = isShortRoute ? 60 : 62;
+            let saltoPuntos = isShortRoute ? 2 : 4; // 🚀 VELOCIDAD DINÁMICA: Más lento en ciudad
 
             if (ultimoAngulo === null) {
                 ultimoAngulo = 0; // 🧭 Empieza mirando exactamente al Norte (0 grados)
@@ -444,85 +460,107 @@ export class RouteManager {
                 velocidadGimbal = 0.0001; 
             } else if (frameCounter >= 90 && frameCounter < 160) {
                 // Segundos 1.5 a 2.6: Gira la cámara hacia la ruta progresivamente y arranca
-                saltoPuntos = 2;
+                saltoPuntos = isShortRoute ? 1 : 2;
                 velocidadGimbal = 0.02; // Ágil pero suave
             }
 
             ultimoAngulo += diff * velocidadGimbal;
 
-            // FASES DEL VUELO BASADAS EN PROGRESO
-            if (progreso > 0.03 && progreso <= 0.20) {
-                // 🚁 ACERCAMIENTO PRE-ÓRBITA: Baja un poco para ver los primeros detalles del terreno
-                let t = (progreso - 0.03) / 0.17; 
-                let smoothT = Math.sin(t * Math.PI); // Curva de campana (0 -> 1 -> 0)
-                offsetZoom = -(smoothT * 1.8); // 🔍 Acercar MÁS en pre-órbita (zoom 13.6)
-                offsetPitch = smoothT * 12;    // Levanta más la mirada
-            } else if (progreso > 0.20 && progreso < 0.70) {
-                if (progreso < 0.35) {
-                    if (!enterCalculated) {
-                        // Mirar adelante para decidir por qué lado entrar a la órbita
-                        let pAdelante = Math.min(indexPuntoActual + 200, this.rutaCoordenadas.length - 1);
-                        let angFuturo = turf.bearing(turf.point(puntoActual), turf.point(this.rutaCoordenadas[pAdelante]));
-                        let diffCurva = ((angFuturo - ultimoAngulo + 540) % 360) - 180;
-                        orbitEnterDir = diffCurva < 0 ? -1 : 1; // Orbitar hacia el lado de la curva
-                        enterCalculated = true;
-                    }
-                    let t = (progreso - 0.20) / 0.15;
-                    let smoothT = -(Math.cos(Math.PI * t) - 1) / 2;
-                    offsetAngulo = orbitEnterDir * smoothT * 180; 
-                    offsetZoom = smoothT * 1.8; 
-                    offsetPitch = -(smoothT * 20);
-                } else if (progreso >= 0.35 && progreso < 0.50) {
-                    offsetAngulo = orbitEnterDir * 180; 
-                    offsetZoom = 1.8; 
-                    offsetPitch = -20;
-                } else if (progreso >= 0.50 && progreso < 0.65) {
-                    if (!exitCalculated) {
-                        // Buscar el atajo más corto al regresar de la órbita
-                        let pAdelante = Math.min(indexPuntoActual + 200, this.rutaCoordenadas.length - 1);
-                        let angFuturo = turf.bearing(turf.point(puntoActual), turf.point(this.rutaCoordenadas[pAdelante]));
-                        let diffCurva = ((angFuturo - ultimoAngulo + 540) % 360) - 180;
-                        orbitExitDir = diffCurva < 0 ? -1 : 1; 
-                        exitCalculated = true;
-                    }
-                    let t = (progreso - 0.50) / 0.15;
-                    let smoothT = -(Math.cos(Math.PI * t) - 1) / 2;
-                    offsetAngulo = (orbitEnterDir * 180) + (orbitExitDir * smoothT * 180); 
-                    offsetZoom = 1.8 - (smoothT * 1.8); 
-                    offsetPitch = -20 + (smoothT * 20);
+            if (isShortRoute) {
+                // ========================================================
+                // 🏙️ COREOGRAFÍA PARA RUTAS CORTAS (CIUDAD / URBANAS)
+                // ========================================================
+                if (progreso > 0.03 && progreso < 0.85) {
+                    let t = (progreso - 0.03) / 0.82;
+                    let smoothT = Math.sin(t * Math.PI); // Campana: 0 -> 1 -> 0
+                    
+                    // Se acerca mucho más para ver calles y edificios claros (hasta zoom 16.3)
+                    offsetZoom = -(smoothT * 1.5); 
+                    // Levanta un poco la mirada para ver el horizonte y no el piso
+                    offsetPitch = smoothT * 15;    
+                    // Paneo lateral suave (Cámara de persecución ±25°) en lugar de órbita
+                    offsetAngulo = Math.sin(t * Math.PI * 2) * 25; 
+                    
+                    // Acelera levemente en el medio
+                    saltoPuntos = 2 + Math.round(smoothT * 1); 
                 }
-            } else if (progreso >= 0.70 && progreso < 0.85) {
-                // 🚁 NUEVA FASE: VUELO RASANTE CINEMÁTICO (TRACKING SHOT LATERAL)
-                if (progreso < 0.73) {
-                    // Picada muy rápida con giro hacia el lado OPUESTO de la montaña
-                    let t = (progreso - 0.70) / 0.03;
-                    let smoothT = -(Math.cos(Math.PI * t) - 1) / 2;
-                    offsetZoom = -(smoothT * 1.3); // 🔭 Menos zoom (13.1 máx) para no comerse las montañas
-                    offsetPitch = smoothT * 10;    // Levanta la mirada un poco (pitch 72)
-                    // 🎥 Gira -75° (lado opuesto) para volar viendo la ruta de frente y la montaña al fondo
-                    offsetAngulo = -orbitExitDir * smoothT * 75; 
-                    saltoPuntos = 4 + Math.round(smoothT * 3);
-                } else if (progreso >= 0.73 && progreso < 0.74) {
-                    // Mantener vuelo paralelo (TIEMPO MUY REDUCIDO)
-                    offsetZoom = -1.3;
-                    offsetPitch = 10;
-                    offsetAngulo = -orbitExitDir * 75;
-                    saltoPuntos = 7; // Vuelo rápido sostenido
-                } else if (progreso >= 0.74 && progreso < 0.85) {
-                    // Volver a tomar altitud y mirar al frente progresivamente
-                    let t = (progreso - 0.74) / 0.11;
-                    let smoothT = -(Math.cos(Math.PI * t) - 1) / 2; 
-                    offsetZoom = -1.3 + (smoothT * 1.3); 
-                    offsetPitch = 10 - (smoothT * 10);
-                    offsetAngulo = (-orbitExitDir * 75) - (-orbitExitDir * smoothT * 75); // Regresa al frente
-                    // 🚀 ANTI-ILUSIÓN ÓPTICA: Aceleración más agresiva al subir rápido (7 a 10)
-                    saltoPuntos = 7 + Math.round(t * 3); 
+            } else {
+                // ========================================================
+                // ⛰️ COREOGRAFÍA PARA RUTAS LARGAS (MONTAÑAS / CARRETERA)
+                // ========================================================
+                if (progreso > 0.03 && progreso <= 0.20) {
+                    // 🚁 ACERCAMIENTO PRE-ÓRBITA: Baja un poco para ver los primeros detalles del terreno
+                    let t = (progreso - 0.03) / 0.17; 
+                    let smoothT = Math.sin(t * Math.PI); // Curva de campana (0 -> 1 -> 0)
+                    offsetZoom = -(smoothT * 1.8); // 🔍 Acercar MÁS en pre-órbita (zoom 13.6)
+                    offsetPitch = smoothT * 12;    // Levanta más la mirada
+                } else if (progreso > 0.20 && progreso < 0.70) {
+                    if (progreso < 0.35) {
+                        if (!enterCalculated) {
+                            // Mirar adelante para decidir por qué lado entrar a la órbita
+                            let pAdelante = Math.min(indexPuntoActual + 200, this.rutaCoordenadas.length - 1);
+                            let angFuturo = turf.bearing(turf.point(puntoActual), turf.point(this.rutaCoordenadas[pAdelante]));
+                            let diffCurva = ((angFuturo - ultimoAngulo + 540) % 360) - 180;
+                            orbitEnterDir = diffCurva < 0 ? -1 : 1; // Orbitar hacia el lado de la curva
+                            enterCalculated = true;
+                        }
+                        let t = (progreso - 0.20) / 0.15;
+                        let smoothT = -(Math.cos(Math.PI * t) - 1) / 2;
+                        offsetAngulo = orbitEnterDir * smoothT * 180; 
+                        offsetZoom = smoothT * 1.8; 
+                        offsetPitch = -(smoothT * 20);
+                    } else if (progreso >= 0.35 && progreso < 0.50) {
+                        offsetAngulo = orbitEnterDir * 180; 
+                        offsetZoom = 1.8; 
+                        offsetPitch = -20;
+                    } else if (progreso >= 0.50 && progreso < 0.65) {
+                        if (!exitCalculated) {
+                            // Buscar el atajo más corto al regresar de la órbita
+                            let pAdelante = Math.min(indexPuntoActual + 200, this.rutaCoordenadas.length - 1);
+                            let angFuturo = turf.bearing(turf.point(puntoActual), turf.point(this.rutaCoordenadas[pAdelante]));
+                            let diffCurva = ((angFuturo - ultimoAngulo + 540) % 360) - 180;
+                            orbitExitDir = diffCurva < 0 ? -1 : 1; 
+                            exitCalculated = true;
+                        }
+                        let t = (progreso - 0.50) / 0.15;
+                        let smoothT = -(Math.cos(Math.PI * t) - 1) / 2;
+                        offsetAngulo = (orbitEnterDir * 180) + (orbitExitDir * smoothT * 180); 
+                        offsetZoom = 1.8 - (smoothT * 1.8); 
+                        offsetPitch = -20 + (smoothT * 20);
+                    }
+                } else if (progreso >= 0.70 && progreso < 0.85) {
+                    // 🚁 NUEVA FASE: VUELO RASANTE CINEMÁTICO (TRACKING SHOT LATERAL)
+                    if (progreso < 0.73) {
+                        // Picada muy rápida con giro hacia el lado OPUESTO de la montaña
+                        let t = (progreso - 0.70) / 0.03;
+                        let smoothT = -(Math.cos(Math.PI * t) - 1) / 2;
+                        offsetZoom = -(smoothT * 1.3); // 🔭 Menos zoom (13.1 máx) para no comerse las montañas
+                        offsetPitch = smoothT * 10;    // Levanta la mirada un poco (pitch 72)
+                        // 🎥 Gira -75° (lado opuesto) para volar viendo la ruta de frente y la montaña al fondo
+                        offsetAngulo = -orbitExitDir * smoothT * 75; 
+                        saltoPuntos = 4 + Math.round(smoothT * 3);
+                    } else if (progreso >= 0.73 && progreso < 0.74) {
+                        // Mantener vuelo paralelo (TIEMPO MUY REDUCIDO)
+                        offsetZoom = -1.3;
+                        offsetPitch = 10;
+                        offsetAngulo = -orbitExitDir * 75;
+                        saltoPuntos = 7; // Vuelo rápido sostenido
+                    } else if (progreso >= 0.74 && progreso < 0.85) {
+                        // Volver a tomar altitud y mirar al frente progresivamente
+                        let t = (progreso - 0.74) / 0.11;
+                        let smoothT = -(Math.cos(Math.PI * t) - 1) / 2; 
+                        offsetZoom = -1.3 + (smoothT * 1.3); 
+                        offsetPitch = 10 - (smoothT * 10);
+                        offsetAngulo = (-orbitExitDir * 75) - (-orbitExitDir * smoothT * 75); // Regresa al frente
+                        // 🚀 ANTI-ILUSIÓN ÓPTICA: Aceleración más agresiva al subir rápido (7 a 10)
+                        saltoPuntos = 7 + Math.round(t * 3); 
+                    }
                 }
             }
 
-            // 🚁 VUELO MÁS ALTO: Aléjate a zoom 11.8 y mira un poco más abajo (pitch 62). 
-            // Esto elimina la sensación de "sube y baja" al cruzar topografía pesada.
-            this.map.jumpTo({ center: puntoActual, pitch: 62 + offsetPitch, bearing: ultimoAngulo + offsetAngulo, zoom: 11.8 - offsetZoom });
+            // 🚁 APLICAR MOVIMIENTO DE CÁMARA
+            // Se usa baseZoom y basePitch para adaptarse a rutas cortas o largas
+            this.map.jumpTo({ center: puntoActual, pitch: basePitch + offsetPitch, bearing: ultimoAngulo + offsetAngulo, zoom: baseZoom - offsetZoom });
 
             // 🏘️ DETECTOR DE POBLADOS: Mostrar etiqueta y efecto al pasar cerca
             for (const poblado of this.pobladosRuta) {
