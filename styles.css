@@ -453,6 +453,109 @@ video:not([src]), video[src=""], video[src="null"] {
     will-change: opacity, transform, clip-path;
 }
 
+/* ====== REDES SOCIALES (SÍGUENOS) ====== */
+#grafico-redes {
+  position: absolute;
+  right: 0; /* Pegado al borde derecho */
+  top: 45%; /* 🔥 Al centro del eje Y como pediste */
+  display: flex;
+  align-items: center;
+  /* 🔥 Fondo original (Azul corporativo excelente) */
+  background: linear-gradient(90deg, rgba(16, 102, 255, 0.95) 0%, rgba(16, 50, 100, 0.9) 100%);
+  color: white;
+  padding: 6px 20px 6px 10px;
+  border-radius: 30px 0 0 30px; /* Forma de píldora original */
+  box-shadow: -5px 5px 15px rgba(0,0,0,0.3);
+  z-index: 100;
+  
+  /* Preparación para animaciones del motor */
+  transition-property: opacity, transform, clip-path;
+  will-change: opacity, transform, clip-path;
+  display: none; /* Oculto por defecto */
+}
+
+.redes-wrapper {
+  display: grid;
+  align-items: center;
+  justify-items: start;
+}
+
+.redes-escena {
+  grid-area: 1 / 1; /* Esto superpone la escena 1 y 2 */
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.redes-icono {
+  background: white;
+  color: #1066ff;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-right: 8px;
+}
+
+.redes-icono svg {
+  width: 14px;
+  height: 14px;
+}
+
+#redes-logo {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  border-radius: 50%;
+  margin-right: 8px;
+  background: white;
+  padding: 2px;
+  box-sizing: border-box;
+}
+
+.redes-titulo {
+  font-size: 15px;
+  font-weight: bold;
+  color: white;
+  letter-spacing: 1px;
+  margin: 0;
+}
+
+#grafico-redes h1 {
+  margin: 0;
+  padding: 0;
+  font-size: 16px;
+  font-weight: bold;
+  background: transparent;
+  color: white;
+  white-space: nowrap;
+}
+
+/* Coreografias de Redes */
+.escena-1 {
+  opacity: 0;
+  animation: inOutEscena1 4s ease forwards 0.5s;
+}
+
+.escena-2 {
+  opacity: 0;
+  animation: inEscena2 0.5s ease forwards 4.5s;
+}
+
+@keyframes inOutEscena1 {
+  0% { opacity: 0; transform: translateY(10px); }
+  10% { opacity: 1; transform: translateY(0); }
+  85% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-10px); }
+}
+
+@keyframes inEscena2 {
+  0% { opacity: 0; transform: translateY(10px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
 #grafico-publicidad img {
   width: var(--ads-img-w);
   height: var(--ads-img-h);

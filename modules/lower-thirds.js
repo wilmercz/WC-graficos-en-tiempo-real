@@ -27,6 +27,12 @@ export class LowerThirds {
                 img: null,
                 video: null,
                 isVisible: false
+            },
+            redes: {                        // ✅ AGREGADO BLOQUE REDES
+                container: null,
+                h1: null,
+                img: null,
+                isVisible: false
             }
         };
         
@@ -82,11 +88,19 @@ export class LowerThirds {
             adContainer.style.bottom = '0px';
             adContainer.style.zIndex = '1001';
         }
+        
+        // Elementos de redes sociales
+        this.elements.redes.container = document.getElementById('grafico-redes');
+        if (this.elements.redes.container) {
+            this.elements.redes.h1 = this.elements.redes.container.querySelector('h1');
+            this.elements.redes.img = this.elements.redes.container.querySelector('#redes-logo');
+        }
 
         console.log('📺 Lower thirds elements found:', {
             invitado: !!this.elements.invitado.container,
             tema: !!this.elements.tema.container,
             lugar: !!this.elements.lugar.container,
+            redes: !!this.elements.redes.container,
             publicidad: !!this.elements.publicidad.container
         });
     }
@@ -369,6 +383,29 @@ export class LowerThirds {
         }
         
         console.log('📺 Contenido de publicidad actualizado:', data);
+    }
+
+    /**
+     * Actualizar contenido de Redes Sociales
+     */
+    updateRedesContent(data) {
+        const element = this.elements.redes;
+        
+        if (element.h1 && data.redes) {
+            element.h1.textContent = data.redes;
+        }
+        
+        // Mostrar logo en la escena 2 si existe URL
+        if (element.img) {
+            if (data.logoUrl) {
+                element.img.src = data.logoUrl;
+                element.img.style.display = 'block';
+            } else {
+                element.img.style.display = 'none';
+            }
+        }
+        
+        console.log('👍 Contenido de redes actualizado:', data);
     }
 
     // ===== MÉTODOS DE ANIMACIÓN =====

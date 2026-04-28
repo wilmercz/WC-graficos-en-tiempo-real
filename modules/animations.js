@@ -317,13 +317,20 @@ applySalidaAnimation(element, animationType) {
         const globalConfig = window.animacionConfig?.[elementType] || {};
         
         // Configuración por defecto
-        const defaultConfig = {
+        let defaultConfig = {
             delay: 200,
             duracion: 600,
             easing: 'EASE_IN_OUT',
             entrada: 'FADE_IN',
             salida: 'FADE_OUT'
         };
+        
+        // ✅ Fallback específico: Siempre forzar deslizamiento para Redes Sociales
+        if (elementType === 'redes') {
+            defaultConfig.entrada = 'SLIDE_IN_RIGHT';
+            defaultConfig.salida = 'SLIDE_OUT_RIGHT';
+            defaultConfig.delay = 100;
+        }
         
         // Merge de configuraciones
         return {

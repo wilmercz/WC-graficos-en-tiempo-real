@@ -221,6 +221,7 @@ class StreamGraphicsApp {
                 'Mostrar_Tema': false,
                 'Mostrar_Lugar': false,
                 'Mostrar_Publicidad': false,
+                'Mostrar_Redes': false,
                 'mostrar_secuencia_invitado_tema': false
             };
 
@@ -373,11 +374,14 @@ class StreamGraphicsApp {
             Mostrar_Hora: rawData.Mostrar_Hora,
             Mostrar_Portada: rawData.Mostrar_Portada,
             Mostar_PortadaVideo: rawData.Mostar_PortadaVideo,
+            Mostrar_Redes: rawData.Mostrar_Redes, // ✅ Mapear switch de Redes
+            
             // ✅ Mapear contenido
             Invitado: processedData.content.invitado,
             Rol: processedData.content.rol,
             Tema: processedData.content.tema,
             Lugar: processedData.content.lugar || rawData.Lugar || 'Sin Lugar',
+            Texto_Redes: rawData.Texto_Redes || 'ArkiMedes TV',
             
             // ✅ Mapear URLs
             urlLogo: processedData.images.logoUrl,
@@ -448,13 +452,15 @@ class StreamGraphicsApp {
     applyVisibilityChangesNow(visibility) {
         console.log('🎬 Ejecutando cambios de visibilidad:', visibility);
     
+        const redesVisible = window.lastFirebaseData.Mostrar_Redes === true || String(window.lastFirebaseData.Mostrar_Redes).toLowerCase() === 'true';
+
         // 🔻 RESTO DE ELEMENTOS (invitadoRol, tema, publicidad) - LÓGICA CORREGIDA
         const elementosLowerThird = [
             { tipo: 'lugar', visible: visibility.lugarAlAire, id: 'grafico-lugar' }, // ✅ PRIMERO: Lugar (fondo)
             { tipo: 'invitadoRol', visible: visibility.graficoAlAire, id: 'grafico-invitado-rol' }, // ✅ SEGUNDO: Invitado (encima)
             { tipo: 'tema', visible: visibility.temaAlAire, id: 'grafico-tema' },
-            { tipo: 'lugar', visible: visibility.lugarAlAire, id: 'grafico-lugar' },
-            { tipo: 'publicidad', visible: visibility.publicidadAlAire, id: 'grafico-publicidad' }
+            { tipo: 'publicidad', visible: visibility.publicidadAlAire, id: 'grafico-publicidad' },
+            { tipo: 'redes', visible: redesVisible, id: 'grafico-redes' } // ✅ AGREGADO: Redes Sociales
         ];
         
         elementosLowerThird.forEach(({ tipo, visible, id }) => {
@@ -471,7 +477,7 @@ class StreamGraphicsApp {
             
             if (visible) {
                 // ======= MOSTRAR ELEMENTO =======
-                el.style.display = (tipo === 'invitadoRol' || tipo === 'lugar') ? 'flex' : 'block';
+                el.style.display = (tipo === 'invitadoRol' || tipo === 'lugar' || tipo === 'redes') ? 'flex' : 'block';
                 
                 // ✅ Aplicar animación de entrada con configuración Firebase
                 this.modules.animations.applyDynamicAnimationFromOldSystem(el, tipo, true);
@@ -690,6 +696,10 @@ class StreamGraphicsApp {
         this.modules.lowerThirds.updateInvitadoContent(data.content);
         this.modules.lowerThirds.updateTemaContent(data.content);
         this.modules.lowerThirds.updateLugarContent(data.content);
+        this.modules.lowerThirds.updateRedesContent({ 
+            redes: window.lastFirebaseData.Texto_Redes,
+            logoUrl: window.lastFirebaseData.urlLogo || data.images.portadaLogoUrl
+        });
         
         // 🖼️ APLICAR IMÁGENES SIN ELIMINAR LAS EXISTENTES
         console.log('🖼️ Aplicando imágenes:', data.images);
@@ -1032,7 +1042,10 @@ class StreamGraphicsApp {
         
         if (animations && Object.keys(animations).length > 0) {
             // Actualizar configuración global
-            window.animacionConfig = animations;
+            window.animacionConfig = {
+                ...window.animacionConfig, // ✅ Preservar configs predeterminadas
+                ...animations
+            };
             
             // Actualizar duraciones en el engine de animaciones
             const durations = {};
@@ -1287,6 +1300,7 @@ class StreamGraphicsApp {
             duracionPublicidad: 30,
             duracionLogoPrincipal: 60,
             duracionLogosAliados: 45,
+            duracionRedes: 15,
             modoAutomatico: true,
             habilitarOcultamientoAutomatico: true,
             habilitarRotacionLogos: false
@@ -1337,6 +1351,13 @@ class StreamGraphicsApp {
                 easing: 'EASE_IN_OUT',
                 entrada: 'WIPE_IN_RIGHT',
                 salida: 'WIPE_OUT_LEFT'
+            },
+            redes: {
+                delay: 100,
+                duracion: 600,
+                easing: 'EASE_IN_OUT',
+                entrada: 'SLIDE_IN_RIGHT',
+                salida: 'SLIDE_OUT_RIGHT'
             }
         };
         
@@ -1505,7 +1526,8 @@ class StreamGraphicsApp {
                 'invitado': 'grafico-invitado-rol', // ✅ AGREGADO: Compatibilidad por seguridad
                 'tema': 'grafico-tema', 
                 'publicidad': 'grafico-publicidad',
-                'lugar': 'grafico-lugar'
+                'lugar': 'grafico-lugar',
+                'redes': 'grafico-redes'
             };
             
             const el = document.getElementById(elementMap[elementType]);
@@ -1550,6 +1572,7 @@ class StreamGraphicsApp {
                     'tema': 'Mostrar_Tema',
                     'publicidad': 'Mostrar_Publicidad',
                     'lugar': 'Mostrar_Lugar',
+                    'redes': 'Mostrar_Redes',
                     'logo': 'Mostrar_Logo'
                 };
 
@@ -1574,6 +1597,7 @@ class StreamGraphicsApp {
             duracionPublicidad: data.duracionPublicidad || 15, // ✅ CAMBIO: 15s por defecto si es null en Firebase
             duracionLogoPrincipal: data.duracionLogoPrincipal || 60,
             duracionLogosAliados: data.duracionLogosAliados || 45,
+            duracionRedes: data.duracionRedes || 15, // ✅ Auto-ocultar Redes en 15s
             modoAutomatico: data.modoAutomatico !== false,
             habilitarOcultamientoAutomatico: data.habilitarOcultamientoAutomatico !== false,
             habilitarRotacionLogos: data.habilitarRotacionLogos || false
@@ -1581,7 +1605,10 @@ class StreamGraphicsApp {
         
         // Actualizar configuración de animaciones
         if (data.animaciones) {
-            window.animacionConfig = data.animaciones;
+            window.animacionConfig = {
+                ...window.animacionConfig, // ✅ Preservar configs predeterminadas
+                ...data.animaciones
+            };
         }
         
         console.log('⚙️ Configuración global actualizada:', window.currentConfig);
