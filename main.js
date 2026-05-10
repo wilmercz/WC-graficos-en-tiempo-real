@@ -12,6 +12,8 @@ import { clockInstance } from './modules/clock.js';
 import { debugTools } from './utils/debug-tools.js';
 import { SequenceManager } from './modules/sequence-manager.js'; // ✅ IMPORTACIÓN FALTANTE
 import { routeManager } from './modules/route-manager.js'; // ✅ IMPORTACIÓN RUTAS 3D
+import { AudioManager } from './modules/audio-manager.js'; // ✅ IMPORTACIÓN AUDIO
+import { WebRTCManager } from './modules/webrtc-manager.js'; // ✅ IMPORTACIÓN WEBRTC
 
 class StreamGraphicsApp {
     constructor() {
@@ -27,7 +29,9 @@ class StreamGraphicsApp {
             clock: null,
             debug: null,
             sequenceManager: null, // ✅ NUEVO: Gestor de secuencias
-            routeManager: null
+            routeManager: null,
+            audioManager: null, // ✅ NUEVO: Gestor de audio
+            webrtcManager: null // ✅ NUEVO: Gestor de tomas en vivo
         };
         this.performance = {
             initTime: 0,
@@ -222,6 +226,7 @@ class StreamGraphicsApp {
                 'Mostrar_Lugar': false,
                 'Mostrar_Publicidad': false,
                 'Mostrar_Redes': false,
+                'Mostrar_EnVivo': false, // ✅ Apagar tomas de apoyo al inicio
                 'mostrar_secuencia_invitado_tema': false
             };
 
@@ -324,6 +329,19 @@ class StreamGraphicsApp {
         window.lastRouteState.show = isShow;
         // =======================================================
 
+        // =======================================================
+        // 🎥 LÓGICA DE TOMAS EN VIVO (WEBRTC B-ROLL)
+        // =======================================================
+        if (rawData.Mostrar_EnVivo !== undefined) {
+            // Pasamos el comando al WebRTC Manager. Él aplicará el "Doble Seguro".
+            // Por defecto, si no especificamos "Muted", lo dejamos en True (silenciado).
+            const isMuted = rawData.EnVivo_Muted !== undefined ? rawData.EnVivo_Muted : true;
+            
+            if (this.modules.webrtcManager) {
+                this.modules.webrtcManager.handleCommand(rawData.Mostrar_EnVivo, isMuted);
+            }
+        }
+
         // Usar el data processor
         const processedData = this.modules.dataProcessor.process(rawData);
         if (!processedData) return;
@@ -375,6 +393,7 @@ class StreamGraphicsApp {
             Mostrar_Portada: rawData.Mostrar_Portada,
             Mostar_PortadaVideo: rawData.Mostar_PortadaVideo,
             Mostrar_Redes: rawData.Mostrar_Redes, // ✅ Mapear switch de Redes
+            Mostrar_EnVivo: rawData.Mostrar_EnVivo, // ✅ Mapear switch de en vivo
             
             // ✅ Mapear contenido
             Invitado: processedData.content.invitado,
@@ -1153,6 +1172,14 @@ class StreamGraphicsApp {
         // Motor 3D de Rutas
         this.modules.routeManager = routeManager;
         this.modules.routeManager.init();
+        
+        // Audio Manager
+        this.modules.audioManager = new AudioManager(this);
+        this.modules.audioManager.init();
+        
+        // WebRTC Manager (Tomas de apoyo)
+        this.modules.webrtcManager = new WebRTCManager(this);
+        this.modules.webrtcManager.init();
 
         console.log('✅ Módulos inicializados');
     }
