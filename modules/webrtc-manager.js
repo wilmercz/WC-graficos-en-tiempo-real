@@ -11,6 +11,7 @@ export class WebRTCManager {
         // Estado solicitado por Firebase vs Estado real de conexión
         this.firebaseRequestedVisible = false;
         this.isConnected = false;
+        this._processedCandidates = new Set();  // ✅ Evita procesar IPs duplicadas
 
         // Rutas de Firebase para la Señalización (Signaling)
         this.SIGNALING_PATH = 'CLAVE_STREAM_FB/STREAM_LIVE/WEBRTC';
@@ -69,12 +70,15 @@ export class WebRTCManager {
 
         // 2. Escuchar los "Candidatos ICE" (Rutas de red/IPs) de Kotlin
         fb.onDataChange(`${this.SIGNALING_PATH}/candidates/android`, (candidatesData) => {
-            if (candidatesData && this.peerConnection) {
-                Object.values(candidatesData).forEach(candidate => {
-                    this.peerConnection.addIceCandidate(new RTCIceCandidate(candidate))
-                        .catch(e => console.error('🎥 Error añadiendo ICE candidate:', e));
-                });
-            }
+            if (!candidatesData || !this.peerConnection) return;
+            
+            Object.entries(candidatesData).forEach(([id, candidate]) => {
+                if (this._processedCandidates.has(id)) return;  // Ya fue procesado, ignorar
+                this._processedCandidates.add(id);
+                
+                this.peerConnection.addIceCandidate(new RTCIceCandidate(candidate))
+                    .catch(e => console.error('🎥 Error añadiendo ICE candidate:', e));
+            });
         });
     }
 
@@ -82,6 +86,8 @@ export class WebRTCManager {
      * Procesar la oferta y crear la respuesta
      */
     async handleOffer(offer) {
+        this._processedCandidates.clear(); // ✅ Limpiar IPs de sesiones anteriores
+
         // Limpiar conexión anterior si existía
         if (this.peerConnection) {
             this.peerConnection.close();
@@ -90,15 +96,41 @@ export class WebRTCManager {
         // Crear nueva conexión
         this.peerConnection = new RTCPeerConnection({
             iceServers: [
-                { urls: 'stun:stun.l.google.com:19302' } // Servidor STUN público para descubrir IPs
+                { urls: 'stun:stun.l.google.com:19302' }, // Servidor STUN público
+                {
+                    urls: 'turn:relay.metered.ca:80',
+                    username: 'openrelayproject',
+                    credential: 'openrelayproject'
+                },
+                {
+                    urls: 'turn:relay.metered.ca:443',
+                    username: 'openrelayproject',
+                    credential: 'openrelayproject'
+                }
             ]
         });
 
         // Escuchar cuando el video de Kotlin llega
         this.peerConnection.ontrack = (event) => {
-            console.log('🎥 📺 ¡Stream de video recibido de Kotlin!');
-            if (this.videoElement.srcObject !== event.streams[0]) {
-                this.videoElement.srcObject = event.streams[0];
+            console.log(`🎥 📺 ¡Track de ${event.track.kind} recibido de Kotlin!`);
+            
+            // 🛡️ Asegurar que guardamos todos los tracks recibidos
+            let stream = this.videoElement.srcObject;
+            if (!stream) {
+                stream = event.streams && event.streams.length > 0 ? event.streams[0] : new MediaStream();
+                this.videoElement.srcObject = stream;
+            }
+            
+            if (event.streams && event.streams.length === 0) {
+                stream.addTrack(event.track);
+            }
+            
+            // Intentar reproducir de inmediato
+            this.videoElement.play().catch(() => {});
+            
+            // 🚀 FORZAR REPRODUCCIÓN cuando lleguen los fotogramas reales
+            this.videoElement.onloadeddata = () => {
+                this.videoElement.play().catch(e => console.error('🎥 ❌ Error de Autoplay WebRTC:', e));
             }
         };
 
