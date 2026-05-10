@@ -1434,6 +1434,23 @@ class StreamGraphicsApp {
                     const testVisibility = { graficoAlAire: false, temaAlAire: false, logoAlAire: false, publicidadAlAire: true };
                     this.applyVisibilityChangesNow(testVisibility);
                 },
+                mostrarEnVivo: () => {
+                    console.log('🧪 TEST: Forzando capa WebRTC visible...');
+                    const envivo = document.getElementById('grafico-envivo');
+                    if (envivo) {
+                        envivo.classList.add('visible');
+                        envivo.style.zIndex = '9999'; // Encima de todo para depurar
+                        if (envivo.querySelector('video')) envivo.querySelector('video').muted = false; // Encender audio
+                    }
+                },
+                ocultarEnVivo: () => {
+                    console.log('🧪 TEST: Ocultando capa WebRTC...');
+                    const envivo = document.getElementById('grafico-envivo');
+                    if (envivo) {
+                        envivo.classList.remove('visible');
+                        envivo.style.zIndex = '1'; // Devolverlo a su lugar
+                    }
+                },
                 ocultarTodo: () => {
                     console.log('🧪 TEST: Ocultando todo...');
                     const testVisibility = { graficoAlAire: false, temaAlAire: false, logoAlAire: false, publicidadAlAire: false };
@@ -1466,6 +1483,8 @@ class StreamGraphicsApp {
                 console.log('   StreamDebug.test.mostrarTema() - Mostrar tema');
                 console.log('   StreamDebug.test.mostrarLogo() - Mostrar logo + rotar');
                 console.log('   StreamDebug.test.mostrarPublicidad() - Mostrar publicidad');
+                console.log('   StreamDebug.test.mostrarEnVivo() - 🔥 Forzar mostrar video WebRTC');
+                console.log('   StreamDebug.test.ocultarEnVivo() - 🛑 Ocultar video WebRTC');
                 console.log('   StreamDebug.test.ocultarTodo() - Ocultar todo');
                 console.log('   StreamDebug.status() - Ver estado completo');
                 console.log('   StreamDebug.debug() - Análisis completo');
