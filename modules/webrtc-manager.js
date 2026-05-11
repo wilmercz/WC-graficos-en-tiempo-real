@@ -10,6 +10,7 @@ export class WebRTCManager {
         
         // Estado solicitado por Firebase vs Estado real de conexión
         this.firebaseRequestedVisible = false;
+        this.firebaseRequestedMuted = true; // ✅ Rastrea si Firebase quiere el audio encendido
         this.isConnected = false;
         this._processedCandidates = new Set();  // ✅ Evita procesar IPs duplicadas
         this.pendingCandidates = []; // ✅ Sala de espera para IPs de Android
@@ -63,6 +64,25 @@ export class WebRTCManager {
             };
             document.body.appendChild(testBtn);
             */
+
+            // -------------------------------------------------------------------
+            // 🔓 DESBLOQUEO DE AUDIO POR TOQUE EN PANTALLA
+            // Si el navegador bloqueó el audio por falta de interacción,
+            // tocar cualquier parte de la pantalla lo reactivará (solo si Firebase
+            // ha ordenado que el audio debe estar encendido).
+            // 🛑 Para DESACTIVAR esta función a futuro, comenta este bloque:
+            // -------------------------------------------------------------------
+            const unlockAudioOnInteraction = () => {
+                // Si WebRTC existe, debe estar visible y Firebase pidió audio (muted = false)
+                if (this.videoElement && this.firebaseRequestedVisible && this.firebaseRequestedMuted === false) {
+                    console.log('👆 Interacción detectada: Restaurando audio de WebRTC...');
+                    this.videoElement.muted = false;
+                    this.videoElement.play().catch(e => console.warn('🎥 Falló reactivación por toque:', e));
+                }
+            };
+            document.addEventListener('click', unlockAudioOnInteraction);
+            document.addEventListener('touchstart', unlockAudioOnInteraction, { passive: true });
+            // -------------------------------------------------------------------
         } else {
             this.videoElement = this.containerElement.querySelector('video');
         }
@@ -122,16 +142,32 @@ export class WebRTCManager {
         // Crear nueva conexión
         this.peerConnection = new RTCPeerConnection({
             iceServers: [
-                { urls: 'stun:stun.l.google.com:19302' }, // Servidor STUN público
+                // STUN (sin rate limit, siempre disponibles)
+                { urls: 'stun:stun.l.google.com:19302' },
+                { urls: 'stun:stun1.l.google.com:19302' },
+        
+                // TURN con credenciales reales de metered.ca
+                // Obtén las tuyas gratis en https://dashboard.metered.ca/
+                // Las mismas credenciales que pusiste en WebRTCManager.kt
                 {
-                    urls: 'turn:relay.metered.ca:80',
-                    username: 'openrelayproject',
-                    credential: 'openrelayproject'
+                    urls: 'turn:standard.relay.metered.ca:80',
+                    username: 'METERED_USER',    // ← mismo que en Kotlin
+                    credential: 'METERED_PASS'  // ← mismo que en Kotlin
                 },
                 {
-                    urls: 'turn:relay.metered.ca:443',
-                    username: 'openrelayproject',
-                    credential: 'openrelayproject'
+                    urls: 'turn:standard.relay.metered.ca:80?transport=tcp',
+                    username: 'METERED_USER',
+                    credential: 'METERED_PASS'
+                },
+                {
+                    urls: 'turn:standard.relay.metered.ca:443',
+                    username: 'METERED_USER',
+                    credential: 'METERED_PASS'
+                },
+                {
+                    urls: 'turn:standard.relay.metered.ca:443?transport=tcp',
+                    username: 'METERED_USER',
+                    credential: 'METERED_PASS'
                 }
             ]
         });
@@ -229,6 +265,7 @@ export class WebRTCManager {
      */
     handleCommand(mostrar, muted) {
         this.firebaseRequestedVisible = mostrar;
+        this.firebaseRequestedMuted = muted;
         
         if (this.videoElement) {
             this.videoElement.muted = muted;
