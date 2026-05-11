@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎥 Emulador de Kotlin (Broadcaster)</title>
+    <!-- Firebase 8 (Compat) para script directo -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <style>
+        body { font-family: Arial; text-align: center; padding: 20px; background: #222; color: white; }
+        video { background: #000; width: 100%; max-width: 600px; border-radius: 10px; margin-bottom: 20px; border: 3px solid #444; }
+        button { padding: 15px 30px; font-size: 18px; font-weight: bold; border: none; border-radius: 5px; cursor: pointer; margin: 10px; }
+        #btnStart { background: #007bff; color: white; }
+        #btnLive { background: #dc3545; color: white; opacity: 0.5; pointer-events: none; }
+        #btnLive.active { opacity: 1; pointer-events: all; }
+    </style>
+</head>
+<body>
+    <h1>Emulador WebRTC (Cámara a Firebase)</h1>
+    <p>Usa esto para probar si tu sistema de gráficos web recibe señal correctamente.</p>
+    
+    <video id="localVideo" autoplay playsinline muted></video>
+    
+    <div>
+        <button id="btnStart" disabled>1. Conectando a Firebase...</button>
+        <button id="btnLive" disabled>2. Transmitir a Gráficos</button>
+    </div>
+
+    <p id="status">Estado: Esperando...</p>
+
+    <script>
+        // 1. Inicializar Firebase (Tu configuración exacta)
+        const firebaseConfig = {
+            apiKey: "AIzaSyD0lkEDKhia76E6ef3uU0B1lOH8CyklCnc",
+            authDomain: "arki-service-autoridades.firebaseapp.com",
+            databaseURL: "https://arki-service-autoridades.firebaseio.com",
+            projectId: "arki-service-autoridades"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const SIGNALING_PATH = 'CLAVE_STREAM_FB/STREAM_LIVE/WEBRTC';
+        const GRAFICOS_PATH = 'CLAVE_STREAM_FB/STREAM_LIVE/GRAFICOS';
+
+        let localStream;
+        let peerConnection;
+
+        const localVideo = document.getElementById('localVideo');
+        const btnStart = document.getElementById('btnStart');
+        const btnLive = document.getElementById('btnLive');
+        const statusTxt = document.getElementById('status');
+
+        // 1.5 Autenticación Anónima (Igual que MainActivity.kt)
+        firebase.auth().signInAnonymously().then(() => {
+            console.log("✅ Autenticado anónimamente con Firebase");
+            btnStart.disabled = false;
+            btnStart.innerText = "1. Encender Cámara";
+            statusTxt.innerText = "Estado: Autenticado. Esperando cámara...";
+        }).catch((error) => {
+            statusTxt.innerText = "Error de Auth: " + error.message;
+        });
+
+        // 2. Encender Cámara de la Laptop/Celular
+        btnStart.onclick = async () => {
+            try {
+                localStream = await navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 720 }, audio: true });
+                localVideo.srcObject = localStream;
+                btnLive.classList.add('active');
+                btnLive.disabled = false;
+                statusTxt.innerText = "Estado: Cámara lista. Presiona Transmitir.";
+            } catch (e) {
+                alert("Error al acceder a la cámara: " + e.message);
+            }
+        };
+
+        // 3. Iniciar Transmisión WebRTC (Igual que Kotlin)
+        btnLive.onclick = async () => {
+            btnLive.innerText = "Transmitiendo...";
+            btnLive.style.background = "green";
+            statusTxt.innerText = "Estado: Conectando...";
+
+            // A. Limpiar Firebase viejo
+            await db.ref(SIGNALING_PATH).remove();
+            
+            // B. Mandar señal de "Mostrar En Vivo" a tus gráficos
+            await db.ref(GRAFICOS_PATH).update({ Mostrar_EnVivo: true, EnVivo_Muted: false });
+
+            // C. Crear Peer Connection con Servidor TURN
+            peerConnection = new RTCPeerConnection({
+                iceServers: [
+                    { urls: 'stun:stun.l.google.com:19302' },
+                    { urls: 'turn:relay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' }
+                ]
+            });
+
+            // D. Inyectar Tracks de la cámara
+            localStream.getTracks().forEach(track => {
+                peerConnection.addTrack(track, localStream);
+            });
+
+            // E. Enviar ICE Candidates a Firebase (Android -> Web)
+            peerConnection.onicecandidate = (event) => {
+                if (event.candidate) {
+                    const pushId = db.ref(`${SIGNALING_PATH}/candidates/android`).push().key;
+                    db.ref(`${SIGNALING_PATH}/candidates/android/${pushId}`).set(event.candidate.toJSON());
+                }
+            };
+
+            // F. Monitorear conexión
+            peerConnection.onconnectionstatechange = () => {
+                statusTxt.innerText = `Estado WebRTC: ${peerConnection.connectionState.toUpperCase()}`;
+            };
+
+            // G. Crear Oferta y Subirla
+            const offer = await peerConnection.createOffer();
+            await peerConnection.setLocalDescription(offer);
+            await db.ref(`${SIGNALING_PATH}/offer`).set({ type: offer.type, sdp: offer.sdp });
+
+            // H. Escuchar la Respuesta de tu sistema de Gráficos (webrtc-manager.js)
+            db.ref(`${SIGNALING_PATH}/answer`).on('value', async (snapshot) => {
+                const answer = snapshot.val();
+                if (answer && peerConnection.signalingState !== "stable") {
+                    console.log("Respuesta recibida de los gráficos!");
+                    await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
+                }
+            });
+
+            // I. Escuchar Candidatos de la Web
+            const processedWebCandidates = new Set();
+            db.ref(`${SIGNALING_PATH}/candidates/web`).on('child_added', (snapshot) => {
+                const candidate = snapshot.val();
+                if (candidate && !processedWebCandidates.has(snapshot.key)) {
+                    processedWebCandidates.add(snapshot.key);
+                    peerConnection.addIceCandidate(new RTCIceCandidate(candidate))
+                        .catch(e => console.error(e));
+                }
+            });
+        };
+    </script>
+</body>
+</html>
