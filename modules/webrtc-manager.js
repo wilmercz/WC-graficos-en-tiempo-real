@@ -41,43 +41,43 @@ export class WebRTCManager {
             this.videoElement.playsInline = true;
             this.videoElement.muted = true; // Por defecto muteado
             
+            // Atributos obligatorios para decodificación móvil/WebRTC en Chrome/Safari:
+            this.videoElement.setAttribute('autoplay', '');
+            this.videoElement.setAttribute('playsinline', '');
+            this.videoElement.setAttribute('muted', '');
+            this.videoElement.style.pointerEvents = 'none'; // Evita bloqueos de clicks del sistema
+            this.videoElement.style.width = '100%';
+            this.videoElement.style.height = '100%';
+            this.videoElement.style.objectFit = 'cover';
+            
             this.containerElement.appendChild(this.videoElement);
             // Insertar justo al principio del body (debajo de todo)
             document.body.insertBefore(this.containerElement, document.body.firstChild);
             
             console.log('🎥 Contenedor WebRTC B-Roll creado dinámicamente');
 
-            // 🧪 BOTÓN DE PRUEBA PARA FORZAR PLAY
-            /*
-            const testBtn = document.createElement('button');
-            testBtn.innerText = '▶ Forzar Play (Test)';
-            testBtn.style.cssText = 'position: absolute; top: 50px; right: 10px; z-index: 99999; padding: 10px 15px; background: red; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; box-shadow: 0px 4px 6px rgba(0,0,0,0.5);';
-            testBtn.onclick = () => {
-                console.log('🧪 Intentando Play manual por clic del usuario...');
-                if (this.videoElement) {
-                    // Intentar reproducir con audio activado
-                    this.videoElement.muted = false; 
-                    this.videoElement.play()
-                        .then(() => console.log('✅ Play forzado por el usuario exitoso (El Autoplay estaba bloqueado)'))
-                        .catch(e => console.error('❌ Error forzando play manual (El problema no era el Autoplay):', e));
-                }
-            };
-            document.body.appendChild(testBtn);
-            */
-
             // -------------------------------------------------------------------
-            // 🔓 DESBLOQUEO DE AUDIO POR TOQUE EN PANTALLA
-            // Si el navegador bloqueó el audio por falta de interacción,
-            // tocar cualquier parte de la pantalla lo reactivará (solo si Firebase
-            // ha ordenado que el audio debe estar encendido).
-            // 🛑 Para DESACTIVAR esta función a futuro, comenta este bloque:
+            // 🔓 DETECCIÓN GLOBAL DE CLIC EN PANTALLA (INVISIBLE)
+            // Cualquier clic en la pantalla validará el permiso de humano para el audio.
             // -------------------------------------------------------------------
             const unlockAudioOnInteraction = () => {
-                // Si WebRTC existe, debe estar visible y Firebase pidió audio (muted = false)
-                if (this.videoElement && this.firebaseRequestedVisible && this.firebaseRequestedMuted === false) {
-                    console.log('👆 Interacción detectada: Restaurando audio de WebRTC...');
-                    this.videoElement.muted = false;
-                    this.videoElement.play().catch(e => console.warn('🎥 Falló reactivación por toque:', e));
+                if (!window.webrtcHumanClickDone) {
+                    console.log('👆 ¡CLIC DETECTADO! Registrando humano en Chrome...');
+                    window.webrtcHumanClickDone = true;
+                    
+                    // 1. 📢 FEEDBACK VISUAL: Activar "Síguenos" (Redes) respetando el tiempo global (15 segundos)
+                    if (this.app) {
+                        this.app.updateFirebaseVisibility('redes', true);
+                        // Lee la configuración global (en segundos) y la pasa a milisegundos
+                        const duracionRedes = (window.currentConfig?.duracionRedes || 9) * 1000;
+                        setTimeout(() => this.app.updateFirebaseVisibility('redes', false), duracionRedes);
+                    }
+
+                    // 2. Reactivar audio/video si el WebRTC ya estaba esperando
+                    if (this.videoElement && this.isConnected && this.firebaseRequestedVisible) {
+                        this.videoElement.muted = this.firebaseRequestedMuted;
+                        this.videoElement.play().catch(e => console.warn('🎥 Falló reactivación por toque:', e));
+                    }
                 }
             };
             document.addEventListener('click', unlockAudioOnInteraction);
@@ -146,28 +146,22 @@ export class WebRTCManager {
                 { urls: 'stun:stun.l.google.com:19302' },
                 { urls: 'stun:stun1.l.google.com:19302' },
         
-                // TURN con credenciales reales de metered.ca
-                // Obtén las tuyas gratis en https://dashboard.metered.ca/
-                // Las mismas credenciales que pusiste en WebRTCManager.kt
+                // TURN público (Open Relay Project)
+                // Coincide exactamente con la configuración en Kotlin
                 {
-                    urls: 'turn:standard.relay.metered.ca:80',
-                    username: 'METERED_USER',    // ← mismo que en Kotlin
-                    credential: 'METERED_PASS'  // ← mismo que en Kotlin
+                    urls: 'turn:relay.metered.ca:80',
+                    username: 'openrelayproject',
+                    credential: 'openrelayproject'
                 },
                 {
-                    urls: 'turn:standard.relay.metered.ca:80?transport=tcp',
-                    username: 'METERED_USER',
-                    credential: 'METERED_PASS'
+                    urls: 'turn:relay.metered.ca:443',
+                    username: 'openrelayproject',
+                    credential: 'openrelayproject'
                 },
                 {
-                    urls: 'turn:standard.relay.metered.ca:443',
-                    username: 'METERED_USER',
-                    credential: 'METERED_PASS'
-                },
-                {
-                    urls: 'turn:standard.relay.metered.ca:443?transport=tcp',
-                    username: 'METERED_USER',
-                    credential: 'METERED_PASS'
+                    urls: 'turn:relay.metered.ca:443?transport=tcp',
+                    username: 'openrelayproject',
+                    credential: 'openrelayproject'
                 }
             ]
         });
@@ -179,7 +173,10 @@ export class WebRTCManager {
             // 🛡️ ESTÁNDAR PURO DE WEBRTC:
             // Asignar el stream directamente.
             if (event.streams && event.streams[0]) {
-                this.videoElement.srcObject = event.streams[0];
+                if (this.videoElement.srcObject !== event.streams[0]) {
+                    console.log('✅ Asignando stream completo al elemento video');
+                    this.videoElement.srcObject = event.streams[0];
+                }
             } else {
                 if (!this.videoElement.srcObject) {
                     this.videoElement.srcObject = new MediaStream();
@@ -189,11 +186,16 @@ export class WebRTCManager {
             
             // 🚀 INTENTO SEGURO DE REPRODUCCIÓN (Anti-Autoplay Block)
             const safePlay = () => {
+                // Si el humano ya hizo clic en el botón rojo, respetamos lo que diga Firebase
+                if (window.webrtcHumanClickDone) {
+                    this.videoElement.muted = this.firebaseRequestedMuted;
+                }
+
                 const playPromise = this.videoElement.play();
                 if (playPromise !== undefined) {
                     playPromise.catch(e => {
                         if (e.name === 'NotAllowedError') {
-                            console.warn('🔇 Autoplay con audio bloqueado por Chrome. Forzando mute temporal...');
+                            console.warn('🔇 Chrome bloqueó el video. Necesitas hacer clic en el botón rojo de arriba.');
                             this.videoElement.muted = true;
                             this.videoElement.play().catch(err => console.error('🎥 Falló el play incluso silenciado:', err));
                         } else if (e.name !== 'AbortError') {
@@ -240,17 +242,17 @@ export class WebRTCManager {
         // Aplicar la oferta de Kotlin
         await this.peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
         
-        // 🚀 INYECTAR CANDIDATOS EN ESPERA
-        console.log(`📦 Inyectando ${this.pendingCandidates.length} candidatos en espera...`);
-        this.pendingCandidates.forEach(candidate => {
-            this.peerConnection.addIceCandidate(new RTCIceCandidate(candidate))
-                .catch(e => console.error('🎥 Error añadiendo ICE:', e));
-        });
-        this.pendingCandidates = [];
-        
-        // Crear nuestra respuesta
+        // Crear nuestra respuesta (Answer) para mandar a Firebase
         const answer = await this.peerConnection.createAnswer();
         await this.peerConnection.setLocalDescription(answer);
+        
+        // 🔥 VACIAR SALA DE ESPERA DE INMEDIATO DESPUÉS DEL LOCAL DESCRIPTION
+        console.log(`🚀 Procesando ${this.pendingCandidates.length} candidatos ICE acumulados`);
+        this.pendingCandidates.forEach(candidate => {
+            this.peerConnection.addIceCandidate(new RTCIceCandidate(candidate))
+                .catch(e => console.error('🎥 Error tardío añadiendo ICE candidate:', e));
+        });
+        this.pendingCandidates = [];
         
         // Enviar nuestra respuesta a Kotlin por Firebase
         console.log('🎥 ✉️ Enviando Respuesta WebRTC a Kotlin...');
@@ -270,14 +272,17 @@ export class WebRTCManager {
         if (this.videoElement) {
             this.videoElement.muted = muted;
             
-            // Al intentar quitar el mute remotamente, asegurar que el video siga reproduciéndose
-            if (mostrar && !this.videoElement.paused) {
-                this.videoElement.play().catch(e => {
-                    if (e.name === 'NotAllowedError') {
-                        console.warn('🔇 Necesitas hacer click en la web una vez para poder activar el audio.');
+            // 🛡️ RECOVERY EXTREMO: Si CameraFi/Chrome apaga el video al intentar ponerle sonido
+            if (mostrar) {
+                const playPromise = this.videoElement.play();
+                if (playPromise !== undefined) {
+                    playPromise.catch(e => {
+                        // Si el bloqueo ocurre, aceptamos el silencio pero salvamos la imagen
+                        console.warn('🔇 CameraFi bloqueó el audio. Rescatando el video en Mute para evitar pantalla negra.');
                         this.videoElement.muted = true;
-                    }
-                });
+                        this.videoElement.play().catch(err => console.error('Error final:', err));
+                    });
+                }
             }
         }
         
