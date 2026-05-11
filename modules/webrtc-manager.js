@@ -47,6 +47,7 @@ export class WebRTCManager {
             console.log('🎥 Contenedor WebRTC B-Roll creado dinámicamente');
 
             // 🧪 BOTÓN DE PRUEBA PARA FORZAR PLAY
+            /*
             const testBtn = document.createElement('button');
             testBtn.innerText = '▶ Forzar Play (Test)';
             testBtn.style.cssText = 'position: absolute; top: 50px; right: 10px; z-index: 99999; padding: 10px 15px; background: red; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; box-shadow: 0px 4px 6px rgba(0,0,0,0.5);';
@@ -61,6 +62,7 @@ export class WebRTCManager {
                 }
             };
             document.body.appendChild(testBtn);
+            */
         } else {
             this.videoElement = this.containerElement.querySelector('video');
         }
@@ -138,25 +140,16 @@ export class WebRTCManager {
         this.peerConnection.ontrack = (event) => {
             console.log(`🎥 📺 ¡Track de ${event.track.kind} recibido de Kotlin!`);
             
-            // 🛡️ FIX DEFINITIVO PANTALLA NEGRA (Bug de Chrome Audio+Video)
-            // Extraemos todas las pistas que ya tenía el reproductor actual
-            let currentTracks = this.videoElement.srcObject ? this.videoElement.srcObject.getTracks() : [];
-            
-            // Añadimos la nueva pista que acaba de llegar (audio o video)
-            if (!currentTracks.includes(event.track)) {
-                currentTracks.push(event.track);
+            // 🛡️ ESTÁNDAR PURO DE WEBRTC:
+            // Asignar el stream directamente.
+            if (event.streams && event.streams[0]) {
+                this.videoElement.srcObject = event.streams[0];
+            } else {
+                if (!this.videoElement.srcObject) {
+                    this.videoElement.srcObject = new MediaStream();
+                }
+                this.videoElement.srcObject.addTrack(event.track);
             }
-            
-            // Extraer también de los streams agrupados por si vienen empacados
-            if (event.streams && event.streams.length > 0) {
-                event.streams[0].getTracks().forEach(t => {
-                    if (!currentTracks.includes(t)) currentTracks.push(t);
-                });
-            }
-            
-            // ✨ LA MAGIA: Creamos un stream NUEVO desde cero para forzar a Chrome a encender el video
-            this.videoElement.srcObject = new MediaStream(currentTracks);
-            console.log(`🎥 Stream clonado y forzado. Pistas actuales: ${currentTracks.map(t => t.kind).join(' + ')}`);
             
             // 🚀 INTENTO SEGURO DE REPRODUCCIÓN (Anti-Autoplay Block)
             const safePlay = () => {
@@ -164,8 +157,8 @@ export class WebRTCManager {
                 if (playPromise !== undefined) {
                     playPromise.catch(e => {
                         if (e.name === 'NotAllowedError') {
-                            console.warn('🔇 Autoplay con audio bloqueado por Chrome. Forzando mute temporal para rescatar el video...');
-                            this.videoElement.muted = true; // Silenciamos a la fuerza
+                            console.warn('🔇 Autoplay con audio bloqueado por Chrome. Forzando mute temporal...');
+                            this.videoElement.muted = true;
                             this.videoElement.play().catch(err => console.error('🎥 Falló el play incluso silenciado:', err));
                         } else if (e.name !== 'AbortError') {
                             console.error('🎥 ❌ Error de Autoplay WebRTC:', e);
@@ -174,11 +167,11 @@ export class WebRTCManager {
                 }
             };
             
-            safePlay(); // Intentar inmediato
+            safePlay(); // Intentar de inmediato
             this.videoElement.onloadedmetadata = () => safePlay();
             this.videoElement.onloadeddata = () => safePlay(); // Intentar al recibir el frame
             
-            //  DEBUG: Monitorear resoluciones extrañas (Dummy Frames)
+            // 🔍 DEBUG: Monitorear resoluciones extrañas (Dummy Frames)
             this.videoElement.addEventListener('resize', () => {
                 console.log(`🎥 📏 Resolución del video recibida: ${this.videoElement.videoWidth}x${this.videoElement.videoHeight}`);
             });
