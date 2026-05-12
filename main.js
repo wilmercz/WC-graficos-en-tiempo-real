@@ -138,6 +138,9 @@ class StreamGraphicsApp {
             // 8. Configurar herramientas de debug
             this.setupDebugTools();
             
+            // 8.5 Configurar Gestos Ocultos (Switcher)
+            this.setupInvisibleSwitcher();
+            
             // 9. Finalizar inicialización
             this.finishInitialization();
             
@@ -1516,6 +1519,93 @@ class StreamGraphicsApp {
             agregarAd: (url) => this.modules.sequenceManager.addAdToPlaylist(url),
             verPlaylist: () => console.log(this.modules.sequenceManager.adPlaylist)
         };
+    }
+
+    /**
+     * 🎮 CONFIGURAR SWITCHER INVISIBLE (Gestos táctiles y clics ocultos)
+     */
+    setupInvisibleSwitcher() {
+        console.log('🎮 Configurando Switcher Invisible (Gestos)...');
+        
+        let lastTapTime = 0;
+        
+        // 1. DOBLE TOQUE EN PANTALLA -> Alternar Video B-Roll (WebRTC)
+        document.addEventListener('click', (e) => {
+            // Ignorar clics si vienen de un panel de control, botones o el logo
+            if (e.target.closest('.debug-panel') || e.target.closest('#webrtc-manual-panel') || e.target.tagName === 'BUTTON' || e.target.closest('#logo')) {
+                return;
+            }
+
+            const currentTime = new Date().getTime();
+            const tapLength = currentTime - lastTapTime;
+            
+            if (tapLength < 300 && tapLength > 0) {
+                console.log('✌️ ¡Doble toque detectado! Alternando Video B-Roll...');
+                
+                const currentState = window.lastFirebaseData?.Mostrar_EnVivo === true;
+                this.updateFirebaseVisibility('Mostrar_EnVivo', !currentState);
+                
+                // Feedback visual (Flash verde si enciende, rojo si apaga)
+                const overlay = document.createElement('div');
+                overlay.style.position = 'fixed';
+                overlay.style.top = '0';
+                overlay.style.left = '0';
+                overlay.style.width = '100vw';
+                overlay.style.height = '100vh';
+                overlay.style.backgroundColor = !currentState ? 'rgba(0, 255, 0, 0.15)' : 'rgba(255, 0, 0, 0.15)';
+                overlay.style.zIndex = '99999';
+                overlay.style.pointerEvents = 'none';
+                overlay.style.transition = 'opacity 0.3s ease';
+                document.body.appendChild(overlay);
+                
+                setTimeout(() => {
+                    overlay.style.opacity = '0';
+                    setTimeout(() => overlay.remove(), 300);
+                }, 100);
+
+                e.preventDefault();
+            }
+            lastTapTime = currentTime;
+        });
+
+        // 2. CLIC EN EL LOGO -> Alternar Secuencia Tema y Lugar
+        const logoEl = document.getElementById('logo');
+        if (logoEl) {
+            logoEl.style.pointerEvents = 'auto'; // Permitir clics
+            logoEl.style.cursor = 'pointer';
+            
+            logoEl.addEventListener('click', (e) => {
+                e.stopPropagation(); // Evitar disparar el doble toque de fondo
+                console.log('🎯 ¡Clic en Logo detectado!');
+                
+                const temaVisible = window.lastFirebaseData?.temaAlAire === true;
+                const temaTexto = window.lastFirebaseData?.Tema;
+                
+                if (temaVisible) {
+                    console.log('🎯 Ocultando Tema y Lugar...');
+                    this.updateFirebaseVisibility('tema', false);
+                    this.updateFirebaseVisibility('lugar', false);
+                } else if (temaTexto && temaTexto !== 'Sin Tema' && temaTexto.trim() !== '') {
+                    console.log('🎯 Mostrando Tema...');
+                    this.updateFirebaseVisibility('tema', true);
+                    
+                    const lugarTexto = window.lastFirebaseData?.Lugar;
+                    if (lugarTexto && lugarTexto !== 'Sin Lugar' && lugarTexto.trim() !== '') {
+                        setTimeout(() => {
+                            // Verificar que el tema siga visible antes de mostrar el lugar
+                            if (window.lastFirebaseData?.temaAlAire === true) {
+                                console.log('🎯 Mostrando Lugar en secuencia...');
+                                this.updateFirebaseVisibility('lugar', true);
+                            }
+                        }, 1200); // 1.2 segundos después de mostrar el tema
+                    }
+                } else {
+                    // Feedback visual si no hay texto: reducir el logo sutilmente
+                    logoEl.style.transform = 'scale(0.9)';
+                    setTimeout(() => logoEl.style.transform = '', 150);
+                }
+            });
+        }
     }
 
     /**

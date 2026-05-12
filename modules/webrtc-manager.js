@@ -262,6 +262,11 @@ export class WebRTCManager {
             if (state === 'disconnected' || state === 'failed') {
                 console.log('🎥 🧹 Limpiando reproductor por pérdida de señal');
                 if (this.videoElement) this.videoElement.srcObject = null;
+                
+                // 🛡️ SEGURO AUTOMÁTICO: Apagar el interruptor en Firebase si se cae el WiFi
+                if (this.app?.modules?.firebaseClient) {
+                    this.app.modules.firebaseClient.writeData('CLAVE_STREAM_FB/STREAM_LIVE/GRAFICOS/Mostrar_EnVivo', false);
+                }
             }
         };
 
