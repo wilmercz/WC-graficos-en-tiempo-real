@@ -1545,24 +1545,6 @@ class StreamGraphicsApp {
                 const currentState = window.lastFirebaseData?.Mostrar_EnVivo === true;
                 this.updateFirebaseVisibility('Mostrar_EnVivo', !currentState);
                 
-                // Feedback visual (Flash verde si enciende, rojo si apaga)
-                const overlay = document.createElement('div');
-                overlay.style.position = 'fixed';
-                overlay.style.top = '0';
-                overlay.style.left = '0';
-                overlay.style.width = '100vw';
-                overlay.style.height = '100vh';
-                overlay.style.backgroundColor = !currentState ? 'rgba(0, 255, 0, 0.15)' : 'rgba(255, 0, 0, 0.15)';
-                overlay.style.zIndex = '99999';
-                overlay.style.pointerEvents = 'none';
-                overlay.style.transition = 'opacity 0.3s ease';
-                document.body.appendChild(overlay);
-                
-                setTimeout(() => {
-                    overlay.style.opacity = '0';
-                    setTimeout(() => overlay.remove(), 300);
-                }, 100);
-
                 e.preventDefault();
             }
             lastTapTime = currentTime;
