@@ -1,0 +1,28 @@
+=========================================================
+   INFORMACIÓN DEL MODO MANUAL DE WEBRTC (DE PRUEBAS)
+=========================================================
+
+El panel de Modo Manual de WebRTC ha sido diseñado como una herramienta de depuración para probar la conexión P2P de video cuando el modo automático presenta inconvenientes.
+
+¿CÓMO ACTIVARLO?
+---------------------------------------------------------
+Para mostrar el panel naranja en la web de gráficos, debes ir a tu base de datos de Firebase y establecer el siguiente campo en la ruta de gráficos:
+Mostrar_WebRTCManual = true
+(Si el campo no existe o se establece en false, el panel permanecerá oculto y no interferirá con la transmisión).
+
+¿CÓMO ELIMINARLO DEL CÓDIGO? (Limpieza para producción)
+---------------------------------------------------------
+Si en el futuro el modo automático de Kotlin funciona perfectamente y deseas retirar todo rastro del modo manual para limpiar el código, debes eliminar los siguientes bloques en estos archivos:
+
+1. index.html:
+   - Busca y elimina el div completo con el id="webrtc-manual-panel" (está debajo del comentario "<!-- 🛠️ PANEL MANUAL WEBRTC (TEMPORAL) -->").
+
+2. main.js:
+   - Busca y elimina el bloque comentado como "LÓGICA DE PANEL MANUAL WEBRTC" dentro de la función procesarDatosFirebase().
+
+3. modules/webrtc-manager.js:
+   - En la función init(), elimina la línea: this.setupManualTesting();
+   - Elimina las funciones completas setupManualTesting() y processManualOffer(offer).
+   - En la función setupFirebaseSignaling(), elimina todo el bloque que escucha la ruta /OFERTA y la variable isManualPath (deja solo la escucha para /offer).
+   - En el constructor, elimina la variable this.isManualMode.
+   - En la función handleCommand(mostrar, muted), elimina la validación inicial "if (this.isManualMode) { ... }".

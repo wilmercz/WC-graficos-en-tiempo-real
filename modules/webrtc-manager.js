@@ -12,6 +12,7 @@ export class WebRTCManager {
         this.firebaseRequestedVisible = false;
         this.firebaseRequestedMuted = true; // ✅ Rastrea si Firebase quiere el audio encendido
         this.isConnected = false;
+        this.isManualMode = false; // ✅ Identifica si el modo manual tiene el control
         this._processedCandidates = new Set();  // ✅ Evita procesar IPs duplicadas
         this.pendingCandidates = []; // ✅ Sala de espera para IPs de Android
 
@@ -23,6 +24,7 @@ export class WebRTCManager {
         console.log('🎥 Inicializando WebRTC Manager...');
         this.createDOMElement();
         this.setupFirebaseSignaling();
+        this.setupManualTesting(); // 🛠️ MANUAL: Inicializar el panel de pruebas
     }
 
     /**
@@ -69,7 +71,7 @@ export class WebRTCManager {
                     if (this.app) {
                         this.app.updateFirebaseVisibility('redes', true);
                         // Lee la configuración global (en segundos) y la pasa a milisegundos
-                        const duracionRedes = (window.currentConfig?.duracionRedes || 9) * 1000;
+                        const duracionRedes = (window.currentConfig?.duracionRedes || 7) * 1000;
                         setTimeout(() => this.app.updateFirebaseVisibility('redes', false), duracionRedes);
                     }
 
@@ -99,18 +101,66 @@ export class WebRTCManager {
 
         const fb = this.app.modules.firebaseClient;
 
-        // 1. Escuchar la "Oferta" de Kotlin
-        fb.onDataChange(`${this.SIGNALING_PATH}/offer`, async (offer) => {
-            if (offer && offer.type && offer.sdp) {
-                console.log('🎥 ✉️ Oferta WebRTC recibida de Kotlin. Preparando conexión...');
-                await this.handleOffer(offer);
+        // 1. Función compartida: Distingue si viene de "OFERTA" (Manual) o "offer" (Kotlin)
+        const processOffer = async (rawOffer, isManualPath) => {
+            console.log(`🎥 ✉️ Datos de Oferta WebRTC recibidos (Ruta Manual: ${isManualPath}):`, rawOffer);
+            if (!rawOffer) return;
+            
+            // Adaptación por si Kotlin lo envía como texto o usa nombres diferentes
+            let offer = rawOffer;
+            if (typeof rawOffer === 'string') {
+                try { offer = JSON.parse(rawOffer); } catch(e) { console.error('Error parseando OFERTA', e); }
             }
-        });
+            
+            // Extraer si viene anidado (ej. Kotlin manda { offer: { type: 'offer', sdp: '...' } })
+            if (offer && offer.offer) offer = offer.offer;
+            if (offer && offer.OFERTA) offer = offer.OFERTA;
 
-        // 2. Escuchar los "Candidatos ICE" (Rutas de red/IPs) de Kotlin
-        fb.onDataChange(`${this.SIGNALING_PATH}/candidates/android`, (candidatesData) => {
+            // Android WebRTC a veces usa "description" en lugar de "sdp"
+            if (offer && offer.description && !offer.sdp) offer.sdp = offer.description;
+            if (offer && typeof offer.type === 'string') offer.type = offer.type.toLowerCase();
+
+            // 🤖 SEMI-AUTOMÁTICO: Llenar la caja de texto SIEMPRE para que veas qué llegó
+            window.lastManualOffer = offer;
+            const manualOfferBox = document.getElementById('webrtc-manual-offer');
+            if (manualOfferBox) {
+                // 🔄 CAMBIO: Poner solo el texto puro de la oferta, igual que el receptor de pruebas
+                manualOfferBox.value = JSON.stringify(window.lastManualOffer, null, 2);
+            }
+
+            if (offer && offer.type && offer.sdp) {
+                // Solo pausar si la oferta vino por la ruta manual Y el panel está visible
+                if (isManualPath) {
+                    const manualPanel = document.getElementById('webrtc-manual-panel');
+                    if (manualPanel && manualPanel.style.display !== 'none') {
+                        console.log('🛑 [MODO SEMI-AUTOMÁTICO] Esperando clic en "Procesar y Enviar Respuesta"...');
+                        return;
+                    }
+                }
+
+                console.log('🎥 Preparando conexión automática...');
+                await this.handleOffer(offer);
+            } else {
+                console.warn('⚠️ La OFERTA llegó, pero no tiene un formato WebRTC válido.', offer);
+            }
+        };
+
+        // Asignar el mismo procesador a ambas rutas
+        fb.onDataChange(`${this.SIGNALING_PATH}/OFERTA`, (data) => processOffer(data, true));
+        fb.onDataChange(`${this.SIGNALING_PATH}/offer`, (data) => processOffer(data, false));
+
+        // 2. Escuchar los "CANDIDATOS" (Rutas de red/IPs) de Kotlin (Ajustado al español)
+        fb.onDataChange(`${this.SIGNALING_PATH}/CANDIDATOS/android`, (candidatesData) => {
             if (!candidatesData) return; // ❌ Eliminamos el bloqueo de peerConnection
             
+            // 🤖 SEMI-AUTOMÁTICO: Guardar candidatos y actualizar la caja de texto
+            window.lastAndroidCandidates = candidatesData;
+
+            const manualPanel = document.getElementById('webrtc-manual-panel');
+            if (manualPanel && manualPanel.style.display !== 'none') {
+                return; // 🛑 En modo semi-automático, no procesar candidatos en segundo plano
+            }
+
             Object.entries(candidatesData).forEach(([id, candidate]) => {
                 if (this._processedCandidates.has(id)) return;  // Ya fue procesado, ignorar
                 this._processedCandidates.add(id);
@@ -140,31 +190,8 @@ export class WebRTCManager {
         }
 
         // Crear nueva conexión
-        this.peerConnection = new RTCPeerConnection({
-            iceServers: [
-                // STUN (sin rate limit, siempre disponibles)
-                { urls: 'stun:stun.l.google.com:19302' },
-                { urls: 'stun:stun1.l.google.com:19302' },
-        
-                // TURN público (Open Relay Project)
-                // Coincide exactamente con la configuración en Kotlin
-                {
-                    urls: 'turn:relay.metered.ca:80',
-                    username: 'openrelayproject',
-                    credential: 'openrelayproject'
-                },
-                {
-                    urls: 'turn:relay.metered.ca:443',
-                    username: 'openrelayproject',
-                    credential: 'openrelayproject'
-                },
-                {
-                    urls: 'turn:relay.metered.ca:443?transport=tcp',
-                    username: 'openrelayproject',
-                    credential: 'openrelayproject'
-                }
-            ]
-        });
+        // 🔄 CAMBIO: Usar conexión limpia, EXACTAMENTE igual que el modo manual de pruebas
+        this.peerConnection = new RTCPeerConnection();
 
         // Escuchar cuando el video de Kotlin llega
         this.peerConnection.ontrack = (event) => {
@@ -219,8 +246,17 @@ export class WebRTCManager {
         this.peerConnection.onconnectionstatechange = () => {
             const state = this.peerConnection.connectionState;
             console.log(`🎥 Estado de conexión WebRTC: ${state}`);
+            
+            // 🌟 NUEVO: Detectar si el cambio es justo ahora una conexión exitosa
+            const justConnected = (state === 'connected' && !this.isConnected);
+            
             this.isConnected = (state === 'connected');
             this.evaluateVisibility(); // Re-evaluar si podemos mostrar la imagen
+            
+            // 🌟 Mostrar animación de éxito "Joven Sucumbios"
+            if (justConnected) {
+                this.showConnectionBadge();
+            }
             
             // 🧹 Limpieza automática si el celular se desconecta o se apaga la pantalla
             if (state === 'disconnected' || state === 'failed') {
@@ -229,43 +265,41 @@ export class WebRTCManager {
             }
         };
 
-        // Enviar nuestros candidatos de red a Kotlin
+        // 🚀 Generar ICE candidates y esperar a que termine (Igual que en manual)
         this.peerConnection.onicecandidate = (event) => {
-            if (event.candidate) {
-                const fb = this.app.modules.firebaseClient;
-                // Guardar candidato en Firebase con un ID único basado en el timestamp
-                const pushId = Date.now().toString();
-                fb.writeData(`${this.SIGNALING_PATH}/candidates/web/${pushId}`, event.candidate.toJSON());
+            if (event.candidate) return; // ⏳ Esperar
+            
+            // 🛑 CUANDO TERMINA: Mandar la respuesta completa a Kotlin con las IPs incluidas
+            console.log('🎥 ✉️ Enviando Respuesta COMPLETA WebRTC al Emisor...');
+            const localDesc = this.peerConnection.localDescription;
+            
+            if (this.app.modules.firebaseClient) {
+                // Enviar a KOTLIN (Automático) como Objeto JSON puro
+                const answerObject = {
+                    type: localDesc.type,
+                    sdp: localDesc.sdp
+                };
+                this.app.modules.firebaseClient.writeData(`${this.SIGNALING_PATH}/answer`, answerObject);
             }
         };
 
         // Aplicar la oferta de Kotlin
         await this.peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
         
-        // Crear nuestra respuesta (Answer) para mandar a Firebase
+        // Crear nuestra respuesta (Answer)
         const answer = await this.peerConnection.createAnswer();
         await this.peerConnection.setLocalDescription(answer);
-        
-        // 🔥 VACIAR SALA DE ESPERA DE INMEDIATO DESPUÉS DEL LOCAL DESCRIPTION
-        console.log(`🚀 Procesando ${this.pendingCandidates.length} candidatos ICE acumulados`);
-        this.pendingCandidates.forEach(candidate => {
-            this.peerConnection.addIceCandidate(new RTCIceCandidate(candidate))
-                .catch(e => console.error('🎥 Error tardío añadiendo ICE candidate:', e));
-        });
-        this.pendingCandidates = [];
-        
-        // Enviar nuestra respuesta a Kotlin por Firebase
-        console.log('🎥 ✉️ Enviando Respuesta WebRTC a Kotlin...');
-        this.app.modules.firebaseClient.writeData(`${this.SIGNALING_PATH}/answer`, {
-            type: answer.type,
-            sdp: answer.sdp
-        });
     }
 
     /**
      * Recibir comando de Firebase (Mostrar/Ocultar EnVivo y Audio)
      */
     handleCommand(mostrar, muted) {
+        if (this.isManualMode) {
+            console.log('🛠️ [MANUAL] Ignorando comando de Firebase porque el modo manual está activo.');
+            return;
+        }
+
         this.firebaseRequestedVisible = mostrar;
         this.firebaseRequestedMuted = muted;
         
@@ -296,5 +330,156 @@ export class WebRTCManager {
         // Solo se hace visible si Firebase lo pide Y estamos realmente conectados
         const shouldShow = this.firebaseRequestedVisible && this.isConnected;
         this.containerElement.classList.toggle('visible', shouldShow);
+    }
+
+    /**
+     * 🌟 Mostrar notificación de conexión WebRTC exitosa
+     */
+    showConnectionBadge() {
+        let badge = document.getElementById('webrtc-connection-badge');
+        if (!badge) {
+            badge = document.createElement('div');
+            badge.id = 'webrtc-connection-badge';
+            
+            const circle = document.createElement('div');
+            circle.className = 'circle-logo';
+            
+            const img = document.createElement('img');
+            circle.appendChild(img);
+            
+            const text = document.createElement('span');
+            text.className = 'badge-text';
+            text.innerText = 'Joven Sucumbios'; // Texto solicitado
+            
+            badge.appendChild(circle);
+            badge.appendChild(text);
+            document.body.appendChild(badge);
+        }
+        
+        // Obtener el logo actual del DOM (el que ya se descargó en el main)
+        const img = badge.querySelector('img');
+        if (img) {
+            const currentLogoUrl = window.lastFirebaseData?.urlLogo || document.getElementById('logo')?.src;
+            if (currentLogoUrl) img.src = currentLogoUrl;
+        }
+        
+        // Reiniciar animación y forzar reflow
+        badge.classList.remove('show');
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => badge.classList.add('show'));
+        });
+        
+        // Desaparecer automáticamente a los 7 segundos
+        if (this._badgeTimer) clearTimeout(this._badgeTimer);
+        this._badgeTimer = setTimeout(() => {
+            if (badge) badge.classList.remove('show');
+        }, 7000);
+    }
+
+    // =======================================================================
+    // 🛠️ FUNCIONES MANUALES (TEMPORALES PARA DEPURAR PANTALLA NEGRA)
+    // =======================================================================
+    
+    setupManualTesting() {
+        const btn = document.getElementById('webrtc-manual-btn');
+        if (btn) {
+            btn.onclick = async () => {
+                const offerText = document.getElementById('webrtc-manual-offer').value;
+                if (!offerText) {
+                    alert('Por favor espera a que la Oferta llegue de Firebase o pégala manualmente.');
+                    return;
+                }
+                try {
+                    let offer = JSON.parse(offerText);
+                    await this.processManualOffer(offer);
+                } catch (e) {
+                    alert('Error parseando JSON. Revisa la consola.');
+                    console.error('🛠️ Error parseando oferta manual:', e);
+                }
+            };
+        }
+
+        const hideBtn = document.getElementById('webrtc-manual-hide-btn');
+        if (hideBtn) {
+            hideBtn.onclick = () => {
+                const panel = document.getElementById('webrtc-manual-panel');
+                if (panel) panel.style.display = 'none';
+                
+                // Actualizar en Firebase para apagar el interruptor
+                if (this.app.modules.firebaseClient) {
+                    this.app.modules.firebaseClient.writeData('CLAVE_STREAM_FB/STREAM_LIVE/GRAFICOS/Mostrar_WebRTCManual', false);
+                }
+            };
+        }
+    }
+
+    async processManualOffer(offer) {
+        console.log("🛠️ [MANUAL] Iniciando proceso manual WebRTC...");
+        
+        // 🚀 Forzar la visibilidad del reproductor principal de fondo (Overlay)
+        this.isManualMode = true;
+        this.firebaseRequestedVisible = true;
+        this.isConnected = true;
+        this.evaluateVisibility();
+
+        // 🚀 Activar controles temporales en la pantalla grande para facilitar pruebas
+        if (this.videoElement) {
+            this.videoElement.controls = true;
+            this.videoElement.style.pointerEvents = 'all'; // Permitir usar el mouse en manual
+        }
+
+        if (this.peerConnection) this.peerConnection.close();
+
+        // 🔄 CAMBIO: Dejado completamente vacío para coincidir exactamente con el emisor HTML
+        this.peerConnection = new RTCPeerConnection();
+
+        this.peerConnection.ontrack = (event) => {
+            console.log(`🛠️ [MANUAL] ¡Track de ${event.track.kind} recibido!`);
+            const stream = event.streams && event.streams[0] ? event.streams[0] : null;
+            
+            // 2. Alimentar el reproductor PRINCIPAL (Pantalla completa / Fondo)
+            if (this.videoElement) {
+                if (stream) {
+                    this.videoElement.srcObject = stream;
+                } else {
+                    if (!this.videoElement.srcObject) this.videoElement.srcObject = new MediaStream();
+                    this.videoElement.srcObject.addTrack(event.track);
+                }
+                
+                this.videoElement.muted = false; // El principal lleva el audio
+                this.videoElement.play().then(() => {
+                    console.log("🛠️ [MANUAL] Video PRINCIPAL reproduciendo con AUDIO correctamente.");
+                }).catch(e => {
+                    console.warn("🛠️ [MANUAL] Error forzando play principal con audio, intentando silenciado...", e);
+                    this.videoElement.muted = true;
+                    this.videoElement.play().catch(err => console.error("🛠️ [MANUAL] Fallo crítico play principal:", err));
+                });
+            }
+        };
+
+        // 🚀 Generar ICE candidates y esperar a que termine
+        this.peerConnection.onicecandidate = (event) => {
+            if (event.candidate) return;
+
+            // 🛑 CUANDO TERMINA (event.candidate es null): Mostrar Respuesta Completa
+            const answerJson = this.peerConnection.localDescription;
+            
+            // 1. Mostrar en caja de texto
+            document.getElementById('webrtc-manual-answer').value = JSON.stringify(answerJson);
+            console.log("🛠️ [MANUAL] Respuesta lista con ICE candidates incluidos.");
+
+            // 2. Enviar automáticamente a Firebase
+            if (this.app.modules.firebaseClient) {
+                console.log("🚀 [MANUAL] Enviando Respuesta Completa a Firebase automáticamente...");
+                this.app.modules.firebaseClient.writeData(`${this.SIGNALING_PATH}/RESPUESTA`, JSON.stringify(answerJson));
+            }
+        };
+
+        await this.peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
+
+        const answer = await this.peerConnection.createAnswer();
+        await this.peerConnection.setLocalDescription(answer);
+        
+        document.getElementById('webrtc-manual-answer').value = "Generando respuesta y candidatos ICE... Por favor espera.";
     }
 }

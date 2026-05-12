@@ -66,6 +66,16 @@
     <!-- Estado de conexión y sistema -->
   </div>
 
+  <!-- 🛠️ PANEL MANUAL WEBRTC (TEMPORAL) -->
+  <div id="webrtc-manual-panel" style="display: none; position: fixed; top: 60px; right: 10px; background: rgba(0,0,0,0.9); color: white; padding: 15px; z-index: 100000; border-radius: 8px; width: 300px; font-family: sans-serif; border: 2px solid #ff8a3d;">
+    <h4 style="margin: 0 0 5px 0; color: #ff8a3d;">🤖 Panel Semi-Automático</h4>
+    <p style="font-size: 11px; margin: 0 0 10px 0; color: #ccc;">Si está visible, pausa lo automático para que hagas clic.</p>
+    <textarea id="webrtc-manual-offer" style="width: 100%; box-sizing: border-box; margin-bottom: 10px;" rows="4" placeholder="Esperando oferta de Firebase o pega tu Oferta aquí..."></textarea>
+    <button id="webrtc-manual-btn" style="width: 100%; padding: 10px; background: #28a745; color: white; border: none; cursor: pointer; border-radius: 4px; font-weight: bold; margin-bottom: 10px;">🟢 Procesar y Enviar Respuesta</button>
+    <textarea id="webrtc-manual-answer" style="width: 100%; box-sizing: border-box;" rows="4" readonly placeholder="Aquí aparecerá la Respuesta..."></textarea>
+    <button id="webrtc-manual-hide-btn" style="margin-top: 5px; width: 100%; background: #dc3545; color: white; border: none; padding: 5px; border-radius: 4px; cursor: pointer;">Ocultar panel y ver señal (Modo Manual)</button>
+  </div>
+
   <!-- 🆕 PANEL DE DEBUG MEJORADO PARA SISTEMA MODULAR -->
   <div id="debug-panel" class="debug-panel" style="display: none;">
     <div class="debug-header">

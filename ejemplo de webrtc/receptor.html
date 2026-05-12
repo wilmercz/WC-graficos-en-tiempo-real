@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WebRTC Receptor</title>
+</head>
+<body>
+    <h2>Receptor</h2>
+    <video id="remoteVideo" autoplay playsinline controls></video>
+    <br/>
+    <textarea id="offerSDP" rows="10" cols="50" placeholder="Pega la oferta del emisor aquí..."></textarea>
+    <br/>
+    <button onclick="handleOffer()">1. Responder Oferta</button>
+    <br/>
+    <textarea id="answerSDP" rows="10" cols="50" placeholder="Respuesta aparecerá aquí..."></textarea>
+
+    <script>
+        const pc = new RTCPeerConnection();
+        const remoteVideo = document.getElementById('remoteVideo');
+        const offerArea = document.getElementById('offerSDP');
+        const answerArea = document.getElementById('answerSDP');
+
+        // 1. Recibir track de video remoto
+        pc.ontrack = e => {
+            remoteVideo.srcObject = e.streams[0];
+        };
+
+        // 2. Generar ICE candidates y mostrarlos
+        pc.onicecandidate = e => {
+            if (e.candidate) return;
+            answerArea.value = JSON.stringify(pc.localDescription);
+        };
+
+        async function handleOffer() {
+            const offer = JSON.parse(offerArea.value);
+            await pc.setRemoteDescription(new RTCSessionDescription(offer));
+            const answer = await pc.createAnswer();
+            await pc.setLocalDescription(answer);
+        }
+    </script>
+</body>
+</html>

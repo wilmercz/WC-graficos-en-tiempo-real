@@ -342,6 +342,15 @@ class StreamGraphicsApp {
             }
         }
 
+        // =======================================================
+        // 🛠️ LÓGICA DE PANEL MANUAL WEBRTC
+        // =======================================================
+        const manualPanel = document.getElementById('webrtc-manual-panel');
+        if (manualPanel) {
+            const showManualPanel = rawData.Mostrar_WebRTCManual === true || String(rawData.Mostrar_WebRTCManual).toLowerCase() === 'true';
+            manualPanel.style.display = showManualPanel ? 'block' : 'none';
+        }
+
         // Usar el data processor
         const processedData = this.modules.dataProcessor.process(rawData);
         if (!processedData) return;

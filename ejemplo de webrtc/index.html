@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WebRTC Emisor</title>
+</head>
+<body>
+    <h2>Emisor (Transmisor)</h2>
+    <video id="localVideo" autoplay playsinline muted></video>
+    <br/>
+    <textarea id="offerSDP" rows="10" cols="50" placeholder="Oferta aparecerá aquí..."></textarea>
+    <br/>
+    <button onclick="createOffer()">1. Crear Oferta</button>
+    <br/>
+    <textarea id="answerSDP" rows="10" cols="50" placeholder="Pega la respuesta del receptor aquí..."></textarea>
+    <br/>
+    <button onclick="handleAnswer()">2. Establecer Respuesta</button>
+
+    <script>
+        const pc = new RTCPeerConnection();
+        const localVideo = document.getElementById('localVideo');
+        const offerArea = document.getElementById('offerSDP');
+        const answerArea = document.getElementById('answerSDP');
+
+        // 1. Obtener cámara y micrófono
+        navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+            .then(stream => {
+                localVideo.srcObject = stream;
+                stream.getTracks().forEach(track => pc.addTrack(track, stream));
+            });
+
+        // 2. Generar ICE candidates y mostrarlos (simplificado sin servidor)
+        pc.onicecandidate = e => {
+            if (e.candidate) return;
+            offerArea.value = JSON.stringify(pc.localDescription);
+        };
+
+        async function createOffer() {
+            const offer = await pc.createOffer();
+            await pc.setLocalDescription(offer);
+        }
+
+        async function handleAnswer() {
+            const answer = JSON.parse(answerArea.value);
+            await pc.setRemoteDescription(new RTCSessionDescription(answer));
+        }
+    </script>
+</body>
+</html>

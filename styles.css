@@ -143,7 +143,9 @@ html, body {
 
 /* 🛡️ FIX: Ocultar imágenes/videos rotos o vacíos para evitar icono de error */
 img:not([src]), img[src=""], img[src="null"], img[src="undefined"],
-video:not([src]), video[src=""], video[src="null"] {
+video:not([src]):not(#envivo-video), 
+video[src=""]:not(#envivo-video), 
+video[src="null"]:not(#envivo-video) {
     display: none !important;
     visibility: hidden !important;
     opacity: 0 !important;
@@ -556,6 +558,71 @@ video:not([src]), video[src=""], video[src="null"] {
   background: transparent;
   color: white;
   white-space: nowrap;
+}
+
+/* ====== WEBRTC CONNECTION BADGE (JOVEN SUCUMBIOS) ====== */
+#webrtc-connection-badge {
+  position: absolute;
+  right: 0;
+  top: 45%; /* Mismo lugar que redes */
+  display: flex;
+  align-items: center;
+  background: linear-gradient(90deg, #ff8a3d 0%, #d6681c 100%);
+  color: white;
+  padding: 6px 20px 6px 8px; /* Padding asimétrico para el círculo */
+  border-radius: 30px 0 0 30px;
+  box-shadow: -5px 5px 15px rgba(0,0,0,0.3);
+  z-index: 10000;
+  opacity: 0;
+  transform: translateX(100%);
+  transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.6s ease;
+  pointer-events: none;
+}
+
+#webrtc-connection-badge.show {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+#webrtc-connection-badge .circle-logo {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: white; /* Círculo blanco para resaltar */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-right: 0px; 
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  flex-shrink: 0;
+  transition: margin-right 0.4s ease 0.4s; /* Anima el margen cuando entra el texto */
+}
+
+#webrtc-connection-badge.show .circle-logo {
+  margin-right: 8px; /* Empuja el texto hacia la izquierda */
+}
+
+#webrtc-connection-badge .circle-logo img {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  border-radius: 50%;
+}
+
+#webrtc-connection-badge .badge-text {
+  font-size: 15px;
+  font-weight: bold;
+  white-space: nowrap;
+  overflow: hidden;
+  max-width: 0;
+  opacity: 0;
+  transition: max-width 0.6s ease-in-out, opacity 0.6s ease-in-out;
+}
+
+#webrtc-connection-badge.show .badge-text {
+  max-width: 200px;
+  opacity: 1;
+  transition-delay: 0.5s; /* El texto se devela DESPUÉS de que el círculo entró */
 }
 
 /* Coreografias de Redes */
