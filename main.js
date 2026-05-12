@@ -508,7 +508,7 @@ class StreamGraphicsApp {
             
             if (visible) {
                 // ======= MOSTRAR ELEMENTO =======
-                el.style.display = (tipo === 'invitadoRol' || tipo === 'lugar' || tipo === 'redes') ? 'flex' : 'block';
+                el.style.display = (tipo === 'invitadoRol' || tipo === 'lugar' || tipo === 'redes' || tipo === 'tema') ? 'flex' : 'block';
                 
                 // ✅ Aplicar animación de entrada con configuración Firebase
                 this.modules.animations.applyDynamicAnimationFromOldSystem(el, tipo, true);
