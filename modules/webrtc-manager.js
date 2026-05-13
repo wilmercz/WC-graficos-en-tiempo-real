@@ -254,9 +254,10 @@ export class WebRTCManager {
             this.evaluateVisibility(); // Re-evaluar si podemos mostrar la imagen
             
             // 🌟 Mostrar animación de éxito "Joven Sucumbios"
-            if (justConnected) {
-                this.showConnectionBadge();
-            }
+            // DESACTIVADO TEMPORALMENTE
+            // if (justConnected) {
+            //     this.showConnectionBadge();
+            // }
             
             // 🧹 Limpieza automática si el celular se desconecta o se apaga la pantalla
             if (state === 'disconnected' || state === 'failed') {
