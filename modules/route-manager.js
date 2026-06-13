@@ -154,17 +154,6 @@ export class RouteManager {
         }
         this.pobladosRuta = [];
 
-        // Crear Pines y Textos
-        const addLabel = (coords, text) => {
-            const marker = new mapboxgl.Marker({ color: '#ff8a3d' }).setLngLat(coords).addTo(this.map);
-            const el = marker.getElement();
-            const label = document.createElement('div');
-            label.className = 'etiqueta-tv';
-            label.innerText = text;
-            el.appendChild(label);
-            this.marcadores.push(marker);
-        };
-
         let lineaCurvaOriginal = null;
 
         // LOGICA HÍBRIDA: ¿Usar Archivo GPX Manual o Auto OSRM?
@@ -195,9 +184,23 @@ export class RouteManager {
             } catch(e) { console.error("🚨 [ERROR OSRM] La API falló o no hay internet:", e); return; }
         }
 
+        // 🧠 INTELIGENCIA VISUAL: Balancear etiquetas para que no se amontonen a la derecha
+        const isA_MasAlOeste = coordsA[0] < coordsC[0];
+
+        // Crear Pines y Textos
+        const addLabel = (coords, text, isWest) => {
+            const marker = new mapboxgl.Marker({ color: '#ff8a3d' }).setLngLat(coords).addTo(this.map);
+            const el = marker.getElement();
+            const label = document.createElement('div');
+            label.className = `etiqueta-tv ${isWest ? 'etiqueta-izquierda' : 'etiqueta-derecha'}`;
+            label.innerText = text;
+            el.appendChild(label);
+            this.marcadores.push(marker);
+        };
+
         // ✅ AHORA DIBUJAMOS LOS PINES (Garantizando que coinciden con la línea final)
-        addLabel(coordsA, data.origenNombre);
-        addLabel(coordsC, data.destinoNombre);
+        addLabel(coordsA, data.origenNombre, isA_MasAlOeste);
+        addLabel(coordsC, data.destinoNombre, !isA_MasAlOeste);
 
         // Posicionar cámara lista en la salida exacta
         this.map.jumpTo({ center: coordsA, zoom: 13, pitch: 65, bearing: 0 });
@@ -395,14 +398,14 @@ export class RouteManager {
                 if (this.currentRouteGeometry) {
                     const bbox = turf.bbox(this.currentRouteGeometry);
                     this.map.fitBounds(bbox, {
-                        padding: { top: 50, bottom: 200, left: 200, right: 50 },
-                        pitch: 30,
+                        padding: { top: 100, bottom: 220, left: 180, right: 180 },
+                        pitch: 25,
                         bearing: 0,
                         duration: 4000
                     });
                 } else {
                     // Fallback si la geometría no está disponible
-                    this.map.flyTo({ center: coordsC, zoom: 10.5, pitch: 30, bearing: 0, duration: 4000 });
+                    this.map.flyTo({ center: coordsC, zoom: 10.5, pitch: 25, bearing: 0, duration: 4000 });
                 }
                 this.isFlying = false;
                 return;

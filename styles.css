@@ -1049,16 +1049,25 @@ video[src="null"]:not(#envivo-video) {
     pointer-events: none;
 }
 
-/* Etiqueta fija para Pines */
+/* Etiqueta fija para Pines (Base) */
 .etiqueta-tv {
     position: absolute;
-    left: 100%; top: 50%; transform: translateY(-50%);
-    margin-left: 8px; 
+    top: 50%; transform: translateY(-50%);
     background: rgba(46, 91, 186, 0.85); color: #FFFFFF;
     padding: 6px 12px; font-weight: bold; font-size: 15px;
     border-radius: 4px; white-space: nowrap; text-transform: uppercase;
-    border-left: 4px solid #ff8a3d; box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
     pointer-events: none;
+}
+
+/* Sale hacia la derecha del pin */
+.etiqueta-derecha {
+    left: 100%; margin-left: 8px; border-left: 4px solid #ff8a3d;
+}
+
+/* Sale hacia la izquierda del pin */
+.etiqueta-izquierda {
+    right: 100%; margin-right: 8px; border-right: 4px solid #ff8a3d;
 }
 
 /* Contenedor oscuro para resaltar la hora sobre el mapa/video */
