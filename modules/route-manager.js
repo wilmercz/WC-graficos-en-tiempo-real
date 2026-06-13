@@ -442,7 +442,22 @@ export class RouteManager {
             let isShortRoute = this.routeDistance < 15; // 🏙️ Menos de 15km es ruta urbana
             let baseZoom = isShortRoute ? 14.8 : 11.8;
             let basePitch = isShortRoute ? 60 : 62;
-            let saltoPuntos = isShortRoute ? 2 : 4; // 🚀 VELOCIDAD DINÁMICA: Más lento en ciudad
+            
+            // 🚀 VELOCIDAD DINÁMICA ADAPTATIVA SEGÚN DISTANCIA (Aceleración para rutas largas)
+            let baseSalto;
+            if (isShortRoute) {
+                baseSalto = 2; // Ciudad (< 15km): Lento y detallado
+            } else if (this.routeDistance < 50) {
+                baseSalto = 4; // Interurbano corto (15-50km)
+            } else if (this.routeDistance < 150) {
+                baseSalto = 8; // Media distancia (50-150km)
+            } else if (this.routeDistance < 300) {
+                baseSalto = 14; // Larga distancia (150-300km)
+            } else {
+                baseSalto = 22; // Ultra larga distancia (> 300km)
+            }
+            
+            let saltoPuntos = baseSalto;
 
             if (ultimoAngulo === null) {
                 ultimoAngulo = 0; // 🧭 Empieza mirando exactamente al Norte (0 grados)
@@ -460,7 +475,7 @@ export class RouteManager {
                 velocidadGimbal = 0.0001; 
             } else if (frameCounter >= 90 && frameCounter < 160) {
                 // Segundos 1.5 a 2.6: Gira la cámara hacia la ruta progresivamente y arranca
-                saltoPuntos = isShortRoute ? 1 : 2;
+                saltoPuntos = isShortRoute ? 1 : Math.max(2, Math.floor(baseSalto / 2));
                 velocidadGimbal = 0.02; // Ágil pero suave
             }
 
@@ -482,7 +497,7 @@ export class RouteManager {
                     offsetAngulo = Math.sin(t * Math.PI * 2) * 25; 
                     
                     // Acelera levemente en el medio
-                    saltoPuntos = 2 + Math.round(smoothT * 1); 
+                    saltoPuntos = baseSalto + Math.round(smoothT * 1); 
                 }
             } else {
                 // ========================================================
@@ -538,13 +553,13 @@ export class RouteManager {
                         offsetPitch = smoothT * 10;    // Levanta la mirada un poco (pitch 72)
                         // 🎥 Gira -75° (lado opuesto) para volar viendo la ruta de frente y la montaña al fondo
                         offsetAngulo = -orbitExitDir * smoothT * 75; 
-                        saltoPuntos = 4 + Math.round(smoothT * 3);
+                        saltoPuntos = baseSalto + Math.round(smoothT * (baseSalto * 0.75));
                     } else if (progreso >= 0.73 && progreso < 0.74) {
                         // Mantener vuelo paralelo (TIEMPO MUY REDUCIDO)
                         offsetZoom = -1.3;
                         offsetPitch = 10;
                         offsetAngulo = -orbitExitDir * 75;
-                        saltoPuntos = 7; // Vuelo rápido sostenido
+                        saltoPuntos = Math.round(baseSalto * 1.75); // Vuelo rápido sostenido
                     } else if (progreso >= 0.74 && progreso < 0.85) {
                         // Volver a tomar altitud y mirar al frente progresivamente
                         let t = (progreso - 0.74) / 0.11;
@@ -552,8 +567,8 @@ export class RouteManager {
                         offsetZoom = -1.3 + (smoothT * 1.3); 
                         offsetPitch = 10 - (smoothT * 10);
                         offsetAngulo = (-orbitExitDir * 75) - (-orbitExitDir * smoothT * 75); // Regresa al frente
-                        // 🚀 ANTI-ILUSIÓN ÓPTICA: Aceleración más agresiva al subir rápido (7 a 10)
-                        saltoPuntos = 7 + Math.round(t * 3); 
+                        // 🚀 ANTI-ILUSIÓN ÓPTICA: Aceleración más agresiva al subir rápido
+                        saltoPuntos = Math.round(baseSalto * 1.75) + Math.round(t * (baseSalto * 0.75)); 
                     }
                 }
             }
