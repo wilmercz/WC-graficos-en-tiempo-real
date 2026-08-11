@@ -12,6 +12,7 @@ export class RouteManager {
         this.isMapLoaded = false;
         this.isFlying = false;
 
+
         // Configuración de motor
         this.token = 'pk.eyJ1IjoiYXJraS1tZWRlczE5ODUiLCJhIjoiY21vZzNqeXdrMDZlMTJ2cTNoZDJoMXE4MSJ9.poOFAaOccIhbmzTSLiqn5A';
         this.rutaCoordenadas = [];
@@ -19,6 +20,7 @@ export class RouteManager {
         this.marcadores = [];
         this.flightAnimationId = null;
         this.currentData = null; // Guardará la info de la ruta actual
+        this.currentEmergencyData = null; // ✅ Guardará la info de la emergencia actual
         this.pendingShow = false; // ✅ Control si piden Mostrar antes de que termine de Preparar
         this.currentRouteGeometry = null; // ✅ Guardará la geometría para el encuadre final
         this.hideTimeoutId = null; // ✅ Control para el temporizador de ocultamiento suave
@@ -54,10 +56,14 @@ export class RouteManager {
         EventBus.on('route-prepare', (data) => this.prepareMapAndRoute(data));
         EventBus.on('route-show', (data) => this.showMapAndFly(data));
         EventBus.on('route-hide', () => this.hideMap());
+
+        // ✅ NUEVOS LISTENERS PARA EMERGENCIAS (NO INTERFIEREN CON RUTAS)
+        EventBus.on('emergency-show', (data) => this.showEmergencyFlight(data));
+        EventBus.on('emergency-hide', () => this.hideMap());
     }
 
     // ==========================================
-    // LÓGICA PRINCIPAL (SE IMPLEMENTARÁ LUEGO)
+    // LÓGICA DE RUTAS (EXISTENTE - NO TOCAR)
     // ==========================================
 
     async prepareMapAndRoute(data) {
@@ -673,6 +679,143 @@ export class RouteManager {
                 this.overlayContainer.style.display = 'none';
             }
         }, 800);
+    }
+
+    // ==================================================
+    // 🚨 NUEVA LÓGICA PARA EMERGENCIAS (INDEPENDIENTE)
+    // ==================================================
+
+    /**
+     * Punto de entrada para el gráfico de emergencia.
+     */
+    async showEmergencyFlight(data) {
+        console.log('🚨 [EMERGENCIA PASO 1] Recibida orden de mostrar emergencia:', data);
+        this.currentEmergencyData = data;
+
+        // Limpiar animaciones previas
+        if (this.flightAnimationId) cancelAnimationFrame(this.flightAnimationId);
+        if (this.flightStartTimeout) clearTimeout(this.flightStartTimeout);
+        this.isFlying = false;
+
+        // Reutilizamos la función de parseo de coordenadas
+        const parseCoords = (str) => {
+            let matches = str.match(/-?\d+([.,]\d+)?/g);
+            if (!matches || matches.length < 2) return [0, 0];
+            let n1 = parseFloat(matches[0].replace(',', '.'));
+            let n2 = parseFloat(matches[1].replace(',', '.'));
+            if (Math.abs(n1) < 20 && Math.abs(n2) > 50) return [n2, n1];
+            return [n1, n2];
+        };
+        const zonaCeroCoords = parseCoords(data.coordenadas);
+
+        // Asegurarse de que el mapa esté listo (lo crea si no existe)
+        await this.ensureMapIsReady(zonaCeroCoords);
+
+        // Limpiar marcadores de rutas anteriores
+        this.marcadores.forEach(m => m.remove());
+        this.marcadores = [];
+        if (this.pobladosRuta) {
+            this.pobladosRuta.forEach(p => { if (p.marcador) p.marcador.remove(); });
+        }
+        this.pobladosRuta = [];
+        // Limpiar línea de ruta anterior
+        if (this.map.getSource('linea-ruta')) {
+            this.map.getSource('linea-ruta').setData({ 'type': 'Feature', 'properties': {}, 'geometry': { 'type': 'LineString', 'coordinates': [] } });
+        }
+
+        // Mostrar el contenedor del mapa
+        this.mapContainer.style.transition = 'opacity 0.8s ease-in-out';
+        this.mapContainer.style.opacity = '1';
+        this.mapContainer.style.display = 'block';
+        
+        // Redimensionar mapa y empezar animación
+        setTimeout(() => {
+            if (this.map) {
+                this.map.resize();
+                console.log('🚨 [EMERGENCIA PASO 2] Mapa redimensionado. ¡Iniciando vuelo de dron!');
+                this.animateEmergency(zonaCeroCoords);
+            }
+        }, 150);
+    }
+
+    /**
+     * Función que crea el mapa si no existe y devuelve una promesa
+     * que se resuelve cuando está listo.
+     */
+    ensureMapIsReady(initialCoords) {
+        return new Promise((resolve) => {
+            if (this.map && this.isMapLoaded) {
+                console.log('🗺️ Mapa ya estaba listo.');
+                resolve();
+                return;
+            }
+
+            mapboxgl.accessToken = this.token;
+            this.map = new mapboxgl.Map({
+                container: 'map-container',
+                style: 'mapbox://styles/mapbox/satellite-streets-v12',
+                center: initialCoords,
+                zoom: 13,
+                pitch: 65,
+                bearing: 0
+            });
+
+            this.map.addControl(new mapboxgl.NavigationControl({ showZoom: false, visualizePitch: true }), 'top-right');
+
+            this.map.on('load', () => {
+                console.log('🗺️ Mapa base descargado por primera vez.');
+                this.isMapLoaded = true;
+                this.map.addSource('mapbox-dem', { 'type': 'raster-dem', 'url': 'mapbox://mapbox.mapbox-terrain-dem-v1', 'tileSize': 512, 'maxzoom': 14 });
+                this.map.setTerrain({ 'source': 'mapbox-dem', 'exaggeration': 1.5 });
+                this.map.addSource('linea-ruta', { 'type': 'geojson', 'data': { 'type': 'Feature', 'properties': {}, 'geometry': { 'type': 'LineString', 'coordinates': [] } } });
+                this.map.addLayer({ 'id': 'linea-amarilla', 'type': 'line', 'source': 'linea-ruta', 'layout': { 'line-join': 'round', 'line-cap': 'round' }, 'paint': { 'line-color': '#ff8a3d', 'line-width': 8, 'line-opacity': 0.9 } });
+                resolve();
+            });
+
+            this.map.on('error', (e) => console.error('🚨 [ERROR MAPBOX]', e));
+        });
+    }
+
+    /**
+     * Animación específica para el modo emergencia.
+     */
+    animateEmergency(coords) {
+        if (this.isFlying) return;
+        this.isFlying = true;
+
+        // Colocar un marcador especial de emergencia
+        const el = document.createElement('div');
+        el.className = 'marker-emergencia'; // Necesitaremos un estilo CSS para esto
+        el.style.backgroundImage = "url('https://i.imgur.com/cT0kb9S.png')"; // Un ícono de exclamación, por ejemplo
+        el.style.width = '50px';
+        el.style.height = '50px';
+        el.style.backgroundSize = '100%';
+
+        const marker = new mapboxgl.Marker(el).setLngLat(coords).addTo(this.map);
+        this.marcadores.push(marker);
+
+        // Secuencia de animación del "dron"
+        // 1. Vuelo rápido hacia la zona cero
+        this.map.flyTo({
+            center: coords,
+            zoom: 17,
+            pitch: 75,
+            bearing: 0,
+            duration: 4000, // 4 segundos para llegar
+            essential: true
+        });
+
+        // 2. Después de llegar, iniciar elevación y rotación
+        setTimeout(() => {
+            if (!this.isFlying) return; // Si se canceló mientras volaba
+            this.map.easeTo({
+                zoom: 14.5,
+                pitch: 45,
+                bearing: 180, // Gira 180 grados
+                duration: 12000, // 12 segundos para elevarse y girar
+                easing: (t) => t * (2 - t) // easeOutQuad para un frenado suave
+            });
+        }, 4500); // Empezar a elevarse 0.5s después de llegar
     }
 
     debugEstado() {

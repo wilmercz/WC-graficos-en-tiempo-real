@@ -1070,6 +1070,75 @@ video[src="null"]:not(#envivo-video) {
     pointer-events: none;
 }
 
+/* =============================================== */
+/* 🚨 GRÁFICOS DE EMERGENCIA                      */
+/* =============================================== */
+
+/* Marcador especial para la zona cero */
+.marker-emergencia {
+    /* Animación de pulso para llamar la atención */
+    animation: pulso-emergencia 2s infinite;
+    box-shadow: 0 0 15px 5px rgba(255, 80, 80, 0.7);
+    border-radius: 50%;
+}
+
+@keyframes pulso-emergencia {
+    0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(255, 80, 80, 0.7);
+    }
+    70% {
+        transform: scale(1.1);
+        box-shadow: 0 0 10px 20px rgba(255, 80, 80, 0);
+    }
+    100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(255, 80, 80, 0);
+    }
+}
+
+/* Contenedor para la información de la emergencia */
+#grafico-emergencia {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    background: rgba(20, 20, 20, 0.85);
+    backdrop-filter: blur(5px);
+    color: white;
+    border-radius: 8px;
+    border-left: 5px solid #ff4d4d;
+    padding: 12px 20px;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 350px;
+    box-shadow: 0 5px 25px rgba(0,0,0,0.5);
+    /* Animación de entrada/salida */
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+#grafico-emergencia.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+#grafico-emergencia h1 {
+    margin: 0;
+    font-size: 22px;
+    font-weight: bold;
+    color: #ff4d4d;
+}
+
+#grafico-emergencia .detalles {
+    display: flex;
+    gap: 15px;
+    font-size: 16px;
+}
+
+
 /* Sale hacia la derecha del pin */
 .etiqueta-derecha {
     left: 100%; margin-left: 8px; border-left: 4px solid #ff8a3d;

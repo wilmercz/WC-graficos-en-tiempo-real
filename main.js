@@ -346,6 +346,54 @@ class StreamGraphicsApp {
         }
 
         // =======================================================
+        // 🚨 LÓGICA DE GRÁFICO DE EMERGENCIA (ACCIDENTES, ETC.)
+        // =======================================================
+        const emergenciaData = rawData.EMERGENCIA;
+        const emergenciaGrafico = document.getElementById('grafico-emergencia');
+
+        if (emergenciaData && emergenciaData.activo && emergenciaGrafico) {
+            // Si el objeto EMERGENCIA existe y está activo, emitimos el evento para el mapa
+            console.log('🚨 Evento de Emergencia detectado:', emergenciaData);
+            EventBus.emit('emergency-show', emergenciaData);
+
+            // Llenar y mostrar el panel de información
+            const tituloEl = document.getElementById('emergencia-titulo');
+            const detallesEl = document.getElementById('emergencia-detalles');
+
+            if (tituloEl) tituloEl.innerText = emergenciaData.titulo || 'Incidente Reportado';
+            
+            if (detallesEl) {
+                let detallesHTML = '';
+                if (emergenciaData.tipo_siniestro) {
+                    detallesHTML += `<span><strong>Tipo:</strong> ${emergenciaData.tipo_siniestro}</span>`;
+                }
+                if (emergenciaData.victimas) {
+                    if (emergenciaData.victimas.heridos > 0) detallesHTML += `<span>❤️ ${emergenciaData.victimas.heridos} Heridos</span>`;
+                    if (emergenciaData.victimas.fallecidos > 0) detallesHTML += `<span>✝️ ${emergenciaData.victimas.fallecidos} Fallecidos</span>`;
+                }
+                if (emergenciaData.vehiculos) {
+                    let vehiculos = [];
+                    if (emergenciaData.vehiculos.autos > 0) vehiculos.push(`🚗 ${emergenciaData.vehiculos.autos}`);
+                    if (emergenciaData.vehiculos.motos > 0) vehiculos.push(`🏍️ ${emergenciaData.vehiculos.motos}`);
+                    if (emergenciaData.vehiculos.buses > 0) vehiculos.push(`🚌 ${emergenciaData.vehiculos.buses}`);
+                    if (vehiculos.length > 0) detallesHTML += `<span> | ${vehiculos.join(' ')}</span>`;
+                }
+                detallesEl.innerHTML = detallesHTML;
+            }
+
+            emergenciaGrafico.style.display = 'flex';
+            setTimeout(() => emergenciaGrafico.classList.add('visible'), 50);
+
+        } else {
+            if (window.lastEmergencyState === true) {
+                EventBus.emit('emergency-hide');
+                if (emergenciaGrafico) emergenciaGrafico.classList.remove('visible');
+            }
+        }
+        window.lastEmergencyState = emergenciaData?.activo === true;
+        // =======================================================
+
+        // =======================================================
         // 🛠️ LÓGICA DE PANEL MANUAL WEBRTC
         // =======================================================
         const manualPanel = document.getElementById('webrtc-manual-panel');
