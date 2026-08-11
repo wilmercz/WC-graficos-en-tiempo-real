@@ -89,9 +89,24 @@ export class RouteManager {
         const coordsA = parseCoords(data.origenCoords);
         const coordsC = parseCoords(data.destinoCoords);
 
-        // 2. Actualizar el texto del Overlay de TV
-        const textoRuta = document.getElementById('map-ruta-texto');
-        if (textoRuta) textoRuta.innerText = `${data.origenNombre} ➔ ${data.destinoNombre}`;
+        // 2. Actualizar el texto del Overlay de TV (Título y subtítulo de diagnóstico)
+        if (this.overlayContainer) {
+            let titleElement = this.overlayContainer.querySelector('h1');
+            if (!titleElement) {
+                titleElement = document.createElement('h1');
+                this.overlayContainer.appendChild(titleElement);
+            }
+            titleElement.innerText = `${data.origenNombre} ➔ ${data.destinoNombre}`;
+
+            // ✅ Crear o encontrar el subtítulo para el diagnóstico
+            let subtitleElement = this.overlayContainer.querySelector('h2');
+            if (!subtitleElement) {
+                subtitleElement = document.createElement('h2');
+                subtitleElement.id = 'map-route-diagnostic'; // ID para darle estilo
+                this.overlayContainer.appendChild(subtitleElement);
+            }
+            subtitleElement.innerText = 'Calculando distancia...'; // Texto provisional
+        }
 
         if (typeof turf === 'undefined') {
             console.error('🚨 [ERROR CRÍTICO] La librería Turf.js fue bloqueada por tu navegador. El cálculo matemático fallará.');
@@ -217,6 +232,16 @@ export class RouteManager {
             const geometry = rutaFeature.geometry;
             this.currentRouteGeometry = geometry; // ✅ Guardar geometría para el encuadre final
             const distancia = turf.length(geometry, { units: 'kilometers' });
+
+            // ✅ Actualizar subtítulo de diagnóstico con la información final
+            const diagnosticText = distancia < 15 
+                ? `Ruta Corta (${distancia.toFixed(1)} km)` 
+                : `Ruta Larga (${distancia.toFixed(1)} km)`;
+            const subtitleElement = this.overlayContainer?.querySelector('#map-route-diagnostic');
+            if (subtitleElement) {
+                subtitleElement.innerText = diagnosticText;
+            }
+
             this.routeDistance = distancia; // ✅ Guardar para decisiones de cámara
             const pasos = Math.floor(distancia * 200); 
             
@@ -488,16 +513,16 @@ export class RouteManager {
                 // ========================================================
                 // 🏙️ COREOGRAFÍA PARA RUTAS CORTAS (CIUDAD / URBANAS)
                 // ========================================================
-                if (progreso > 0.03 && progreso < 0.85) {
-                    let t = (progreso - 0.03) / 0.82;
+                if (progreso > 0.03 && progreso < 0.45) { // Duración aún más reducida
+                    let t = (progreso - 0.03) / 0.42; // Nuevo ajuste para el rango más corto
                     let smoothT = Math.sin(t * Math.PI); // Campana: 0 -> 1 -> 0
                     
-                    // Se acerca mucho más para ver calles y edificios claros (hasta zoom 16.3)
-                    offsetZoom = -(smoothT * 1.5); 
+                    // Acercamiento reducido para una vista más amplia (Zoom máx ~15.8)
+                    offsetZoom = -(smoothT * 0.2); 
                     // Levanta un poco la mirada para ver el horizonte y no el piso
-                    offsetPitch = smoothT * 15;    
+                    offsetPitch = smoothT * 12;    
                     // Paneo lateral suave (Cámara de persecución ±25°) en lugar de órbita
-                    offsetAngulo = Math.sin(t * Math.PI * 2) * 25; 
+                    offsetAngulo = Math.sin(t * Math.PI * 2) * 20; 
                     
                     // Acelera levemente en el medio
                     saltoPuntos = baseSalto + Math.round(smoothT * 1); 
@@ -506,9 +531,9 @@ export class RouteManager {
                 // ========================================================
                 // ⛰️ COREOGRAFÍA PARA RUTAS LARGAS (MONTAÑAS / CARRETERA)
                 // ========================================================
-                if (progreso > 0.03 && progreso <= 0.20) {
+                if (progreso > 0.03 && progreso <= 0.15) { // <-- ACORTAMOS LA DURACIÓN AQUÍ
                     // 🚁 ACERCAMIENTO PRE-ÓRBITA: Baja un poco para ver los primeros detalles del terreno
-                    let t = (progreso - 0.03) / 0.17; 
+                    let t = (progreso - 0.03) / 0.12; // ✅ CORREGIDO: Se elimina la declaración duplicada de 't'
                     let smoothT = Math.sin(t * Math.PI); // Curva de campana (0 -> 1 -> 0)
                     offsetZoom = -(smoothT * 1.8); // 🔍 Acercar MÁS en pre-órbita (zoom 13.6)
                     offsetPitch = smoothT * 12;    // Levanta más la mirada

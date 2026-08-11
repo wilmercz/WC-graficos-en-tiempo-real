@@ -1019,11 +1019,11 @@ video[src="null"]:not(#envivo-video) {
 /*TERCIO INFERIOR DEL MAPA CON INFORMACION*/
 #map-overlay {
     position: absolute; 
-    bottom: var(--tema-bottom); 
+    bottom: calc(var(--tema-bottom) + 5px); 
     left: var(--tema-left); 
     z-index: 15;
     /* ✅ Se aumentó el padding izquierdo a 95px para empujar el texto a la derecha del logo */
-    background: rgba(250, 250, 250, 0.85); color: #2e5bba; padding: 15px 30px 15px 95px;
+    background: rgba(250, 250, 250, 0.85); color: #2e5bba; padding: 2px 30px 2px 95px;
     border-radius: 5px; border-left: 5px solid #2e5bba; box-shadow: 0 10px 20px rgba(0,0,0,0.5);
 }
 
@@ -1033,6 +1033,16 @@ video[src="null"]:not(#envivo-video) {
     margin: 0; 
     font-size: 24px; 
     text-transform: uppercase; 
+}
+
+/* ✅ NUEVO: Estilo para el subtítulo de diagnóstico de ruta */
+#map-route-diagnostic {
+    margin: 4px 0 0 0;
+    font-size: 14px;
+    font-weight: normal;
+    text-transform: none;
+    color: inherit; /* Hereda el color azul del contenedor */
+    opacity: 0.9; /* No roba protagonismo */
 }
 
 /* Cambiar el color del "ojo" (círculo interior) de los pines amarillos de Mapbox */
